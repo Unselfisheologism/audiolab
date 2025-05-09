@@ -8,8 +8,6 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/componen
 import type { EffectSettings } from '@/types/audio-forge';
 import { useToast } from '@/hooks/use-toast';
 import { audioUtils, fileToDataUrl } from '@/lib/audio-utils';
-import { acousticPurification } from '@/ai/flows/acoustic-purification';
-import { soundScrubber } from '@/ai/flows/sound-scrubber';
 import { effectsList } from '@/app/audio-forge/effects';
 
 export default function AudioForgeClientContent() {
@@ -74,7 +72,7 @@ export default function AudioForgeClientContent() {
     }
 
     setIsLoading(true);
-    setAnalysisResult(null); // Clear previous analysis
+    setAnalysisResult(null); // Clear previous analysis for new effect application
     const currentAudio = processedAudioDataUrl || originalAudioDataUrl; // Apply effect to currently processed audio or original
 
     try {
@@ -84,14 +82,7 @@ export default function AudioForgeClientContent() {
       
       const combinedParams = { ...effectSettings[effectId], ...params };
 
-      if (actualHandlerKey === 'acousticPurification') {
-        const aiResult = await acousticPurification({ audioDataUri: currentAudio });
-        result = { processedAudioDataUrl: aiResult.purifiedAudioDataUri, analysis: aiResult.processingDetails };
-      } else if (actualHandlerKey === 'soundScrubber') {
-        const description = combinedParams.description || "Audio recording";
-        const aiResult = await soundScrubber({ audioDataUri: currentAudio, description });
-        result = { processedAudioDataUrl: aiResult.cleanedAudioDataUri, analysis: aiResult.analysis };
-      } else if (audioUtils[actualHandlerKey]) {
+      if (audioUtils[actualHandlerKey]) {
         result = await audioUtils[actualHandlerKey](currentAudio, combinedParams);
       } else {
         throw new Error(`Handler for ${actualHandlerKey} not found.`);
@@ -104,7 +95,7 @@ export default function AudioForgeClientContent() {
       toast({ title: "Effect Applied", description: `${effect?.name || actualHandlerKey} processing complete.` });
     } catch (error) {
       console.error(`Error applying effect ${effectId}:`, error);
-      toast({ title: "Processing Error", description: `Could not apply ${effectId}.`, variant: "destructive" });
+      toast({ title: "Processing Error", description: `Could not apply ${effect?.name || effectId}.`, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }

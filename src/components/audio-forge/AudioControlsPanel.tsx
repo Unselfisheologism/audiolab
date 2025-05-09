@@ -62,7 +62,7 @@ export function AudioControlsPanel({
                       onApplyEffect={onApplyEffect}
                       onParameterChange={onParameterChange}
                       currentSettings={getEffectSettings(effect.id)}
-                      isLoading={isLoading && (effect.isAi || false)} // Only show AI loading on its specific card
+                      isLoading={isLoading} // Pass global isLoading
                       isAudioLoaded={isAudioLoaded}
                     />
                   ))}

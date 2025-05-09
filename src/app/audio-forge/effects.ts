@@ -41,34 +41,6 @@ import {
 } from 'lucide-react';
 
 export const effectsList: Effect[] = [
-  // AI Tools
-  {
-    id: 'acousticPurification',
-    name: 'Acoustic Purification',
-    description: 'AI-powered artifact reduction. Cleans up recordings by automatically adjusting parameters.',
-    icon: Sparkles,
-    controlType: 'button',
-    actionLabel: 'Purify Audio',
-    isAi: true,
-    handlerKey: 'acousticPurification',
-    groupName: 'AI Tools',
-    outputsAnalysis: true,
-  },
-  {
-    id: 'soundScrubber',
-    name: 'Sound Scrubber',
-    description: 'AI-powered ambient sound reduction. Describe the audio for better results.',
-    icon: Eraser,
-    controlType: 'button', // Will also have a textarea parameter
-    parameters: [
-      { name: 'description', label: 'Audio Description', type: 'textarea', defaultValue: 'General audio recording', placeholder: 'e.g., outdoor interview with wind noise', rows: 3 }
-    ],
-    actionLabel: 'Scrub Sounds',
-    isAi: true,
-    handlerKey: 'soundScrubber',
-    groupName: 'AI Tools',
-    outputsAnalysis: true,
-  },
   // Core Effects
   {
     id: 'resonanceAlteration',
@@ -142,7 +114,7 @@ export const effectsList: Effect[] = [
       { name: 'semitones', label: 'Semitones', type: 'number_input', defaultValue: 0, min: -12, max: 12, step: 1 }
     ],
     handlerKey: 'keyTransposer',
-    groupName: 'Pitch &amp; Time',
+    groupName: 'Pitch & Time',
   },
   {
     id: 'echoGenerator',
@@ -178,7 +150,7 @@ export const effectsList: Effect[] = [
       { name: 'tempo', label: 'Tempo Adjust', type: 'slider', defaultValue: 1, min: 0.5, max: 2, step: 0.01 }
     ],
     handlerKey: 'paceAdjuster',
-    groupName: 'Pitch &amp; Time',
+    groupName: 'Pitch & Time',
   },
   {
     id: 'gainController',
@@ -203,7 +175,7 @@ export const effectsList: Effect[] = [
     groupName: 'Analysis Tools',
     outputsAnalysis: true,
   },
-  // Presets &amp; Other Tools
+  // Presets & Other Tools
   {
     id: 'dreamscapeMaker',
     name: 'Dreamscape Maker',

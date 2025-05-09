@@ -110,7 +110,7 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
               placeholder={param.placeholder}
               rows={param.rows || 3}
               onChange={(e) => handleInputChange(param.name, e)}
-              disabled={isLoading && effect.isAi} // Only disable textarea for AI loading, not general audio loading
+              disabled={isLoading || !isAudioLoaded}
             />
           </div>
         );
@@ -152,7 +152,7 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
             disabled={isLoading || !isAudioLoaded}
             className="w-full"
           >
-            {isLoading && effect.isAi ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {isLoading && effect.outputsAnalysis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             {effect.actionLabel}
           </Button>
         </CardFooter>

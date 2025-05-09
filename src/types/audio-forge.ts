@@ -10,7 +10,7 @@ export interface EffectParameterOption {
 export interface EffectParameter {
   name: string;
   label: string;
-  type: 'slider' | 'number_input' | 'select' | 'textarea';
+  type: 'slider' | 'number_input' | 'select' | 'textarea' | 'button'; // Added 'button' for grouped buttons
   defaultValue: number | string;
   min?: number;
   max?: number;
@@ -18,6 +18,7 @@ export interface EffectParameter {
   options?: EffectParameterOption[];
   placeholder?: string;
   rows?: number;
+  handlerKey?: string; // For buttons within a group that have specific actions
 }
 
 export interface Effect {
@@ -26,12 +27,11 @@ export interface Effect {
   description: string;
   icon: LucideIcon;
   controlType: ControlType;
-  isAi?: boolean;
   parameters?: EffectParameter[];
   actionLabel?: string; // For buttons
   handlerKey?: string; // Key to map to a handler function
   groupName?: string; // For grouping effects in UI
-  outputsAnalysis?: boolean; // If AI tool outputs analysis text
+  outputsAnalysis?: boolean; // If tool outputs analysis text
 }
 
 export interface EffectSettings {
