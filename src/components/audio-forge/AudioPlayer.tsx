@@ -1,5 +1,5 @@
 'use client';
-import type React from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlayCircle, PauseCircle, Download } from 'lucide-react';
 
