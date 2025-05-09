@@ -1,3 +1,10 @@
+import { redirect } from 'next/navigation';
+
 export default function Home() {
-  return <></>;
+  redirect('/audio-forge');
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <p>Loading Audio Forge...</p>
+    </div>
+  );
 }
