@@ -255,7 +255,7 @@ export const effectsList: Effect[] = [
   {
     id: 'audioSplitter',
     name: 'Audio Splitter',
-    description: 'Extract sections from an audio file by specifying start and end times.',
+    description: 'Extract sections from an audio file by specifying start and end times in minutes.',
     icon: Scissors,
     controlType: 'group',
     parameters: [
@@ -268,10 +268,10 @@ export const effectsList: Effect[] = [
   {
     id: 'voiceExtractor',
     name: 'Voice Extractor',
-    description: 'Isolate vocal tracks from a mix. Placeholder.',
+    description: 'Attempts to isolate vocals by focusing on center-panned audio and typical vocal frequencies. Results vary.',
     icon: Mic,
     controlType: 'button',
-    actionLabel: 'Extract Vocals (Placeholder)',
+    actionLabel: 'Extract Vocals',
     handlerKey: 'voiceExtractor',
     groupName: 'Utility Tools',
     outputsAnalysis: true, 
@@ -301,31 +301,6 @@ export const effectsList: Effect[] = [
     groupName: 'Spatial Effects',
   },
 ];
-
-// AI Features that were removed
-// {
-//   id: 'acousticPurification',
-//   name: 'Acoustic Purification (AI)',
-//   description: 'AI tool to diminish sound artifacts in recordings.',
-//   icon: Wand2,
-//   controlType: 'button',
-//   actionLabel: 'Purify Audio',
-//   handlerKey: 'acousticPurification',
-//   groupName: 'AI Tools',
-//   outputsAnalysis: true,
-// },
-// {
-//   id: 'soundScrubber',
-//   name: 'Sound Scrubber (AI)',
-//   description: 'Reduce ambient sounds using an AI tool.',
-//   icon: Eraser, // Or any other icon that fits
-//   controlType: 'button',
-//   actionLabel: 'Scrub Sound',
-//   handlerKey: 'soundScrubber',
-//   groupName: 'AI Tools',
-//   outputsAnalysis: true,
-// },
-
 
 export const effectGroups = Array.from(new Set(effectsList.map(e => e.groupName))).filter(Boolean) as string[];
 

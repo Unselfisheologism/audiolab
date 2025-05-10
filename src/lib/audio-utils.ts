@@ -208,18 +208,6 @@ export const audioUtils = {
       const gainL_to_R = offlineContext.createGain();
       const gainR_to_R = offlineContext.createGain();
   
-      // Mid component gain for both output channels
-      const midGain = (1 + (1 - width)) / 2; // Example logic, can be adjusted
-      // Side component gain adjustment
-      const sideGain = (width) / 2;
-  
-      // L_out = L_in * ( (1+W)/2 ) + R_in * ( (1-W)/2 )
-      // R_out = L_in * ( (1-W)/2 ) + R_in * ( (1+W)/2 )
-      // Where W is desired width factor (0=mono, 1=original, >1 wider)
-      // The parameter 'width' from UI is 0-200. Let's map it to 0-2 for W.
-      // widthParam 0   -> W = 0   (mono)
-      // widthParam 100 -> W = 1   (original stereo)
-      // widthParam 200 -> W = 2   (exaggerated stereo)
       const W = widthParam / 100.0;
   
       gainL_to_L.gain.value = (1 + W) / 2.0;
@@ -231,12 +219,12 @@ export const audioUtils = {
       splitter.connect(gainL_to_L, 0, 0); 
       splitter.connect(gainR_to_L, 1, 0);
       gainL_to_L.connect(merger, 0, 0);
-      gainR_to_L.connect(merger, 0, 0); // Summing into left channel of merger
+      gainR_to_L.connect(merger, 0, 0); 
   
       splitter.connect(gainL_to_R, 0, 0);
       splitter.connect(gainR_to_R, 1, 0);
       gainL_to_R.connect(merger, 0, 1);
-      gainR_to_R.connect(merger, 0, 1); // Summing into right channel of merger
+      gainR_to_R.connect(merger, 0, 1); 
   
       return [splitter, gainL_to_L, gainR_to_L, gainL_to_R, gainR_to_R, merger];
     }, `Stereo Widener: Width set to ${widthParam}%. Applied only if audio is stereo.`);
@@ -516,9 +504,11 @@ export const audioUtils = {
 
     sourceNode.connect(splitter);
     
-    splitter.connect(merger, 0, 1); 
-    splitter.connect(merger, 1, 0); 
+    // Swap L (0) and R (1)
+    splitter.connect(merger, 0, 1); // Left input (channel 0) to Right output (channel 1)
+    splitter.connect(merger, 1, 0); // Right input (channel 1) to Left output (channel 0)
     
+    // Pass through other channels if they exist
     for (let i = 2; i < numChannels; i++) {
         splitter.connect(merger, i, i);
     }
@@ -585,6 +575,7 @@ export const audioUtils = {
       analysisMessage = `Audio Splitter: Extracted segment from ${sTimeSeconds.toFixed(2)}s (${startTimeMinutes.toFixed(2)}min) to ${eTimeSeconds.toFixed(2)}s (${endTimeMinutes.toFixed(2)}min). New duration: ${renderedBuffer.duration.toFixed(2)}s.`;
     } else {
       analysisMessage = `Audio Splitter: Extracted segment from ${sTimeSeconds.toFixed(2)}s (${startTimeMinutes.toFixed(2)}min) to ${eTimeSeconds.toFixed(2)}s (${endTimeMinutes.toFixed(2)}min) resulted in a very short or empty audio clip (duration: ${renderedBuffer.duration.toFixed(4)}s). Original audio unchanged if displayed.`;
+      return { processedAudioDataUrl: audioDataUrl, analysis: analysisMessage }; // Return original if segment is too small
     }
     
     return {
@@ -605,33 +596,47 @@ export const audioUtils = {
 
     let analysisMessage: string;
 
-    if (numChannels === 1) {
-      analysisMessage = "Voice Extractor: Input audio is mono. True vocal extraction from mono audio is complex and often requires advanced techniques not implemented here. No changes made to the audio.";
-      return { processedAudioDataUrl: audioDataUrl, analysis: analysisMessage };
-    }
-
-    // Attempt center channel extraction for stereo
-    // This creates a mono output by averaging L and R: (L+R)/2
-    // It's a very basic form of "center" extraction.
-    const offlineContext = new OfflineAudioContext(1, length, sampleRate); // Output is mono
+    // Output will be mono
+    const offlineContext = new OfflineAudioContext(1, length, sampleRate);
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
 
-    // If more than 2 channels, it will mix down the first two.
-    // We want to effectively do (L+R)/2 which is what happens when you connect stereo to mono destination.
-    // No need for explicit splitter/merger for simple (L+R)/2 to mono.
-    // The OfflineAudioContext with 1 channel will mix down a stereo source.
+    // Create a high-pass filter to cut lows (e.g., rumble, some non-vocal bass)
+    const highPassFilter = offlineContext.createBiquadFilter();
+    highPassFilter.type = 'highpass';
+    highPassFilter.frequency.setValueAtTime(100, offlineContext.currentTime); // Cut frequencies below 100Hz
+    highPassFilter.Q.setValueAtTime(0.7071, offlineContext.currentTime); // Butterworth Q for flat passband
 
-    sourceNode.connect(offlineContext.destination);
+
+    // Create a low-pass filter to cut highs (e.g., cymbals, some instrumental shimmer)
+    const lowPassFilter = offlineContext.createBiquadFilter();
+    lowPassFilter.type = 'lowpass';
+    lowPassFilter.frequency.setValueAtTime(10000, offlineContext.currentTime); // Cut frequencies above 10kHz
+    lowPassFilter.Q.setValueAtTime(0.7071, offlineContext.currentTime); // Butterworth Q
+
+
+    // Connect the nodes: source -> highPass -> lowPass -> destination
+    // If the original audio is mono, it will pass through the filters.
+    // If the original audio is stereo, connecting it to the mono offlineContext's destination
+    // effectively downmixes it to (L+R)/2. This downmixed (center) signal is then filtered.
+    sourceNode.connect(highPassFilter);
+    highPassFilter.connect(lowPassFilter);
+    lowPassFilter.connect(offlineContext.destination);
+    
     sourceNode.start(0);
     
     const renderedBuffer = await offlineContext.startRendering();
     const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
     
-    analysisMessage = "Voice Extractor: Attempted center channel extraction (mono output). This basic method aims to isolate centrally panned elements like vocals but may also include other centered instruments (e.g., bass, kick, snare). Results vary greatly depending on the original mix.";
+    if (numChannels === 1) {
+        analysisMessage = "Voice Extractor: Input audio is mono. Applied band-pass filter (approx. 100Hz-10kHz) to emphasize typical vocal frequencies. True vocal isolation from mono audio is complex and this method has limitations.";
+    } else {
+        analysisMessage = "Voice Extractor: Attempted center channel extraction with band-pass filtering (approx. 100Hz-10kHz). This basic method aims to isolate centrally panned vocals by downmixing to mono and filtering. Results vary greatly; other centered instruments (e.g., bass, kick, snare) or wide stereo vocals might still be present or affected.";
+    }
     
     return { processedAudioDataUrl, analysis: analysisMessage };
   },
+
 
   channelCompressor: async (audioDataUrl: string, { channels }: { channels: 'mono' | 'stereo' }) => {
     if (channels === 'stereo') { 
