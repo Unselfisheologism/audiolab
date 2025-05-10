@@ -1,7 +1,4 @@
 
-
-
-
 // In a real app, these would interact with Web Audio API or a backend service
 
 export type AudioProcessingFunction = (
@@ -464,6 +461,62 @@ const paceAdjuster: AudioProcessingFunction = async (audioDataUrl, params) => {
   return { processedAudioDataUrl, analysis };
 };
 
+const echoGenerator: AudioProcessingFunction = async (audioDataUrl, params) => {
+  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  await resumeAudioContext(audioContext);
+  const response = await fetch(audioDataUrl);
+  const arrayBuffer = await response.arrayBuffer();
+  const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+  const offlineContext = new OfflineAudioContext(
+    decodedAudioBuffer.numberOfChannels,
+    // Extend duration to accommodate delay tail. Max delay 1s + original duration.
+    decodedAudioBuffer.length + decodedAudioBuffer.sampleRate * 2, // Max delay 2s
+    decodedAudioBuffer.sampleRate
+  );
+  await resumeAudioContext(offlineContext);
+
+  const sourceNode = offlineContext.createBufferSource();
+  sourceNode.buffer = decodedAudioBuffer;
+
+  const delayTimeMs = Number(params.delay || 300);
+  const feedbackAmount = Number(params.feedback || 0.5);
+  const mixAmount = Number(params.mix || 0.5);
+
+  const delayNode = offlineContext.createDelay(2.0); // Max delay time 2 seconds
+  delayNode.delayTime.setValueAtTime(delayTimeMs / 1000, offlineContext.currentTime);
+
+  const feedbackGainNode = offlineContext.createGain();
+  feedbackGainNode.gain.setValueAtTime(feedbackAmount, offlineContext.currentTime);
+
+  const wetGainNode = offlineContext.createGain();
+  wetGainNode.gain.setValueAtTime(mixAmount, offlineContext.currentTime);
+  
+  const dryGainNode = offlineContext.createGain();
+  dryGainNode.gain.setValueAtTime(1 - mixAmount, offlineContext.currentTime);
+
+  // Dry path
+  sourceNode.connect(dryGainNode);
+  dryGainNode.connect(offlineContext.destination);
+
+  // Wet path (with feedback)
+  sourceNode.connect(delayNode);
+  delayNode.connect(feedbackGainNode);
+  feedbackGainNode.connect(delayNode); // Feedback loop
+  delayNode.connect(wetGainNode);
+  wetGainNode.connect(offlineContext.destination);
+
+  sourceNode.start(0);
+
+  const renderedBuffer = await offlineContext.startRendering();
+  const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
+
+  const analysis = `Applied Echo Generator: Delay: ${delayTimeMs}ms, Feedback: ${(feedbackAmount * 100).toFixed(0)}%, Mix: ${(mixAmount * 100).toFixed(0)}%.`;
+
+  await audioContext.close();
+  return { processedAudioDataUrl, analysis };
+};
+
 
 const simulateProcessing = async (audioDataUrl: string, operationName: string, params: Record<string, any>): Promise<{ processedAudioDataUrl: string; analysis?: string }> => {
   console.log(`Simulating ${operationName} with params:`, params);
@@ -481,7 +534,7 @@ export const audioUtils: Record<string, AudioProcessingFunction> = {
   frequencySculptor: frequencySculptor,
   keyTransposer: keyTransposer,
   paceAdjuster: paceAdjuster,
-  echoGenerator: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Echo Generator', params),
+  echoGenerator: echoGenerator,
   reversePlayback: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Reverse Playback', params),
   channelRouter: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Channel Router', params),
   audioSplitter: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Audio Splitter', params),
@@ -528,4 +581,3 @@ export const resumeAudioContext = async (audioContext: AudioContext | OfflineAud
     }
   }
 };
-
