@@ -85,7 +85,7 @@ export const effectsList: Effect[] = [
     icon: TrendingDown,
     controlType: 'slider',
     parameters: [
-      { name: 'intensity', label: 'Intensity', type: 'slider', defaultValue: 0, min: 0, max: 100, step: 1 }
+      { name: 'intensity', label: 'Intensity', type: 'slider', defaultValue: 50, min: 0, max: 100, step: 1 }
     ],
     handlerKey: 'subharmonicIntensifier',
     groupName: 'Frequency Tools',
@@ -298,7 +298,39 @@ export const effectsList: Effect[] = [
   },
 ];
 
+// AI Features that were removed
+// {
+//   id: 'acousticPurification',
+//   name: 'Acoustic Purification (AI)',
+//   description: 'AI tool to diminish sound artifacts in recordings.',
+//   icon: Wand2,
+//   controlType: 'button',
+//   actionLabel: 'Purify Audio',
+//   handlerKey: 'acousticPurification',
+//   groupName: 'AI Tools',
+//   outputsAnalysis: true,
+// },
+// {
+//   id: 'soundScrubber',
+//   name: 'Sound Scrubber (AI)',
+//   description: 'Reduce ambient sounds using an AI tool.',
+//   icon: Eraser, // Or any other icon that fits
+//   controlType: 'button',
+//   actionLabel: 'Scrub Sound',
+//   handlerKey: 'soundScrubber',
+//   groupName: 'AI Tools',
+//   outputsAnalysis: true,
+// },
+
+
 export const effectGroups = Array.from(new Set(effectsList.map(e => e.groupName))).filter(Boolean) as string[];
 
 // Add a fallback icon for any effects that might miss one
 export const fallbackIcon = HelpingHand;
+
+// Features that might be represented differently or are not direct effects
+// - Audio Upload & Processing: Handled by FileUploadArea
+// - Export Configuration: Handled by ExportPanel
+// - Format Shifter: Part of ExportPanel
+// - Frequency Visualizer: Component in MainDisplayPanel
+// - Amplitude Plotter: Component in MainDisplayPanel
