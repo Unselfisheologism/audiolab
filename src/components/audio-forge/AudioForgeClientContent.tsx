@@ -1,6 +1,7 @@
+
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { AppHeader } from './AppHeader';
 import { AudioControlsPanel } from './AudioControlsPanel';
 import { MainDisplayPanel } from './MainDisplayPanel';
@@ -16,8 +17,11 @@ export default function AudioForgeClientContent() {
   const [processedAudioDataUrl, setProcessedAudioDataUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+  
+  const [processedAudioBuffer, setProcessedAudioBuffer] = useState<AudioBuffer | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+
   const [effectSettings, setEffectSettings] = useState<Record<string, EffectSettings>>(() => {
-    // Initialize default settings for all effects
     const initialSettings: Record<string, EffectSettings> = {};
     effectsList.forEach(effect => {
       initialSettings[effect.id] = {};
@@ -30,6 +34,48 @@ export default function AudioForgeClientContent() {
 
   const { toast } = useToast();
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    // No global cleanup for audioContextRef here as it's used throughout the component's life.
+    // It can be closed on unmount if necessary, but for now, it persists.
+    // return () => {
+    //   audioContextRef.current?.close().catch(e => console.error("Failed to close AudioContext", e));
+    //   audioContextRef.current = null;
+    // }
+  }, []);
+
+  const loadAudioBufferForVisualizer = useCallback(async (dataUrl: string | null) => {
+    if (!dataUrl || !audioContextRef.current) {
+      setProcessedAudioBuffer(null);
+      return;
+    }
+    // setIsLoading(true); // This isLoading is for main processing, visualizer is secondary
+    try {
+      const response = await fetch(dataUrl);
+      const arrayBuffer = await response.arrayBuffer();
+      // Ensure context is active
+      if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
+         console.warn("AudioContext was closed, reinitializing for visualizer.");
+         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      const audioBuffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
+      setProcessedAudioBuffer(audioBuffer);
+    } catch (error) {
+      console.error("Error decoding audio data for visualizer:", error);
+      // toast({ title: "Visualizer Error", description: "Could not load audio for visualization.", variant: "destructive" });
+      setProcessedAudioBuffer(null);
+    } finally {
+      // setIsLoading(false);
+    }
+  }, []); // Removed toast from deps for this specific loader
+
+  useEffect(() => {
+    loadAudioBufferForVisualizer(processedAudioDataUrl);
+  }, [processedAudioDataUrl, loadAudioBufferForVisualizer]);
+
+
   const handleFileSelect = useCallback(async (file: File | null) => {
     setOriginalAudioFile(file);
     if (file) {
@@ -37,8 +83,8 @@ export default function AudioForgeClientContent() {
       try {
         const dataUrl = await fileToDataUrl(file);
         setOriginalAudioDataUrl(dataUrl);
-        setProcessedAudioDataUrl(dataUrl); // Initially, processed is same as original
-        setAnalysisResult(null); // Clear previous analysis
+        setProcessedAudioDataUrl(dataUrl); 
+        setAnalysisResult(null);
         toast({ title: "Audio Loaded", description: `${file.name} is ready for forging.` });
       } catch (error) {
         console.error("Error loading file:", error);
@@ -52,6 +98,7 @@ export default function AudioForgeClientContent() {
       setOriginalAudioDataUrl(null);
       setProcessedAudioDataUrl(null);
       setAnalysisResult(null);
+      setProcessedAudioBuffer(null); // Clear buffer if file is cleared
     }
   }, [toast]);
 
@@ -72,15 +119,15 @@ export default function AudioForgeClientContent() {
     }
 
     setIsLoading(true);
-    setAnalysisResult(null); // Clear previous analysis for new effect application
-    const currentAudio = processedAudioDataUrl || originalAudioDataUrl; // Apply effect to currently processed audio or original
+    setAnalysisResult(null); 
+    const currentAudio = processedAudioDataUrl || originalAudioDataUrl; 
 
     try {
       let result: { processedAudioDataUrl: string; analysis?: string } = { processedAudioDataUrl: currentAudio };
       const effect = effectsList.find(e => e.id === effectId || e.parameters?.find(p => p.handlerKey === effectId));
       const actualHandlerKey = effect?.parameters?.find(p => p.handlerKey === effectId)?.handlerKey || effect?.handlerKey || effectId;
       
-      const combinedParams = { ...effectSettings[effectId], ...params };
+      const combinedParams = { ...(effectSettings[effect?.id ?? effectId] || {}), ...params };
 
       if (audioUtils[actualHandlerKey]) {
         result = await audioUtils[actualHandlerKey](currentAudio, combinedParams);
@@ -102,8 +149,6 @@ export default function AudioForgeClientContent() {
   }, [originalAudioDataUrl, processedAudioDataUrl, toast, effectSettings]);
 
   const handleExport = useCallback((format: string, quality: string) => {
-    // This is mostly a placeholder for now as download is handled by AudioPlayer
-    // In a real app, this might trigger specific encoding
     console.log(`Exporting as ${format} with ${quality} quality.`);
     if(!processedAudioDataUrl) {
       toast({ title: "Nothing to Export", description: "No processed audio available.", variant: "destructive"});
@@ -132,6 +177,7 @@ export default function AudioForgeClientContent() {
           <MainDisplayPanel
             originalAudioDataUrl={originalAudioDataUrl}
             processedAudioDataUrl={processedAudioDataUrl}
+            audioBuffer={processedAudioBuffer}
             onExport={handleExport}
             isLoading={isLoading}
             analysisResult={analysisResult}

@@ -1,5 +1,6 @@
+
 'use client';
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlayCircle, PauseCircle, Download } from 'lucide-react';
 
@@ -7,63 +8,90 @@ interface AudioPlayerProps {
   title: string;
   audioSrc: string | null;
   fileName?: string; // For download
+  onPlayStateChange?: (isPlaying: boolean) => void;
 }
 
-export function AudioPlayer({ title, audioSrc, fileName = "processed_audio.wav" }: AudioPlayerProps) {
+export function AudioPlayer({ title, audioSrc, fileName = "processed_audio.wav", onPlayStateChange }: AudioPlayerProps) {
   const audioRef = React.useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [duration, setDuration] = React.useState(0);
   const [currentTime, setCurrentTime] = React.useState(0);
 
   const togglePlayPause = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
+    const audio = audioRef.current;
+    if (audio) {
+      if (audio.paused || audio.ended) {
+        audio.play().catch(error => console.error("Error playing audio:", error));
       } else {
-        audioRef.current.play().catch(error => console.error("Error playing audio:", error));
+        audio.pause();
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const audio = audioRef.current;
     if (audio) {
       const setAudioData = () => {
-        setDuration(audio.duration);
+        if (isFinite(audio.duration)) {
+            setDuration(audio.duration);
+        } else {
+            setDuration(0); // Handle Infinite or NaN duration
+        }
         setCurrentTime(audio.currentTime);
       }
       const setAudioTime = () => setCurrentTime(audio.currentTime);
 
-      audio.addEventListener('loadeddata', setAudioData);
+      const handlePlay = () => { setIsPlaying(true); onPlayStateChange?.(true); };
+      const handlePause = () => { setIsPlaying(false); onPlayStateChange?.(false); };
+      const handleEnded = () => { 
+        setIsPlaying(false); 
+        onPlayStateChange?.(false); 
+        setCurrentTime(0); // Reset to beginning on end
+      };
+      
+      audio.addEventListener('loadedmetadata', setAudioData);
+      audio.addEventListener('durationchange', setAudioData); // Handle duration changes
       audio.addEventListener('timeupdate', setAudioTime);
-      audio.addEventListener('play', () => setIsPlaying(true));
-      audio.addEventListener('pause', () => setIsPlaying(false));
-      audio.addEventListener('ended', () => setIsPlaying(false));
+      audio.addEventListener('play', handlePlay);
+      audio.addEventListener('pause', handlePause);
+      audio.addEventListener('ended', handleEnded);
 
-
-      // Reset player if src changes
+      // Initial sync of play state
       if (audioSrc) {
-         // if audioSrc changes and is not null, try to play
-        if(isPlaying) audio.play().catch(e => console.error("Error auto-playing new src:", e));
+          // Audio might already be playing or paused from previous src or autoPlay
+          if (!audio.paused && !audio.ended && audio.readyState >= HTMLMediaElement.HAVE_METADATA) {
+              setIsPlaying(true);
+              onPlayStateChange?.(true);
+          } else {
+              setIsPlaying(false);
+              onPlayStateChange?.(false);
+          }
+          // Ensure duration is set if metadata already loaded
+          if (audio.readyState >= HTMLMediaElement.HAVE_METADATA && isFinite(audio.duration)) {
+            setDuration(audio.duration);
+          } else {
+            setDuration(0);
+          }
       } else {
-        setIsPlaying(false);
-        setCurrentTime(0);
-        setDuration(0);
+          setIsPlaying(false);
+          onPlayStateChange?.(false);
+          setCurrentTime(0);
+          setDuration(0);
       }
-
 
       return () => {
-        audio.removeEventListener('loadeddata', setAudioData);
+        audio.removeEventListener('loadedmetadata', setAudioData);
+        audio.removeEventListener('durationchange', setAudioData);
         audio.removeEventListener('timeupdate', setAudioTime);
-        audio.removeEventListener('play', () => setIsPlaying(true));
-        audio.removeEventListener('pause', () => setIsPlaying(false));
-        audio.removeEventListener('ended', () => setIsPlaying(false));
+        audio.removeEventListener('play', handlePlay);
+        audio.removeEventListener('pause', handlePause);
+        audio.removeEventListener('ended', handleEnded);
       }
     }
-  }, [audioSrc, isPlaying]);
+  }, [audioSrc, onPlayStateChange]);
 
   const formatTime = (time: number) => {
+    if (!isFinite(time) || time < 0) return '0:00';
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60).toString().padStart(2, '0');
     return `${minutes}:${seconds}`;
@@ -71,8 +99,9 @@ export function AudioPlayer({ title, audioSrc, fileName = "processed_audio.wav" 
   
   const handleSeek = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (audioRef.current) {
-        audioRef.current.currentTime = Number(event.target.value);
-        setCurrentTime(Number(event.target.value));
+        const seekTime = Number(event.target.value);
+        audioRef.current.currentTime = seekTime;
+        setCurrentTime(seekTime);
     }
   };
 
@@ -95,15 +124,17 @@ export function AudioPlayer({ title, audioSrc, fileName = "processed_audio.wav" 
                 max={duration || 0} 
                 value={currentTime} 
                 onChange={handleSeek}
-                className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary disabled:opacity-50"
                 aria-label="Seek"
+                disabled={!audioSrc || duration === 0}
               />
               <span className="text-sm text-muted-foreground w-20 text-right">{formatTime(currentTime)} / {formatTime(duration)}</span>
                <a
                 href={audioSrc}
                 download={fileName}
-                className="text-primary hover:text-accent transition-colors p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                className={`text-primary hover:text-accent transition-colors p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-ring ${!audioSrc ? 'opacity-50 cursor-not-allowed' : ''}`}
                 aria-label="Download processed audio"
+                onClick={(e) => !audioSrc && e.preventDefault()}
               >
                 <Download size={20} />
               </a>
