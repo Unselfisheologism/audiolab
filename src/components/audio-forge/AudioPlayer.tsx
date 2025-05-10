@@ -114,7 +114,7 @@ export function AudioPlayer({ title, audioSrc, fileName = "processed_audio.wav",
         {audioSrc ? (
           <>
             <audio ref={audioRef} src={audioSrc} className="w-full hidden" preload="metadata" />
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <button onClick={togglePlayPause} className="text-primary hover:text-accent transition-colors" aria-label={isPlaying ? "Pause" : "Play"}>
                 {isPlaying ? <PauseCircle size={32} /> : <PlayCircle size={32} />}
               </button>
@@ -124,11 +124,11 @@ export function AudioPlayer({ title, audioSrc, fileName = "processed_audio.wav",
                 max={duration || 0} 
                 value={currentTime} 
                 onChange={handleSeek}
-                className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary disabled:opacity-50"
+                className="flex-grow h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary disabled:opacity-50 min-w-[100px]"
                 aria-label="Seek"
                 disabled={!audioSrc || duration === 0}
               />
-              <span className="text-sm text-muted-foreground w-20 text-right">{formatTime(currentTime)} / {formatTime(duration)}</span>
+              <span className="text-sm text-muted-foreground min-w-[5rem] text-right flex-shrink-0">{formatTime(currentTime)} / {formatTime(duration)}</span>
                <a
                 href={audioSrc}
                 download={fileName}
@@ -147,3 +147,4 @@ export function AudioPlayer({ title, audioSrc, fileName = "processed_audio.wav",
     </Card>
   );
 }
+

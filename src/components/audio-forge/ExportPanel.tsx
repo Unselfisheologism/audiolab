@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -35,14 +36,14 @@ export function ExportPanel({ processedAudioDataUrl, onExport, isLoading, origin
   return (
     <Card className="shadow-md">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-xl">
           <Settings2 className="text-primary" />
           Export Configuration
         </CardTitle>
         <CardDescription>Choose your preferred output settings.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1">
             <Label htmlFor="format">Format</Label>
             <Select value={format} onValueChange={setFormat} disabled={isLoading || !processedAudioDataUrl}>

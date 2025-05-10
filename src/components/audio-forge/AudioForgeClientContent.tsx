@@ -10,6 +10,7 @@ import type { EffectSettings } from '@/types/audio-forge';
 import { useToast } from '@/hooks/use-toast';
 import { audioUtils, fileToDataUrl } from '@/lib/audio-utils';
 import { effectsList } from '@/app/audio-forge/effects';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function AudioForgeClientContent() {
   const [originalAudioFile, setOriginalAudioFile] = useState<File | null>(null);
@@ -21,6 +22,7 @@ export default function AudioForgeClientContent() {
   
   const [processedAudioBuffer, setProcessedAudioBuffer] = useState<AudioBuffer | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const isMobile = useIsMobile();
 
   const [effectSettings, setEffectSettings] = useState<Record<string, EffectSettings>>(() => {
     const initialSettings: Record<string, EffectSettings> = {};
@@ -117,9 +119,9 @@ export default function AudioForgeClientContent() {
 
     try {
       let result: { processedAudioDataUrl: string; analysis?: string } = { processedAudioDataUrl: currentAudio };
-      const effect = effectsList.find(e => e.id === effectId || e.parameters?.find(p => p.handlerKey === effectId));
-      const actualHandlerKey = effect?.parameters?.find(p => p.handlerKey === effectId)?.handlerKey || effect?.handlerKey || effectId;
-      const parentEffectId = effect?.id || null;
+      const effectToApply = effectsList.find(e => e.id === effectId || e.parameters?.find(p => p.handlerKey === effectId));
+      const actualHandlerKey = effectToApply?.parameters?.find(p => p.handlerKey === effectId)?.handlerKey || effectToApply?.handlerKey || effectId;
+      const parentEffectId = effectToApply?.id || null;
       
       const combinedParams = { ...(effectSettings[parentEffectId ?? effectId] || {}), ...params };
 
@@ -132,14 +134,15 @@ export default function AudioForgeClientContent() {
       setProcessedAudioDataUrl(result.processedAudioDataUrl);
       if (result.analysis) {
         setAnalysisResult(result.analysis);
-        if (effect?.outputsAnalysis) {
+        if (effectToApply?.outputsAnalysis) {
           setAnalysisSourceEffectId(parentEffectId);
         }
       }
-      toast({ title: "Effect Applied", description: `${effect?.name || actualHandlerKey} processing complete.` });
-    } catch (error) {
+      toast({ title: "Effect Applied", description: `${effectToApply?.name || actualHandlerKey} processing complete.` });
+    } catch (error: any) {
       console.error(`Error applying effect ${effectId}:`, error);
-      toast({ title: "Processing Error", description: `Could not apply ${effect?.name || effectId}.`, variant: "destructive" });
+      const effectToApply = effectsList.find(e => e.id === effectId || e.parameters?.find(p => p.handlerKey === effectId));
+      toast({ title: "Processing Error", description: `Could not apply ${effectToApply?.name || effectId}. ${error.message}`, variant: "destructive" });
       setAnalysisResult(null);
       setAnalysisSourceEffectId(null);
     } finally {
@@ -159,8 +162,15 @@ export default function AudioForgeClientContent() {
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
       <AppHeader />
-      <ResizablePanelGroup direction="horizontal" className="flex-grow min-h-0">
-        <ResizablePanel defaultSize={35} minSize={25} maxSize={50}>
+      <ResizablePanelGroup 
+        direction={isMobile ? 'vertical' : 'horizontal'} 
+        className="flex-grow min-h-0"
+      >
+        <ResizablePanel 
+          defaultSize={isMobile ? 40 : 35} 
+          minSize={isMobile ? 30 : 25} 
+          maxSize={isMobile ? 60 : 50}
+        >
           <AudioControlsPanel
             onFileSelect={handleFileSelect}
             selectedFile={originalAudioFile}
@@ -174,7 +184,10 @@ export default function AudioForgeClientContent() {
           />
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={65} minSize={50}>
+        <ResizablePanel 
+          defaultSize={isMobile ? 60 : 65} 
+          minSize={isMobile ? 40 : 50}
+        >
           <MainDisplayPanel
             originalAudioDataUrl={originalAudioDataUrl}
             processedAudioDataUrl={processedAudioDataUrl}
@@ -190,3 +203,4 @@ export default function AudioForgeClientContent() {
     </div>
   );
 }
+
