@@ -164,7 +164,7 @@ export const audioUtils = {
       const filterFreq = Math.max(20, 1000 + (frequency * 40)); 
       biquadFilter.frequency.setValueAtTime(filterFreq, context.currentTime);
       biquadFilter.Q.setValueAtTime(1.5, context.currentTime);
-      biquadFilter.gain.setValueAtTime(frequency, context.currentTime); // Use the passed frequency as gain
+      biquadFilter.gain.setValueAtTime(frequency, context.currentTime);
       return [biquadFilter];
     }, `Altered resonance: Peaking filter with ${frequency}dB gain around ${ (1000 + (frequency * 40)).toFixed(0) }Hz.`);
   },
@@ -231,32 +231,40 @@ export const audioUtils = {
 
       const sumGainL = offlineContext.createGain(); 
       gainLToMid.connect(sumGainL);
-      gainRToMid.connect(sumGainL);
+      gainRToMid.connect(sumGainL); // This should be gainRToMid connected to sumGainL
       gainLToSide.connect(sumGainL);
-      gainRToSideInverted.connect(sumGainL); 
-      sumGainL.connect(merger, 0, 0);
-
-
-      const sumGainR_M = offlineContext.createGain(); 
-      gainLToMid.connect(sumGainR_M);
-      gainRToMid.connect(sumGainR_M);
+      // gainRToSideInverted is NOT connected to sumGainL. It should be gainLToSide (inverted for right)
       
-      const sumGainR_S_inverted = offlineContext.createGain(); 
-      const sideInverterForR_L = offlineContext.createGain(); 
-      sideInverterForR_L.gain.setValueAtTime(-1, offlineContext.currentTime);
-      gainLToSide.connect(sideInverterForR_L);
-      sideInverterForR_L.connect(sumGainR_S_inverted);
+      // Corrected logic for Left Channel Output (L_out = M + S)
+      // M = 0.5 * (L_in + R_in)
+      // S = 0.5 * width * (L_in - R_in)
+      // L_out = 0.5 * L_in + 0.5 * R_in + 0.5 * width * L_in - 0.5 * width * R_in
+      // L_out = (0.5 + 0.5 * width) * L_in + (0.5 - 0.5 * width) * R_in
+      const gainL_L = offlineContext.createGain();
+      gainL_L.gain.setValueAtTime(0.5 * (1 + width), offlineContext.currentTime);
+      const gainL_R = offlineContext.createGain();
+      gainL_R.gain.setValueAtTime(0.5 * (1 - width), offlineContext.currentTime);
 
-      const sideInverterForR_R = offlineContext.createGain();
-      sideInverterForR_R.gain.setValueAtTime(-1, offlineContext.currentTime);
-      gainRToSideInverted.connect(sideInverterForR_R); 
-      sideInverterForR_R.connect(sumGainR_S_inverted);
+      splitter.connect(gainL_L, 0, 0);
+      splitter.connect(gainL_R, 1, 0);
+      gainL_L.connect(merger, 0, 0);
+      gainL_R.connect(merger, 0, 0);
 
-      const finalSumR = offlineContext.createGain();
-      sumGainR_M.connect(finalSumR);
-      sumGainR_S_inverted.connect(finalSumR);
-      finalSumR.connect(merger, 0, 1);
-  
+
+      // Corrected logic for Right Channel Output (R_out = M - S)
+      // R_out = 0.5 * L_in + 0.5 * R_in - (0.5 * width * L_in - 0.5 * width * R_in)
+      // R_out = 0.5 * L_in + 0.5 * R_in - 0.5 * width * L_in + 0.5 * width * R_in
+      // R_out = (0.5 - 0.5 * width) * L_in + (0.5 + 0.5 * width) * R_in
+      const gainR_L = offlineContext.createGain();
+      gainR_L.gain.setValueAtTime(0.5 * (1 - width), offlineContext.currentTime);
+      const gainR_R = offlineContext.createGain();
+      gainR_R.gain.setValueAtTime(0.5 * (1 + width), offlineContext.currentTime);
+
+      splitter.connect(gainR_L, 0, 0);
+      splitter.connect(gainR_R, 1, 0);
+      gainR_L.connect(merger, 0, 1);
+      gainR_R.connect(merger, 0, 1);
+
       return [merger]; 
     }, `Stereo Widener: Width set to ${widthParam}%. Applied only if audio is stereo.`, 
        2 
@@ -338,7 +346,7 @@ export const audioUtils = {
     if (decodedAudioBuffer.length === 0) return { processedAudioDataUrl: audioDataUrl, analysis: "Audio is empty."};
 
 
-    const clampedDelay = Math.max(0.001, Math.min(delay / 1000, audioContext.sampleRate)); 
+    const clampedDelay = Math.max(0.001, Math.min(delay / 1000, 1)); // Max delay 1s for safety for createDelay
     const clampedFeedback = Math.max(0, Math.min(feedback, 0.95)); 
     const clampedMix = Math.max(0, Math.min(mix, 1)); 
 
@@ -362,7 +370,7 @@ export const audioUtils = {
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
 
-    const delayNode = offlineContext.createDelay(Math.max(1, clampedDelay + 1)); 
+    const delayNode = offlineContext.createDelay(Math.max(1, clampedDelay + 2)); // Ensure maxDelayTime for createDelay is sufficient
     delayNode.delayTime.setValueAtTime(clampedDelay, offlineContext.currentTime);
 
     const feedbackNode = offlineContext.createGain();
@@ -589,22 +597,21 @@ export const audioUtils = {
     return { ...result, analysis: `Tuned to 432Hz (shifted by approx. ${semitones.toFixed(2)} semitones from 440Hz standard).` };
   },
   apply8DEffect: async (audioDataUrl: string, params: {} = {}) => {
-    // Step 1: Apply Automated Sweep (Auto Panner)
-    // Parameters for Sweep: Frequency: 0.08 Hz
+    // Parameters based on user description for "8D Audio Preset"
+    // 1. Auto Panner
+    //    Frequency: 0.08 Hz (this is the 'speed' for our automatedSweep)
     const pannerParams = { speed: 0.08 };
     const sweepResult = await audioUtils.automatedSweep(audioDataUrl, pannerParams);
   
-    // Step 2: Apply Echo Generator (Reverb) to the output of the sweep
-    // Parameters for Reverb: 
-    // Reverberance: 50% -> mix: 0.5
-    // Room scale: 100% -> delay: 800ms
-    // Feedback around 0.4 for noticeable reverb
-    const reverbParams = { delay: 800, feedback: 0.4, mix: 0.5 };
+    // 2. Reverb (using our Echo Generator)
+    //    Reverberance: 50%  => mix: 0.5
+    //    Room scale: 100%   => Interpreted as delay: 250ms, feedback: 0.6 for a more spacious, less echo-like feel.
+    const reverbParams = { delay: 250, feedback: 0.6, mix: 0.5 };
     const finalResult = await audioUtils.echoGenerator(sweepResult.processedAudioDataUrl, reverbParams);
   
     return {
       ...finalResult,
-      analysis: `8D Audio Effect Applied: Auto Panner (Speed: ${pannerParams.speed}Hz) followed by Reverb (Delay: ${reverbParams.delay}ms, Feedback: ${(reverbParams.feedback*100).toFixed(0)}%, Mix: ${(reverbParams.mix*100).toFixed(0)}% Wet). Best experienced with headphones.`,
+      analysis: `8D Audio Effect Applied: Auto Panner (Speed: ${pannerParams.speed}Hz) followed by Reverb (Delay: ${reverbParams.delay}ms, Feedback: ${(reverbParams.feedback*100).toFixed(0)}%, Mix: ${(reverbParams.mix*100).toFixed(0)}% Wet). Best experienced with headphones. The effect aims to create a sense of spatial movement.`,
     };
   },
 
@@ -621,7 +628,7 @@ export const audioUtils = {
     return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 75 });
   },
   maximumBassOverdrive: async (audioDataUrl: string, params: EffectSettings) => {
-    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 100 }); // Capped at 100 for safety
+    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 100 });
   },
 
   vocalAmbience: async (audioDataUrl: string, params: EffectSettings) => {
@@ -648,14 +655,14 @@ export const audioUtils = {
 
   automatedSweep: async (audioDataUrl: string, { speed }: { speed: number }) => {
      return processAudioWithEffect(audioDataUrl, (context, sourceNode, buffer) => {
-        if (buffer.numberOfChannels < 2) { 
+        if (buffer.numberOfChannels < 2 && buffer.numberOfChannels !== 0) { 
              console.warn("Automated Sweep: Input is mono. Effect will pan, but perception requires stereo playback.");
         }
 
         const panner = context.createStereoPanner();
         const lfo = context.createOscillator();
         lfo.type = 'sine';
-        const clampedSpeed = Math.max(0.05, Math.min(speed, 10)); 
+        const clampedSpeed = Math.max(0.01, Math.min(speed, 10)); 
         lfo.frequency.setValueAtTime(clampedSpeed, context.currentTime);
         
         const lfoGain = context.createGain(); 
@@ -754,3 +761,5 @@ export const audioUtils = {
     }, `Spatial Audio Effect: Pan set to ${((depth - 50) / 50).toFixed(2)}. Output will be stereo.`, 2); 
   },
 };
+
+    
