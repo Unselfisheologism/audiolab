@@ -209,48 +209,57 @@ export const audioUtils = {
       const splitter = offlineContext.createChannelSplitter(2);
       const merger = offlineContext.createChannelMerger(2);
       
-      // Mid-Side encoding constants
-      const mGain = 1; // Mid channel gain (sum of L and R)
-      const sGain = width; // Side channel gain (difference of L and R, scaled by width)
+      const mGain = 1; 
+      const sGain = width; 
 
-      // Gains for Mid channel processing
       const gainLToMid = offlineContext.createGain();
-      gainLToMid.gain.value = 0.5 * mGain; // L * 0.5
+      gainLToMid.gain.value = 0.5 * mGain; 
       const gainRToMid = offlineContext.createGain();
-      gainRToMid.gain.value = 0.5 * mGain; // R * 0.5
+      gainRToMid.gain.value = 0.5 * mGain; 
 
-      // Gains for Side channel processing
       const gainLToSide = offlineContext.createGain();
-      gainLToSide.gain.value = 0.5 * sGain;  // L * 0.5 * width
+      gainLToSide.gain.value = 0.5 * sGain;  
       const gainRToSideInverted = offlineContext.createGain();
-      gainRToSideInverted.gain.value = -0.5 * sGain; // -R * 0.5 * width
+      gainRToSideInverted.gain.value = -0.5 * sGain; 
       
-      // Connect L and R to create Mid channel (M = (L+R)/2 * mGain but here mGain is 1, effectively)
       sourceNode.connect(splitter);
-      splitter.connect(gainLToMid, 0, 0); // Left input to gainLToMid
-      splitter.connect(gainRToMid, 1, 0); // Right input to gainRToMid
+      splitter.connect(gainLToMid, 0, 0); 
+      splitter.connect(gainRToMid, 1, 0); 
 
-      // Create Side channel (S = (L-R)/2 * sGain)
-      splitter.connect(gainLToSide, 0, 0);       // L input to gainLToSide
-      splitter.connect(gainRToSideInverted, 1, 0); // R input to gainRToSideInverted (becomes -R)
+      splitter.connect(gainLToSide, 0, 0);       
+      splitter.connect(gainRToSideInverted, 1, 0); 
 
       // Output L' = M + S
-      gainLToMid.connect(merger, 0, 0);
-      gainRToMid.connect(merger, 0, 0); // Sum L and R for M part of L'
-      gainLToSide.connect(merger, 0, 0); // Add S part to L'
-      gainRToSideInverted.connect(merger, 0, 0); // Add S part to L' (effectively (L-R)*sGain/2 part)
+      const sumGainL = offlineContext.createGain(); // To sum M and S components for L'
+      gainLToMid.connect(sumGainL);
+      gainRToMid.connect(sumGainL);
+      gainLToSide.connect(sumGainL);
+      gainRToSideInverted.connect(sumGainL); // This was (L-R) basically.
+      sumGainL.connect(merger, 0, 0);
+
 
       // Output R' = M - S
-      gainLToMid.connect(merger, 0, 1);
-      gainRToMid.connect(merger, 0, 1); // Sum L and R for M part of R'
-      // To subtract S for R', we invert S by multiplying by -1
-      const sideInverterForR = offlineContext.createGain();
-      sideInverterForR.gain.value = -1;
-      gainLToSide.connect(sideInverterForR);
-      gainRToSideInverted.connect(sideInverterForR); // S is (L*0.5*sGain) + (-R*0.5*sGain)
-      sideInverterForR.connect(merger, 0, 1); // Add -S part to R'
+      const sumGainR_M = offlineContext.createGain(); // For M part of R'
+      gainLToMid.connect(sumGainR_M);
+      gainRToMid.connect(sumGainR_M);
+      
+      const sumGainR_S_inverted = offlineContext.createGain(); // For -S part of R'
+      const sideInverterForR_L = offlineContext.createGain(); 
+      sideInverterForR_L.gain.value = -1;
+      gainLToSide.connect(sideInverterForR_L);
+      sideInverterForR_L.connect(sumGainR_S_inverted);
+
+      const sideInverterForR_R = offlineContext.createGain();
+      sideInverterForR_R.gain.value = -1;
+      gainRToSideInverted.connect(sideInverterForR_R); // This is -(-R*0.5*sGain) = R*0.5*sGain
+      sideInverterForR_R.connect(sumGainR_S_inverted);
+
+      const finalSumR = offlineContext.createGain();
+      sumGainR_M.connect(finalSumR);
+      sumGainR_S_inverted.connect(finalSumR);
+      finalSumR.connect(merger, 0, 1);
   
-      return [merger]; // Only merger is the final output node connected from source implicitly via setup
+      return [merger]; 
     }, `Stereo Widener: Width set to ${widthParam}%. Applied only if audio is stereo.`, 
        2 
     );
@@ -264,7 +273,7 @@ export const audioUtils = {
       lowshelfFilter.frequency.value = 120; 
       lowshelfFilter.gain.value = gainDb; 
       return [lowshelfFilter];
-    }, `Applied Subharmonic Intensifier: Low-shelf filter at 120Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityParam}%).`);
+    }, `Applied Subharmonic Intensifier: Low-shelf filter at 120Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityParam}%). Effect is most noticeable on audio with existing low-frequency content.`);
   },
 
   frequencySculptor: async (audioDataUrl: string, { low, mid, high }: { low: number, mid: number, high: number }) => {
@@ -277,7 +286,7 @@ export const audioUtils = {
       const midFilter = context.createBiquadFilter();
       midFilter.type = 'peaking';
       midFilter.frequency.value = 1000;
-      midFilter.Q.value = 0.707; // More standard Q for peaking
+      midFilter.Q.value = 0.707; 
       midFilter.gain.value = mid;
 
       const highFilter = context.createBiquadFilter();
@@ -464,7 +473,7 @@ export const audioUtils = {
   rhythmDetector: async (audioDataUrl: string, params: {}): Promise<{ processedAudioDataUrl: string; analysis?: string }> => {
     const audioContext = getGlobalAudioContext();
     if (!audioContext) {
-      return { processedAudioDataUrl: audioDataUrl, analysis: "BPM Analysis: AudioContext not available." };
+      return { processedAudioDataUrl: audioDataUrl, analysis: "BPM: N/A\nInterval: N/A (AudioContext not available.)" };
     }
 
     try {
@@ -503,7 +512,7 @@ export const audioUtils = {
       }
 
       if (peaks.length < 2) {
-        return { processedAudioDataUrl: audioDataUrl, analysis: "BPM: N/A\nInterval: N/A (Not enough peaks)" };
+        return { processedAudioDataUrl: audioDataUrl, analysis: "BPM: N/A\nInterval: N/A (Not enough peaks detected for reliable analysis.)" };
       }
 
       const intervalsInSeconds = [];
@@ -512,7 +521,7 @@ export const audioUtils = {
       }
 
       if (intervalsInSeconds.length === 0) {
-        return { processedAudioDataUrl: audioDataUrl, analysis: "BPM: N/A\nInterval: N/A (No intervals)" };
+        return { processedAudioDataUrl: audioDataUrl, analysis: "BPM: N/A\nInterval: N/A (No intervals found between peaks.)" };
       }
 
       const intervalCounts: { [key: string]: number } = {};
@@ -553,7 +562,7 @@ export const audioUtils = {
                 else if (mostCommonIntervalSec / 2 >= 60/240 && mostCommonIntervalSec / 2 <= 60/40) mostCommonIntervalSec /=2;
             }
             if (mostCommonIntervalSec <= 0 || mostCommonIntervalSec < 60/240 || mostCommonIntervalSec > 60/40) {
-                 return { processedAudioDataUrl: audioDataUrl, analysis: "BPM: N/A\nInterval: N/A (No consistent beat in typical range)" };
+                 return { processedAudioDataUrl: audioDataUrl, analysis: "BPM: N/A\nInterval: N/A (No consistent beat found in typical BPM range.)" };
             }
         }
       }
@@ -565,7 +574,7 @@ export const audioUtils = {
 
     } catch (error) {
       console.error("Error in rhythmDetector:", error);
-      return { processedAudioDataUrl: audioDataUrl, analysis: `BPM: N/A\nInterval: N/A (Error: ${error.message || 'Unknown'})` };
+      return { processedAudioDataUrl: audioDataUrl, analysis: `BPM: N/A\nInterval: N/A (Error: ${error.message || 'Unknown error during analysis.'})` };
     }
   },
 
@@ -595,7 +604,9 @@ export const audioUtils = {
     return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 75 });
   },
   maximumBassOverdrive: async (audioDataUrl: string, params: EffectSettings) => {
-    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 90 });
+    // Diagnostic: Using a very high intensity to make the effect extremely obvious if it's working at all.
+    // This corresponds to a +24dB gain, which should be very noticeable or cause clipping.
+    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 200 }); 
   },
 
   vocalAmbience: async (audioDataUrl: string, params: EffectSettings) => {
@@ -622,7 +633,7 @@ export const audioUtils = {
 
   automatedSweep: async (audioDataUrl: string, { speed }: { speed: number }) => {
      return processAudioWithEffect(audioDataUrl, (context, sourceNode, buffer) => {
-        if (buffer.numberOfChannels < 2) { // Ensure audio is stereo or will be processed as stereo
+        if (buffer.numberOfChannels < 2) { 
              console.warn("Automated Sweep: Input is mono. Effect will pan, but perception requires stereo playback.");
         }
 
@@ -633,7 +644,7 @@ export const audioUtils = {
         lfo.frequency.value = clampedSpeed;
         
         const lfoGain = context.createGain(); 
-        lfoGain.gain.value = 1; // Pan from -1 to 1
+        lfoGain.gain.value = 1; 
         
         lfo.connect(lfoGain);
         lfoGain.connect(panner.pan); 
@@ -641,7 +652,7 @@ export const audioUtils = {
         lfo.start();
         
         return [panner]; 
-    }, `Automated Sweep: Speed ${speed}Hz. Output will be stereo.`, 2); // Force output to 2 channels
+    }, `Automated Sweep: Speed ${speed}Hz. Output will be stereo.`, 2); 
   },
 
   audioSplitter: async (audioDataUrl: string, { startTime: startTimeMinutes, endTime: endTimeMinutes }: { startTime: number, endTime: number }) => {
@@ -728,4 +739,3 @@ export const audioUtils = {
     }, `Spatial Audio Effect: Pan set to ${((depth - 50) / 50).toFixed(2)}. Output will be stereo.`, 2); 
   },
 };
-
