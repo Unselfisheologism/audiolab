@@ -52,16 +52,6 @@ export const effectsList: Effect[] = [
     groupName: 'Creative Presets',
   },
   {
-    id: 'frequencyTuner432',
-    name: 'Tune to 432Hz',
-    description: 'Convert a track from standard 440Hz A4 tuning to 432Hz.',
-    icon: Copyleft, 
-    controlType: 'button',
-    actionLabel: 'Tune to 432Hz',
-    handlerKey: 'frequencyTuner',
-    groupName: 'Creative Presets',
-  },
-  {
     id: 'audio8DConverter',
     name: '8D Audio Converter',
     description: 'Simulate an 8D audio experience by combining panning and reverb. Best experienced with headphones.',
@@ -69,6 +59,16 @@ export const effectsList: Effect[] = [
     controlType: 'button',
     actionLabel: 'Apply 8D Effect',
     handlerKey: 'apply8DEffect',
+    groupName: 'Creative Presets',
+  },
+  {
+    id: 'frequencyTuner432',
+    name: 'Tune to 432Hz',
+    description: 'Convert a track from standard 440Hz A4 tuning to 432Hz.',
+    icon: Copyleft, 
+    controlType: 'button',
+    actionLabel: 'Tune to 432Hz',
+    handlerKey: 'frequencyTuner',
     groupName: 'Creative Presets',
   },
   // Core Effects
@@ -96,29 +96,6 @@ export const effectsList: Effect[] = [
     handlerKey: 'temporalModification',
     groupName: 'Core Effects',
   },
-  // AI Tools - REMOVED as per user request
-  // {
-  //   id: 'acousticPurification',
-  //   name: 'Acoustic Purification (AI)',
-  //   description: 'Diminish sound artifacts using AI.',
-  //   icon: Sparkles,
-  //   controlType: 'button',
-  //   actionLabel: 'Purify Audio',
-  //   handlerKey: 'acousticPurification', // This will call the Genkit flow
-  //   groupName: 'AI Tools',
-  //   outputsAnalysis: true,
-  // },
-  // {
-  //   id: 'soundScrubber',
-  //   name: 'Sound Scrubber (AI)',
-  //   description: 'Reduce ambient sounds using AI.',
-  //   icon: Eraser,
-  //   controlType: 'button',
-  //   actionLabel: 'Scrub Sound',
-  //   handlerKey: 'soundScrubber', // This will call the Genkit flow
-  //   groupName: 'AI Tools',
-  //   outputsAnalysis: true,
-  // },
   // Spatial Effects
   {
     id: 'stereoWidener',
@@ -307,7 +284,19 @@ export const effectsList: Effect[] = [
   },
 ];
 
-export const effectGroups = Array.from(new Set(effectsList.map(e => e.groupName))).filter(Boolean) as string[];
+export const effectGroups = [
+    'Creative Presets',
+    'Core Effects',
+    'Spatial Effects',
+    'Frequency Tools',
+    'Pitch & Time',
+    'Creative Effects',
+    'Utility Tools',
+    'Analysis Tools',
+    'Bass Boost Presets',
+    'Reverb Presets'
+];
+
 
 export const fallbackIcon = HelpingHand;
 
