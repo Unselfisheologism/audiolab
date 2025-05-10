@@ -246,7 +246,7 @@ export const audioUtils = {
   },
   
   subharmonicIntensifier: async (audioDataUrl: string, { intensity: intensityParam }: { intensity: number }) => {
-    const gainDb = (intensityParam / 100) * 12; 
+    const gainDb = (intensityParam / 100) * 12; // Map intensity 0-100 to 0-12dB gain
     return processAudioWithEffect(audioDataUrl, (offlineContext, sourceNode, decodedAudioBuffer) => {
       const lowshelfFilter = offlineContext.createBiquadFilter();
       lowshelfFilter.type = 'lowshelf';
@@ -724,13 +724,5 @@ export const audioUtils = {
       processedAudioDataUrl,
       analysis: analysisMessage
     };
-  },
-  spatialAudioEffect: async (audioDataUrl: string, { depth }: { depth: number }) => {
-    return processAudioWithEffect(audioDataUrl, (context, sourceNode, buffer) => {
-        const panner = context.createStereoPanner();
-        const panValue = (depth - 50) / 50; 
-        panner.pan.value = Math.max(-1, Math.min(1, panValue));
-        return [panner]; 
-    }, `Spatial Audio Effect: Pan set to ${((depth - 50) / 50).toFixed(2)}. Output will be stereo.`, 2); 
   },
 };

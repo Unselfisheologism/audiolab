@@ -121,18 +121,6 @@ export const effectsList: Effect[] = [
     handlerKey: 'automatedSweep',
     groupName: 'Spatial Effects',
   },
-  {
-    id: 'spatialAudioEffect',
-    name: 'Spatial Audio Effect',
-    description: 'Emulate surround sound. Placeholder.',
-    icon: Globe,
-    controlType: 'slider',
-    parameters: [
-      { name: 'depth', label: 'Spatial Depth', type: 'slider', defaultValue: 50, min: 0, max: 100, step: 1 }
-    ],
-    handlerKey: 'spatialAudioEffect',
-    groupName: 'Spatial Effects',
-  },
   // Frequency Tools
   {
     id: 'subharmonicIntensifier',
