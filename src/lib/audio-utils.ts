@@ -245,11 +245,12 @@ export const audioUtils = {
   
   subharmonicIntensifier: async (audioDataUrl: string, { intensity: intensityParam }: { intensity: number }) => {
     const gainDb = (intensityParam / 100) * 12; // Max 12dB boost for intensity 100
-    return processAudioWithEffect(audioDataUrl, (context, source, buffer) => {
-        const lowshelfFilter = context.createBiquadFilter();
+    return processAudioWithEffect(audioDataUrl, (offlineContext, sourceNode, decodedAudioBuffer) => {
+        const lowshelfFilter = offlineContext.createBiquadFilter();
         lowshelfFilter.type = 'lowshelf';
-        lowshelfFilter.frequency.setValueAtTime(120, context.currentTime); // Boost frequencies below 120Hz
-        lowshelfFilter.gain.setValueAtTime(gainDb, context.currentTime);
+        lowshelfFilter.frequency.setValueAtTime(120, offlineContext.currentTime); 
+        lowshelfFilter.gain.setValueAtTime(gainDb, offlineContext.currentTime);
+        
         return [lowshelfFilter];
       }, 
       `Applied Subharmonic Intensifier: Low-shelf filter at 120Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityParam}%).`
@@ -542,7 +543,7 @@ export const audioUtils = {
       }
 
       const bpm = 60 / mostCommonIntervalSec;
-      const analysis = `Estimated ${bpm.toFixed(1)} BPM (Interval: ${mostCommonIntervalSec.toFixed(2)}s)`;
+      const analysis = `BPM: ${bpm.toFixed(1)}, Interval: ${mostCommonIntervalSec.toFixed(2)}s`;
       
       return { processedAudioDataUrl: audioDataUrl, analysis };
 
