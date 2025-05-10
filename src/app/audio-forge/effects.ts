@@ -243,16 +243,6 @@ export const effectsList: Effect[] = [
     groupName: 'Spatial Effects',
   },
   {
-    id: 'channelRouter',
-    name: 'Channel Router',
-    description: 'Shift audio from one channel to another (e.g., L to R). Currently swaps L/R for stereo.',
-    icon: GitFork,
-    controlType: 'button',
-    actionLabel: 'Swap L/R Channels',
-    handlerKey: 'channelRouter',
-    groupName: 'Utility Tools',
-  },
-  {
     id: 'audioSplitter',
     name: 'Audio Splitter',
     description: 'Extract sections from an audio file by specifying start and end times in minutes.',
@@ -263,18 +253,6 @@ export const effectsList: Effect[] = [
       { name: 'endTime', label: 'End Time (min)', type: 'number_input', defaultValue: 0.1, min: 0, step: 0.01 } // Default 0.1 min = 6 seconds
     ],
     handlerKey: 'audioSplitter',
-    groupName: 'Utility Tools',
-  },
-  {
-    id: 'channelCompressor',
-    name: 'Channel Compressor',
-    description: 'Decrease channel count (e.g., stereo to mono). Placeholder.',
-    icon: Combine,
-    controlType: 'select',
-    parameters: [
-      { name: 'channels', label: 'Output Channels', type: 'select', defaultValue: 'mono', options: [{value: 'mono', label: 'Mono'}, {value: 'stereo', label: 'Stereo (Passthrough)'}]}
-    ],
-    handlerKey: 'channelCompressor',
     groupName: 'Utility Tools',
   },
   {

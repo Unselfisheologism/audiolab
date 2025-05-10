@@ -490,27 +490,6 @@ export const audioUtils = {
     }, `Automated Sweep: Speed ${speed}Hz. (Applied only if audio is stereo)`);
   },
 
-  channelRouter: async (audioDataUrl: string, params: {}) => {
-    return processAudioWithEffect(audioDataUrl, 
-      (offlineContext, sourceNode, decodedAudioBuffer) => {
-        const numChannels = decodedAudioBuffer.numberOfChannels;
-        if (numChannels < 2) {
-          return []; // No change for mono
-        }
-        const splitter = offlineContext.createChannelSplitter(numChannels);
-        const merger = offlineContext.createChannelMerger(numChannels);
-        
-        // Swap L (channel 0) and R (channel 1)
-        splitter.connect(merger, 0, 1); 
-        splitter.connect(merger, 1, 0); 
-        
-        for (let i = 2; i < numChannels; i++) {
-            splitter.connect(merger, i, i); 
-        }
-        return [splitter, merger];
-    }, "Channel Router: Left and Right channels swapped. Other channels (if any) passed through. No change if audio is mono.");
-  },
-
   audioSplitter: async (audioDataUrl: string, { startTime: startTimeMinutes, endTime: endTimeMinutes }: { startTime: number, endTime: number }) => {
     const audioContext = getGlobalAudioContext();
     if (!audioContext) throw new Error("AudioContext not supported");
@@ -578,60 +557,6 @@ export const audioUtils = {
       analysis: analysisMessage
     };
   },
-
-  channelCompressor: async (audioDataUrl: string, { channels: targetChannels }: { channels: 'mono' | 'stereo' }) => {
-    const audioContext = getGlobalAudioContext();
-    if (!audioContext) throw new Error("AudioContext not supported");
-  
-    const arrayBuffer = await dataUrlToArrayBuffer(audioDataUrl);
-    const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-    const sourceChannels = decodedAudioBuffer.numberOfChannels;
-  
-    let analysis = "";
-    let contextOutputChannelCount = sourceChannels; 
-  
-    if (targetChannels === 'mono') {
-      if (sourceChannels === 1) {
-        analysis = "Channel Compressor: Audio is already mono. No changes made.";
-        return { processedAudioDataUrl: audioDataUrl, analysis };
-      }
-      contextOutputChannelCount = 1; // Target one channel for OfflineAudioContext
-      analysis = `Channel Compressor: Audio converted to mono from ${sourceChannels} channels.`;
-    } else if (targetChannels === 'stereo') {
-      if (sourceChannels === 1) {
-        contextOutputChannelCount = 2; // Target two channels for OfflineAudioContext to create dual-mono
-        analysis = "Channel Compressor: Input is mono, selected stereo output. Audio file is now 2-channel (dual mono).";
-      } else if (sourceChannels === 2) {
-        analysis = "Channel Compressor: Audio is already stereo. No changes made.";
-        return { processedAudioDataUrl: audioDataUrl, analysis };
-      } else { // sourceChannels > 2
-        contextOutputChannelCount = 2; // Downmix to stereo
-        analysis = `Channel Compressor: Audio downmixed from ${sourceChannels} channels to stereo.`;
-      }
-    } else {
-      analysis = "Channel Compressor: Invalid target channel configuration.";
-      return { processedAudioDataUrl: audioDataUrl, analysis };
-    }
-  
-    // Process only if a change is needed or specifically if mono to dual-mono stereo
-    if (contextOutputChannelCount !== sourceChannels || (sourceChannels === 1 && targetChannels === 'stereo')) {
-      const offlineContext = new OfflineAudioContext(
-        contextOutputChannelCount, 
-        decodedAudioBuffer.length, 
-        decodedAudioBuffer.sampleRate
-      );
-      const sourceNode = offlineContext.createBufferSource();
-      sourceNode.buffer = decodedAudioBuffer;
-      sourceNode.connect(offlineContext.destination); // Web Audio API handles upmixing/downmixing
-      sourceNode.start(0);
-      
-      const renderedBuffer = await offlineContext.startRendering();
-      const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer); // This will encode based on renderedBuffer.numberOfChannels
-      return { processedAudioDataUrl, analysis };
-    }
-    // If no processing was needed (e.g. stereo to stereo, mono to mono where no dual-mono creation was forced)
-    return { processedAudioDataUrl: audioDataUrl, analysis };
-  },
   spatialAudioEffect: async (audioDataUrl: string, { depth }: { depth: number }) => {
     return processAudioWithEffect(audioDataUrl, (context, sourceNode, buffer) => {
         if (buffer.numberOfChannels < 2) return []; 
@@ -644,4 +569,3 @@ export const audioUtils = {
     }, `Spatial Audio Effect: Pan set to ${((depth - 50) / 50).toFixed(2)}. (Applied only if audio is stereo)`);
   },
 };
-
