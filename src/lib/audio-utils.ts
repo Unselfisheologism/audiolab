@@ -1,4 +1,6 @@
 
+
+
 // In a real app, these would interact with Web Audio API or a backend service
 
 export type AudioProcessingFunction = (
@@ -82,7 +84,7 @@ const alterResonance: AudioProcessingFunction = async (audioDataUrl, params) => 
 
   const offlineContext = new OfflineAudioContext(
     decodedAudioBuffer.numberOfChannels,
-    decodedAudioBuffer.length, // Keep original length for now, filter doesn't change it
+    decodedAudioBuffer.length,
     decodedAudioBuffer.sampleRate
   );
 
@@ -94,10 +96,12 @@ const alterResonance: AudioProcessingFunction = async (audioDataUrl, params) => 
 
   const BASE_PEAKING_FILTER_HZ = 1000; 
   const Q_VALUE = 5; 
-  const GAIN_VALUE = params.gainValue !== undefined ? params.gainValue : 6; // Allow dynamic gain if needed, else default
+  const GAIN_VALUE = 12; // Increased gain for more noticeable effect
 
   const frequencyShiftParam = params.frequency || 0; 
-  const centerFrequency = BASE_PEAKING_FILTER_HZ * Math.pow(2, frequencyShiftParam / 12);
+  // Ensure frequencyShiftParam is a number, providing a default if it's not (e.g. from initial state)
+  const numericFrequencyShift = typeof frequencyShiftParam === 'number' ? frequencyShiftParam : 0;
+  const centerFrequency = BASE_PEAKING_FILTER_HZ * Math.pow(2, numericFrequencyShift / 12);
   
   filterNode.frequency.setValueAtTime(centerFrequency, offlineContext.currentTime);
   filterNode.Q.setValueAtTime(Q_VALUE, offlineContext.currentTime);
@@ -110,7 +114,7 @@ const alterResonance: AudioProcessingFunction = async (audioDataUrl, params) => 
   const renderedBuffer = await offlineContext.startRendering();
   const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
   
-  const analysis = `Applied Resonance Alteration: Peaking filter centered at ${centerFrequency.toFixed(2)} Hz, Q=${Q_VALUE}, Gain=${GAIN_VALUE}dB. Original shift param: ${frequencyShiftParam}.`;
+  const analysis = `Applied Resonance Alteration: Peaking filter centered at ${centerFrequency.toFixed(2)} Hz, Q=${Q_VALUE}, Gain=${GAIN_VALUE}dB. Original shift param: ${numericFrequencyShift}.`;
   
   await audioContext.close();
 
@@ -125,6 +129,7 @@ const temporalModification: AudioProcessingFunction = async (audioDataUrl, param
 
   const rate = params.rate || 1.0;
   if (rate <= 0) {
+    await audioContext.close();
     throw new Error("Playback rate must be greater than 0.");
   }
 
@@ -154,6 +159,60 @@ const temporalModification: AudioProcessingFunction = async (audioDataUrl, param
   return { processedAudioDataUrl, analysis };
 };
 
+const automatedSweep: AudioProcessingFunction = async (audioDataUrl, params) => {
+  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const response = await fetch(audioDataUrl);
+  const arrayBuffer = await response.arrayBuffer();
+  const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+  const offlineContext = new OfflineAudioContext(
+    // For StereoPannerNode to work, the context must be stereo (2 channels)
+    2, // Force stereo output
+    decodedAudioBuffer.length,
+    decodedAudioBuffer.sampleRate
+  );
+
+  const sourceNode = offlineContext.createBufferSource();
+  sourceNode.buffer = decodedAudioBuffer;
+
+  const pannerNode = offlineContext.createStereoPanner();
+
+  const lfo = offlineContext.createOscillator();
+  lfo.type = 'sine'; 
+  const sweepSpeed = params.speed || 1; 
+  lfo.frequency.setValueAtTime(sweepSpeed, offlineContext.currentTime);
+
+  const lfoGain = offlineContext.createGain();
+  lfoGain.gain.value = 1; 
+  
+  lfo.connect(lfoGain);
+  lfoGain.connect(pannerNode.pan);
+
+  // If original audio is mono, it needs to be upmixed to stereo before panner for effect
+  if (decodedAudioBuffer.numberOfChannels === 1) {
+    const merger = offlineContext.createChannelMerger(2);
+    sourceNode.connect(merger, 0, 0); // Connect source to left input of merger
+    sourceNode.connect(merger, 0, 1); // Connect source to right input of merger
+    merger.connect(pannerNode);
+  } else {
+    sourceNode.connect(pannerNode);
+  }
+  
+  pannerNode.connect(offlineContext.destination);
+
+  lfo.start(0);
+  sourceNode.start(0);
+
+  const renderedBuffer = await offlineContext.startRendering();
+  const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
+
+  const analysis = `Applied Automated Sweep: Panning sound left-to-right at ${sweepSpeed.toFixed(2)} Hz.`;
+
+  await audioContext.close();
+
+  return { processedAudioDataUrl, analysis };
+};
+
 
 const simulateProcessing = async (audioDataUrl: string, operationName: string, params: Record<string, any>): Promise<{ processedAudioDataUrl: string; analysis?: string }> => {
   console.log(`Simulating ${operationName} with params:`, params);
@@ -165,8 +224,8 @@ const simulateProcessing = async (audioDataUrl: string, operationName: string, p
 export const audioUtils: Record<string, AudioProcessingFunction> = {
   alterResonance: alterResonance,
   temporalModification: temporalModification,
+  automatedSweep: automatedSweep,
   stereoWidener: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Stereo Widener', params),
-  automatedSweep: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Automated Sweep', params),
   subharmonicIntensifier: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Subharmonic Intensifier', params),
   frequencySculptor: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Frequency Sculptor', params),
   keyTransposer: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Key Transposer', params),
@@ -207,3 +266,14 @@ export const fileToDataUrl = (file: File): Promise<string> => {
   });
 };
 
+// Helper to ensure AudioContext is resumed if it's suspended
+export const resumeAudioContext = async (audioContext: AudioContext | OfflineAudioContext) => {
+  if (audioContext instanceof AudioContext && audioContext.state === 'suspended') {
+    try {
+      await audioContext.resume();
+      console.log("AudioContext resumed.");
+    } catch (e) {
+      console.error("Error resuming AudioContext:", e);
+    }
+  }
+};
