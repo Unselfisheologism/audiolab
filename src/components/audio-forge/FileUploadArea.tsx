@@ -26,7 +26,9 @@ export function FileUploadArea({ onFileSelect, selectedFile, isLoading }: FileUp
           <UploadCloud className="text-primary" />
           Upload Audio
         </CardTitle>
-        <CardDescription>Select an audio file to start forging.</CardDescription>
+        <CardDescription>
+          Select an audio file (e.g., MP3, WAV, WebM, Ogg, FLAC) to start forging. Accepts most common audio formats.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -34,7 +36,7 @@ export function FileUploadArea({ onFileSelect, selectedFile, isLoading }: FileUp
           <Input
             id="audio-file"
             type="file"
-            accept="audio/*"
+            accept="audio/*,.mp3,.wav,.webm,.weba,.ogg,.flac,.aac,.m4a"
             onChange={handleFileChange}
             disabled={isLoading}
             className="cursor-pointer file:text-primary file:font-semibold hover:file:bg-primary/10"
