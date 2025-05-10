@@ -69,6 +69,10 @@ export function FunctionalFrequencyVisualizer({ audioBuffer, isPlaying }: Functi
     
     // Setup AnalyserNode
     if (!analyserNodeRef.current || analyserNodeRef.current.context.state === 'closed') {
+        if(localAudioContext.state === 'closed') { // Double check context before creating analyser
+            console.warn("Visualizer audio context is closed, cannot create analyser.");
+            return;
+        }
         analyserNodeRef.current = localAudioContext.createAnalyser();
         analyserNodeRef.current.fftSize = FFT_SIZE;
     }
@@ -95,19 +99,19 @@ export function FunctionalFrequencyVisualizer({ audioBuffer, isPlaying }: Functi
     }
 
     const draw = () => {
-      if (analyser && dataArray && sourceNodeRef.current) { // Check sourceNodeRef.current to ensure it's active
+      if (analyser && dataArray && sourceNodeRef.current && sourceNodeRef.current.buffer ) { 
         analyser.getByteFrequencyData(dataArray); 
 
         const newFrequencyLevels = [];
         const binCount = analyser.frequencyBinCount;
-        const step = Math.max(1, Math.floor(binCount / NUM_BARS)); // Ensure step is at least 1
+        const step = Math.max(1, Math.floor(binCount / NUM_BARS)); 
 
         for (let i = 0; i < NUM_BARS; i++) {
           let sum = 0;
           const startBin = i * step;
-          const endBin = Math.min(startBin + step, binCount); // Ensure we don't go out of bounds
+          const endBin = Math.min(startBin + step, binCount); 
           
-          if (startBin >= binCount) break; // Stop if we've processed all available bins
+          if (startBin >= binCount) break; 
 
           for (let j = startBin; j < endBin; j++) {
             sum += dataArray[j];
@@ -123,17 +127,15 @@ export function FunctionalFrequencyVisualizer({ audioBuffer, isPlaying }: Functi
 
     draw();
 
-    // This return is the cleanup for this specific effect invocation
     return cleanup;
 
-  }, [audioBuffer, isPlaying]); // Rerun effect if audioBuffer or isPlaying changes
+  }, [audioBuffer, isPlaying]); 
 
-  // Effect for cleaning up the AudioContext when the component unmounts
   useEffect(() => {
     const contextToClose = audioContextRef.current;
     return () => {
       contextToClose?.close().catch(e => console.error("Error closing visualizer audio context on unmount", e));
-      audioContextRef.current = null; // Ensure it's nulled for next mount if any
+      audioContextRef.current = null; 
     };
   }, []);
 
@@ -141,9 +143,10 @@ export function FunctionalFrequencyVisualizer({ audioBuffer, isPlaying }: Functi
   return (
     <Card className="shadow-md">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BarChartBig className="text-primary" />
-          Frequency Visualizer
+        <CardTitle className="flex items-baseline gap-2">
+          <BarChartBig className="text-primary h-5 w-5" />
+          <span className="text-xl">Frequency Visualizer</span>
+          <span className="text-sm text-muted-foreground ml-1">(Play an audio)</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="h-[200px]">
@@ -177,3 +180,4 @@ export function FunctionalFrequencyVisualizer({ audioBuffer, isPlaying }: Functi
     </Card>
   );
 }
+
