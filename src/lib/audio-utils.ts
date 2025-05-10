@@ -209,32 +209,6 @@ export const audioUtils = {
       const splitter = offlineContext.createChannelSplitter(2);
       const merger = offlineContext.createChannelMerger(2);
       
-      const mGain = 1; 
-      const sGain = width; 
-
-      const gainLToMid = offlineContext.createGain();
-      gainLToMid.gain.setValueAtTime(0.5 * mGain, offlineContext.currentTime); 
-      const gainRToMid = offlineContext.createGain();
-      gainRToMid.gain.setValueAtTime(0.5 * mGain, offlineContext.currentTime); 
-
-      const gainLToSide = offlineContext.createGain();
-      gainLToSide.gain.setValueAtTime(0.5 * sGain, offlineContext.currentTime);  
-      const gainRToSideInverted = offlineContext.createGain();
-      gainRToSideInverted.gain.setValueAtTime(-0.5 * sGain, offlineContext.currentTime); 
-      
-      sourceNode.connect(splitter);
-      splitter.connect(gainLToMid, 0, 0); 
-      splitter.connect(gainRToMid, 1, 0); 
-
-      splitter.connect(gainLToSide, 0, 0);       
-      splitter.connect(gainRToSideInverted, 1, 0); 
-
-      const sumGainL = offlineContext.createGain(); 
-      gainLToMid.connect(sumGainL);
-      gainRToMid.connect(sumGainL); // This should be gainRToMid connected to sumGainL
-      gainLToSide.connect(sumGainL);
-      // gainRToSideInverted is NOT connected to sumGainL. It should be gainLToSide (inverted for right)
-      
       // Corrected logic for Left Channel Output (L_out = M + S)
       // M = 0.5 * (L_in + R_in)
       // S = 0.5 * width * (L_in - R_in)
@@ -265,7 +239,7 @@ export const audioUtils = {
       gainR_L.connect(merger, 0, 1);
       gainR_R.connect(merger, 0, 1);
 
-      return [merger]; 
+      return [splitter, merger]; 
     }, `Stereo Widener: Width set to ${widthParam}%. Applied only if audio is stereo.`, 
        2 
     );
@@ -597,21 +571,20 @@ export const audioUtils = {
     return { ...result, analysis: `Tuned to 432Hz (shifted by approx. ${semitones.toFixed(2)} semitones from 440Hz standard).` };
   },
   apply8DEffect: async (audioDataUrl: string, params: {} = {}) => {
-    // Parameters based on user description for "8D Audio Preset"
-    // 1. Auto Panner
-    //    Frequency: 0.08 Hz (this is the 'speed' for our automatedSweep)
-    const pannerParams = { speed: 0.08 };
+    const pannerParams = { speed: 0.08 }; // Auto Panner speed
     const sweepResult = await audioUtils.automatedSweep(audioDataUrl, pannerParams);
   
-    // 2. Reverb (using our Echo Generator)
-    //    Reverberance: 50%  => mix: 0.5
-    //    Room scale: 100%   => Interpreted as delay: 250ms, feedback: 0.6 for a more spacious, less echo-like feel.
-    const reverbParams = { delay: 250, feedback: 0.6, mix: 0.5 };
+    // Adjusted Reverb parameters for more diffusion and less distinct echo
+    const reverbParams = { 
+      delay: 70,       // Shorter delay for diffusion (ms)
+      feedback: 0.15,  // Low feedback to prevent echo
+      mix: 0.4         // Moderate mix for spatial presence
+    };
     const finalResult = await audioUtils.echoGenerator(sweepResult.processedAudioDataUrl, reverbParams);
   
     return {
       ...finalResult,
-      analysis: `8D Audio Effect Applied: Auto Panner (Speed: ${pannerParams.speed}Hz) followed by Reverb (Delay: ${reverbParams.delay}ms, Feedback: ${(reverbParams.feedback*100).toFixed(0)}%, Mix: ${(reverbParams.mix*100).toFixed(0)}% Wet). Best experienced with headphones. The effect aims to create a sense of spatial movement.`,
+      analysis: `8D Audio Effect Applied: Auto Panner (Speed: ${pannerParams.speed}Hz) with Diffuse Reverb (Delay: ${reverbParams.delay}ms, Feedback: ${(reverbParams.feedback*100).toFixed(0)}%, Mix: ${(reverbParams.mix*100).toFixed(0)}% Wet). Designed for headphone listening to create a spatially diffuse experience.`,
     };
   },
 
@@ -761,5 +734,3 @@ export const audioUtils = {
     }, `Spatial Audio Effect: Pan set to ${((depth - 50) / 50).toFixed(2)}. Output will be stereo.`, 2); 
   },
 };
-
-    
