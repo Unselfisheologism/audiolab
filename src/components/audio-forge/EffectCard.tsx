@@ -1,3 +1,4 @@
+
 import type React from 'react';
 import type { Effect, EffectParameter, EffectSettings } from '@/types/audio-forge';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -121,7 +122,7 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
               key={param.name}
               variant="outline"
               size="sm"
-              onClick={() => onApplyEffect(param.handlerKey || effect.id, { preset: param.name })}
+              onClick={() => onApplyEffect(param.handlerKey || effect.id, { preset: param.name, ...currentSettings })}
               disabled={isLoading || !isAudioLoaded}
               className="w-full"
             >
@@ -132,6 +133,12 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
         return null;
     }
   };
+  
+  const shouldShowApplyButton = 
+    effect.parameters && effect.parameters.length > 0 && // Has parameters
+    !(effect.controlType === 'button' && effect.actionLabel) && // Not a primary action button effect
+    !(effect.controlType === 'group' && effect.parameters.every(p => p.type === 'button')) && // Not a group of only buttons
+    effect.controlType !== 'toggle'; // Toggles usually apply instantly or don't need an apply button
 
   return (
     <Card className="shadow-md overflow-hidden">
@@ -145,6 +152,8 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
       <CardContent className="space-y-4">
         {effect.parameters?.map(renderParameterControl)}
       </CardContent>
+      
+      {/* Footer for primary action button effects */}
       {(effect.controlType === 'button' && effect.actionLabel && !effect.parameters?.some(p => p.type === 'button')) && (
         <CardFooter>
           <Button
@@ -157,15 +166,31 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
           </Button>
         </CardFooter>
       )}
+
+      {/* Footer for toggle effects (no apply button, action is usually via onParameterChange) */}
       {effect.controlType === 'toggle' && effect.parameters && (
         <CardFooter className="flex items-center justify-between">
           <Label htmlFor={`${effect.id}-${effect.parameters[0].name}`}>{effect.parameters[0].label}</Label>
           <Switch
             id={`${effect.id}-${effect.parameters[0].name}`}
             checked={currentSettings[effect.parameters[0].name] ?? effect.parameters[0].defaultValue}
-            onCheckedChange={(checked) => handleToggleChange(effect.parameters![0].name, checked)} // Non-null assertion as toggle implies param
+            onCheckedChange={(checked) => handleToggleChange(effect.parameters![0].name, checked)}
             disabled={isLoading || !isAudioLoaded}
           />
+        </CardFooter>
+      )}
+
+      {/* Footer with "Apply" button for effects with parameters that need explicit application */}
+      {shouldShowApplyButton && (
+        <CardFooter>
+          <Button
+            onClick={() => onApplyEffect(effect.id, currentSettings)}
+            disabled={isLoading || !isAudioLoaded}
+            className="w-full"
+          >
+            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {isLoading ? 'Applying...' : `Apply ${effect.name}`}
+          </Button>
         </CardFooter>
       )}
     </Card>
