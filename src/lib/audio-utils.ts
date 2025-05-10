@@ -8,19 +8,19 @@ export type AudioProcessingFunction = (
 
 // Helper function to convert AudioBuffer to WAV Data URL
 async function audioBufferToWavDataUrl(audioBuffer: AudioBuffer): Promise<string> {
-  const بابا = देशों(audioBuffer); // wav_blob
+  const wavBlob = audioBufferToWavBlob(audioBuffer); 
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onloadend = () => {
       resolve(reader.result as string);
     };
     reader.onerror = reject;
-    reader.readAsDataURL(بابا);
+    reader.readAsDataURL(wavBlob);
   });
 }
 
 // Based on https://gist.github.com/also/912053
-function देशों(audioBuffer: AudioBuffer): Blob { // audioBufferToWavBlob
+function audioBufferToWavBlob(audioBuffer: AudioBuffer): Blob { 
   const numChannels = audioBuffer.numberOfChannels;
   const sampleRate = audioBuffer.sampleRate;
   const numSamples = audioBuffer.length;
@@ -82,7 +82,7 @@ const alterResonance: AudioProcessingFunction = async (audioDataUrl, params) => 
 
   const offlineContext = new OfflineAudioContext(
     decodedAudioBuffer.numberOfChannels,
-    decodedAudioBuffer.length,
+    decodedAudioBuffer.length, // Keep original length for now, filter doesn't change it
     decodedAudioBuffer.sampleRate
   );
 
@@ -92,12 +92,11 @@ const alterResonance: AudioProcessingFunction = async (audioDataUrl, params) => 
   const filterNode = offlineContext.createBiquadFilter();
   filterNode.type = 'peaking';
 
-  const BASE_PEAKING_FILTER_HZ = 1000; // Base frequency for the peaking filter (e.g., 1kHz)
-  const Q_VALUE = 5; // Q factor for the filter - determines bandwidth (higher is narrower)
-  const GAIN_VALUE = 6; // Gain in dB for the peaking filter (positive to boost, negative to cut)
+  const BASE_PEAKING_FILTER_HZ = 1000; 
+  const Q_VALUE = 5; 
+  const GAIN_VALUE = params.gainValue !== undefined ? params.gainValue : 6; // Allow dynamic gain if needed, else default
 
-  const frequencyShiftParam = params.frequency || 0; // Slider value from -12 to 12
-  // Map slider value (semitones) to frequency
+  const frequencyShiftParam = params.frequency || 0; 
   const centerFrequency = BASE_PEAKING_FILTER_HZ * Math.pow(2, frequencyShiftParam / 12);
   
   filterNode.frequency.setValueAtTime(centerFrequency, offlineContext.currentTime);
@@ -113,7 +112,44 @@ const alterResonance: AudioProcessingFunction = async (audioDataUrl, params) => 
   
   const analysis = `Applied Resonance Alteration: Peaking filter centered at ${centerFrequency.toFixed(2)} Hz, Q=${Q_VALUE}, Gain=${GAIN_VALUE}dB. Original shift param: ${frequencyShiftParam}.`;
   
-  await audioContext.close(); // Close the temporary AudioContext
+  await audioContext.close();
+
+  return { processedAudioDataUrl, analysis };
+};
+
+const temporalModification: AudioProcessingFunction = async (audioDataUrl, params) => {
+  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const response = await fetch(audioDataUrl);
+  const arrayBuffer = await response.arrayBuffer();
+  const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+  const rate = params.rate || 1.0;
+  if (rate <= 0) {
+    throw new Error("Playback rate must be greater than 0.");
+  }
+
+  // The new duration will be original duration / rate
+  const newDurationInSamples = Math.floor(decodedAudioBuffer.length / rate);
+
+  const offlineContext = new OfflineAudioContext(
+    decodedAudioBuffer.numberOfChannels,
+    newDurationInSamples, // Adjust length of context for the new duration
+    decodedAudioBuffer.sampleRate // Sample rate remains the same
+  );
+
+  const sourceNode = offlineContext.createBufferSource();
+  sourceNode.buffer = decodedAudioBuffer;
+  sourceNode.playbackRate.value = rate; // This changes speed and pitch
+
+  sourceNode.connect(offlineContext.destination);
+  sourceNode.start(0);
+
+  const renderedBuffer = await offlineContext.startRendering();
+  const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
+  
+  const analysis = `Applied Temporal Modification: Playback rate set to ${rate.toFixed(2)}x. Note: This also affects pitch.`;
+  
+  await audioContext.close();
 
   return { processedAudioDataUrl, analysis };
 };
@@ -128,7 +164,7 @@ const simulateProcessing = async (audioDataUrl: string, operationName: string, p
 
 export const audioUtils: Record<string, AudioProcessingFunction> = {
   alterResonance: alterResonance,
-  temporalModification: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Temporal Modification', params),
+  temporalModification: temporalModification,
   stereoWidener: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Stereo Widener', params),
   automatedSweep: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Automated Sweep', params),
   subharmonicIntensifier: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Subharmonic Intensifier', params),
@@ -170,3 +206,4 @@ export const fileToDataUrl = (file: File): Promise<string> => {
     reader.readAsDataURL(file);
   });
 };
+
