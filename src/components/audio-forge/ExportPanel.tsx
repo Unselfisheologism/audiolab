@@ -4,33 +4,33 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Download, Settings2 } from 'lucide-react';
+import { Download, Settings2, Repeat as LoopIcon } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 interface ExportPanelProps {
   processedAudioDataUrl: string | null;
-  onExport: (format: string, quality: string) => void;
+  onExport: (format: string, quality: string, loopCount: number) => void;
   isLoading: boolean;
-  originalFileName?: string;
 }
 
-export function ExportPanel({ processedAudioDataUrl, onExport, isLoading, originalFileName }: ExportPanelProps) {
+export function ExportPanel({ processedAudioDataUrl, onExport, isLoading }: ExportPanelProps) {
   const [format, setFormat] = useState('wav');
   const [quality, setQuality] = useState('high');
+  const [loopCount, setLoopCount] = useState(1);
 
-  const handleExport = () => {
+  const handleExportClick = () => {
     if (processedAudioDataUrl) {
-      onExport(format, quality);
-      // Actual download link will be part of the AudioPlayer, 
-      // this button just triggers the conceptual export logic.
-      // For a real app, this might involve backend processing or client-side library.
-      const link = document.createElement('a');
-      link.href = processedAudioDataUrl;
-      const name = originalFileName ? originalFileName.substring(0, originalFileName.lastIndexOf('.')) : 'audio';
-      link.download = `${name}_forged.${format}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      onExport(format, quality, loopCount);
     }
+  };
+
+  const handleLoopCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = parseInt(e.target.value, 10);
+    if (isNaN(value)) {
+      value = 1; // Default to 1 if input is not a number
+    }
+    value = Math.max(1, Math.min(10, value)); // Clamp between 1 and 10
+    setLoopCount(value);
   };
 
   return (
@@ -40,7 +40,7 @@ export function ExportPanel({ processedAudioDataUrl, onExport, isLoading, origin
           <Settings2 className="text-primary" />
           Export Configuration
         </CardTitle>
-        <CardDescription>Choose your preferred output settings.</CardDescription>
+        <CardDescription>Choose your preferred output settings and loop options.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -72,10 +72,33 @@ export function ExportPanel({ processedAudioDataUrl, onExport, isLoading, origin
             </Select>
           </div>
         </div>
+        <div className="space-y-1">
+          <Label htmlFor="loop-count" className="flex items-center gap-1">
+            <LoopIcon className="h-4 w-4" />
+            Number of Loops
+          </Label>
+          <Input
+            id="loop-count"
+            type="number"
+            min="1"
+            max="10"
+            value={loopCount}
+            onChange={handleLoopCountChange}
+            onBlur={(e) => { // Ensure value is clamped on blur if user types something out of range
+                let value = parseInt(e.target.value, 10);
+                if (isNaN(value) || value < 1) value = 1;
+                if (value > 10) value = 10;
+                setLoopCount(value);
+            }}
+            disabled={isLoading || !processedAudioDataUrl}
+            className="w-full sm:w-1/2"
+          />
+          <p className="text-xs text-muted-foreground">Set how many times the audio should loop (1-10 times). 1 means no looping.</p>
+        </div>
       </CardContent>
       <CardFooter>
         <Button
-          onClick={handleExport}
+          onClick={handleExportClick}
           disabled={!processedAudioDataUrl || isLoading}
           className="w-full"
         >

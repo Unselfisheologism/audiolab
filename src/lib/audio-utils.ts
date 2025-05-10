@@ -209,11 +209,6 @@ export const audioUtils = {
       const splitter = offlineContext.createChannelSplitter(2);
       const merger = offlineContext.createChannelMerger(2);
       
-      // Corrected logic for Left Channel Output (L_out = M + S)
-      // M = 0.5 * (L_in + R_in)
-      // S = 0.5 * width * (L_in - R_in)
-      // L_out = 0.5 * L_in + 0.5 * R_in + 0.5 * width * L_in - 0.5 * width * R_in
-      // L_out = (0.5 + 0.5 * width) * L_in + (0.5 - 0.5 * width) * R_in
       const gainL_L = offlineContext.createGain();
       gainL_L.gain.setValueAtTime(0.5 * (1 + width), offlineContext.currentTime);
       const gainL_R = offlineContext.createGain();
@@ -224,11 +219,6 @@ export const audioUtils = {
       gainL_L.connect(merger, 0, 0);
       gainL_R.connect(merger, 0, 0);
 
-
-      // Corrected logic for Right Channel Output (R_out = M - S)
-      // R_out = 0.5 * L_in + 0.5 * R_in - (0.5 * width * L_in - 0.5 * width * R_in)
-      // R_out = 0.5 * L_in + 0.5 * R_in - 0.5 * width * L_in + 0.5 * width * R_in
-      // R_out = (0.5 - 0.5 * width) * L_in + (0.5 + 0.5 * width) * R_in
       const gainR_L = offlineContext.createGain();
       gainR_L.gain.setValueAtTime(0.5 * (1 - width), offlineContext.currentTime);
       const gainR_R = offlineContext.createGain();
@@ -246,7 +236,7 @@ export const audioUtils = {
   },
   
   subharmonicIntensifier: async (audioDataUrl: string, { intensity: intensityParam }: { intensity: number }) => {
-    const gainDb = (intensityParam / 100) * 12; // Map intensity 0-100 to 0-12dB gain
+    const gainDb = (intensityParam / 100) * 12; 
     return processAudioWithEffect(audioDataUrl, (offlineContext, sourceNode, decodedAudioBuffer) => {
       const lowshelfFilter = offlineContext.createBiquadFilter();
       lowshelfFilter.type = 'lowshelf';
@@ -320,7 +310,7 @@ export const audioUtils = {
     if (decodedAudioBuffer.length === 0) return { processedAudioDataUrl: audioDataUrl, analysis: "Audio is empty."};
 
 
-    const clampedDelay = Math.max(0.001, Math.min(delay / 1000, 1)); // Max delay 1s for safety for createDelay
+    const clampedDelay = Math.max(0.001, Math.min(delay / 1000, 1)); 
     const clampedFeedback = Math.max(0, Math.min(feedback, 0.95)); 
     const clampedMix = Math.max(0, Math.min(mix, 1)); 
 
@@ -344,7 +334,7 @@ export const audioUtils = {
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
 
-    const delayNode = offlineContext.createDelay(Math.max(1, clampedDelay + 2)); // Ensure maxDelayTime for createDelay is sufficient
+    const delayNode = offlineContext.createDelay(Math.max(1, clampedDelay + 2)); 
     delayNode.delayTime.setValueAtTime(clampedDelay, offlineContext.currentTime);
 
     const feedbackNode = offlineContext.createGain();
@@ -571,14 +561,13 @@ export const audioUtils = {
     return { ...result, analysis: `Tuned to 432Hz (shifted by approx. ${semitones.toFixed(2)} semitones from 440Hz standard).` };
   },
   apply8DEffect: async (audioDataUrl: string, params: {} = {}) => {
-    const pannerParams = { speed: 0.08 }; // Auto Panner speed
+    const pannerParams = { speed: 0.08 }; 
     const sweepResult = await audioUtils.automatedSweep(audioDataUrl, pannerParams);
   
-    // Adjusted Reverb parameters for more diffusion and less distinct echo
     const reverbParams = { 
-      delay: 70,       // Shorter delay for diffusion (ms)
-      feedback: 0.15,  // Low feedback to prevent echo
-      mix: 0.4         // Moderate mix for spatial presence
+      delay: 70,       
+      feedback: 0.15,  
+      mix: 0.4         
     };
     const finalResult = await audioUtils.echoGenerator(sweepResult.processedAudioDataUrl, reverbParams);
   
@@ -627,28 +616,29 @@ export const audioUtils = {
   },
 
   automatedSweep: async (audioDataUrl: string, { speed }: { speed: number }) => {
-     return processAudioWithEffect(audioDataUrl, (context, sourceNode, buffer) => {
-        if (buffer.numberOfChannels < 2 && buffer.numberOfChannels !== 0) { 
-             console.warn("Automated Sweep: Input is mono. Effect will pan, but perception requires stereo playback.");
-        }
+    const maxDelayTimePanning = 1; // Max allowed by StereoPannerNode for pan, but LFO range is -1 to 1
+    return processAudioWithEffect(audioDataUrl, (context, sourceNode, buffer) => {
+       if (buffer.numberOfChannels < 2 && buffer.numberOfChannels !== 0) { 
+            console.warn("Automated Sweep: Input is mono. Effect will pan, but perception requires stereo playback.");
+       }
 
-        const panner = context.createStereoPanner();
-        const lfo = context.createOscillator();
-        lfo.type = 'sine';
-        const clampedSpeed = Math.max(0.01, Math.min(speed, 10)); 
-        lfo.frequency.setValueAtTime(clampedSpeed, context.currentTime);
-        
-        const lfoGain = context.createGain(); 
-        lfoGain.gain.setValueAtTime(1, context.currentTime); 
-        
-        lfo.connect(lfoGain);
-        lfoGain.connect(panner.pan); 
-        
-        lfo.start();
-        
-        return [panner]; 
-    }, `Automated Sweep: Speed ${speed}Hz. Output will be stereo.`, 2); 
-  },
+       const panner = context.createStereoPanner();
+       const lfo = context.createOscillator();
+       lfo.type = 'sine';
+       const clampedSpeed = Math.max(0.01, Math.min(speed, 10)); 
+       lfo.frequency.setValueAtTime(clampedSpeed, context.currentTime);
+       
+       const lfoGain = context.createGain(); 
+       lfoGain.gain.setValueAtTime(1, context.currentTime); // Pan from -1 (left) to 1 (right)
+       
+       lfo.connect(lfoGain);
+       lfoGain.connect(panner.pan); 
+       
+       lfo.start();
+       
+       return [panner]; 
+   }, `Automated Sweep: Speed ${speed}Hz. Output will be stereo.`, 2); 
+ },
 
   audioSplitter: async (audioDataUrl: string, { startTime: startTimeMinutes, endTime: endTimeMinutes }: { startTime: number, endTime: number }) => {
     const audioContext = getGlobalAudioContext();
@@ -724,5 +714,49 @@ export const audioUtils = {
       processedAudioDataUrl,
       analysis: analysisMessage
     };
+  },
+  loopAudio: async (audioDataUrl: string, loopCount: number): Promise<string> => {
+    if (loopCount <= 1) {
+      return audioDataUrl; // No looping needed
+    }
+
+    const audioContext = getGlobalAudioContext();
+    if (!audioContext) {
+      throw new Error("AudioContext not supported or initialized for looping.");
+    }
+
+    const arrayBuffer = await dataUrlToArrayBuffer(audioDataUrl);
+    const originalBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+    if (originalBuffer.length === 0) {
+      console.warn("Cannot loop empty audio buffer.");
+      return audioDataUrl;
+    }
+
+    const numChannels = originalBuffer.numberOfChannels;
+    const sampleRate = originalBuffer.sampleRate;
+    const originalLength = originalBuffer.length;
+    const newLength = originalLength * loopCount;
+
+    const loopedBuffer = audioContext.createBuffer(numChannels, newLength, sampleRate);
+
+    for (let channel = 0; channel < numChannels; channel++) {
+      const originalChannelData = originalBuffer.getChannelData(channel);
+      const newChannelData = loopedBuffer.getChannelData(channel);
+      for (let i = 0; i < loopCount; i++) {
+        newChannelData.set(originalChannelData, originalLength * i);
+      }
+    }
+    // Use an OfflineAudioContext to "play" the loopedBuffer once to get a final render,
+    // as audioBufferToWavDataUrl expects a buffer that could be from an OfflineAudioContext.
+    // This step ensures consistency, though for simple concatenation it might seem redundant.
+    const offlineContext = new OfflineAudioContext(numChannels, newLength, sampleRate);
+    const sourceNode = offlineContext.createBufferSource();
+    sourceNode.buffer = loopedBuffer;
+    sourceNode.connect(offlineContext.destination);
+    sourceNode.start(0);
+
+    const renderedLoopedBuffer = await offlineContext.startRendering();
+    return audioBufferToWavDataUrl(renderedLoopedBuffer);
   },
 };

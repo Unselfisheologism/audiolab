@@ -1,7 +1,8 @@
+
 'use client';
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { AppHeader } from './AppHeader';
+import { AppHeader } from '@/components/audio-forge/AppHeader';
 import { AudioControlsPanel } from './AudioControlsPanel';
 import { MainDisplayPanel } from './MainDisplayPanel';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
@@ -101,7 +102,7 @@ export default function AudioForgeClientContent() {
       setOriginalAudioBuffer(null);
       setProcessedAudioBuffer(null); 
     }
-  }, [toast, loadAudioBuffer]);
+  }, [toast]);
 
   const handleParameterChange = useCallback((effectId: string, paramName: string, value: any) => {
     setEffectSettings(prev => ({
@@ -157,14 +158,38 @@ export default function AudioForgeClientContent() {
     }
   }, [originalAudioDataUrl, processedAudioDataUrl, toast, effectSettings]);
 
-  const handleExport = useCallback((format: string, quality: string) => {
-    console.log(`Exporting as ${format} with ${quality} quality.`);
-    if(!processedAudioDataUrl) {
-      toast({ title: "Nothing to Export", description: "No processed audio available.", variant: "destructive"});
+  const handleExport = useCallback(async (format: string, quality: string, loopCount: number) => {
+    console.log(`Exporting as ${format} with ${quality} quality, loops: ${loopCount}.`);
+    if (!processedAudioDataUrl) {
+      toast({ title: "Nothing to Export", description: "No processed audio available.", variant: "destructive" });
       return;
     }
-    toast({ title: "Export Initiated", description: `Preparing download for ${format}.` });
-  }, [processedAudioDataUrl, toast]);
+    setIsLoading(true);
+    try {
+      let audioToDownloadUrl = processedAudioDataUrl;
+      if (loopCount > 1) {
+        toast({ title: "Looping Audio", description: `Applying ${loopCount} loops... This may take a moment.` });
+        audioToDownloadUrl = await audioUtils.loopAudio(processedAudioDataUrl, loopCount);
+      }
+
+      toast({ title: "Export Ready", description: `Preparing download for ${originalAudioFile?.name || 'audio'}_forged.${format}.` });
+      const link = document.createElement('a');
+      link.href = audioToDownloadUrl;
+      const baseName = originalAudioFile ? originalAudioFile.name.substring(0, originalAudioFile.name.lastIndexOf('.')) : 'audio';
+      const loopSuffix = loopCount > 1 ? `_loops${loopCount}` : '';
+      link.download = `${baseName}_forged${loopSuffix}.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+    } catch (error: any) {
+      console.error("Error during export:", error);
+      toast({ title: "Export Error", description: `Failed to export audio. ${error.message}`, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [processedAudioDataUrl, originalAudioFile, toast]);
+
 
   const audioControlsPanelProps = {
     onFileSelect: handleFileSelect,

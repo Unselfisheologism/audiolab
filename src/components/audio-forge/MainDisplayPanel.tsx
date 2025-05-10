@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useState } from 'react';
 import { AudioPlayer } from './AudioPlayer';
@@ -15,7 +16,7 @@ interface MainDisplayPanelProps {
   processedAudioDataUrl: string | null;
   originalAudioBuffer: AudioBuffer | null; 
   processedAudioBuffer: AudioBuffer | null; 
-  onExport: (format: string, quality: string) => void;
+  onExport: (format: string, quality: string, loopCount: number) => void;
   isLoading: boolean;
   analysisResult: string | null;
   analysisSourceEffectId: string | null;
@@ -96,7 +97,6 @@ export function MainDisplayPanel({
           processedAudioDataUrl={processedAudioDataUrl} 
           onExport={onExport}
           isLoading={isLoading}
-          originalFileName={originalFileName}
         />
       </div>
     </ScrollArea>
