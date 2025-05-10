@@ -49,7 +49,12 @@ export function AudioControlsPanel({
           {effectGroups.map((groupName) => (
             <AccordionItem value={groupName} key={groupName} className="border bg-card rounded-lg shadow">
               <AccordionTrigger className="px-4 py-3 text-base font-semibold text-primary hover:no-underline">
-                {groupName}
+                <div className="flex items-baseline">
+                  <span>{groupName}</span>
+                  {groupName === 'Spatial Effects' && (
+                    <span className="ml-2 text-xs font-normal text-muted-foreground">(Only Stereo sounds)</span>
+                  )}
+                </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pt-0 pb-4">
                 <div className="space-y-4">
