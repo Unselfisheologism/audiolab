@@ -13,7 +13,7 @@ export function AppHeader({ isMobile, onOpenEffectsPanel }: AppHeaderProps) {
       <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Music className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-bold text-primary">Audio Forge</h1>
+          <h1 className="text-2xl font-bold text-primary">Audio Lab</h1>
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggleButton />
@@ -27,3 +27,4 @@ export function AppHeader({ isMobile, onOpenEffectsPanel }: AppHeaderProps) {
     </header>
   );
 }
+

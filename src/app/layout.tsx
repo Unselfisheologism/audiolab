@@ -5,7 +5,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'Audio Forge',
+  title: 'Audio Lab',
   description: 'Forge your sound with powerful audio processing tools.',
 };
 
@@ -23,3 +23,4 @@ export default function RootLayout({
     </html>
   );
 }
+
