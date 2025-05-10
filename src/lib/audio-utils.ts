@@ -22,36 +22,37 @@ async function audioBufferToWavDataUrl(audioBuffer: AudioBuffer): Promise<string
   const sampleRate = audioBuffer.sampleRate;
   const format = 1; // PCM
   const bitDepth = 16;
-  const blockAlign = numChannels * (bitDepth / 8);
+  
+  // For WAV, we'll output mono or stereo. If input has more, it should have been downmixed by OfflineAudioContext.
+  const wavOutputChannels = Math.min(numChannels, 2);
+
+
+  const blockAlign = wavOutputChannels * (bitDepth / 8);
   const byteRate = sampleRate * blockAlign;
 
   let interleaved = new Int16Array(0);
-  if (numChannels === 1) {
+  const length = audioBuffer.length;
+
+  if (wavOutputChannels === 1) {
     const channelData = audioBuffer.getChannelData(0);
-    interleaved = new Int16Array(channelData.length);
-    for (let i = 0; i < channelData.length; i++) {
+    interleaved = new Int16Array(length);
+    for (let i = 0; i < length; i++) {
       interleaved[i] = Math.max(-1, Math.min(1, channelData[i])) * 32767;
     }
-  } else if (numChannels >= 2) { // Handle stereo and multi-channel (downmixing to stereo for WAV if > 2)
-    const actualNumChannelsForWav = Math.min(numChannels, 2); // WAV supports mono or stereo well here
-    const samples = [];
-    for (let ch = 0; ch < actualNumChannelsForWav; ch++) {
-      samples.push(audioBuffer.getChannelData(ch));
-    }
-    const length = samples[0].length;
-    interleaved = new Int16Array(length * actualNumChannelsForWav);
-
+  } else if (wavOutputChannels === 2) { 
+    const leftChannel = audioBuffer.getChannelData(0);
+    const rightChannel = numChannels > 1 ? audioBuffer.getChannelData(1) : leftChannel; // Use left for right if original was mono but target is stereo
+    
+    interleaved = new Int16Array(length * 2);
     for (let i = 0; i < length; i++) {
-      for (let ch = 0; ch < actualNumChannelsForWav; ch++) {
-        interleaved[i * actualNumChannelsForWav + ch] = Math.max(-1, Math.min(1, samples[ch][i])) * 32767;
-      }
+      interleaved[i * 2] = Math.max(-1, Math.min(1, leftChannel[i])) * 32767;
+      interleaved[i * 2 + 1] = Math.max(-1, Math.min(1, rightChannel[i])) * 32767;
     }
   }
   
   const dataSize = interleaved.length * (bitDepth / 8);
   const buffer = new ArrayBuffer(44 + dataSize);
   const view = new DataView(buffer);
-  const wavChannels = Math.min(numChannels, 2); // Standard WAV usually mono/stereo
 
   // RIFF header
   writeString(view, 0, 'RIFF');
@@ -61,10 +62,10 @@ async function audioBufferToWavDataUrl(audioBuffer: AudioBuffer): Promise<string
   writeString(view, 12, 'fmt ');
   view.setUint32(16, 16, true);
   view.setUint16(20, format, true);
-  view.setUint16(22, wavChannels, true);
+  view.setUint16(22, wavOutputChannels, true);
   view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * wavChannels * (bitDepth / 8), true); // Corrected byteRate for wav
-  view.setUint16(32, wavChannels * (bitDepth / 8), true); // Corrected blockAlign for wav
+  view.setUint32(28, byteRate, true); 
+  view.setUint16(32, blockAlign, true); 
   view.setUint16(34, bitDepth, true);
   // data chunk
   writeString(view, 36, 'data');
@@ -105,8 +106,9 @@ const getGlobalAudioContext = (() => {
 
 const processAudioWithEffect = async (
   audioDataUrl: string,
-  setupEffect: (audioContext: OfflineAudioContext, sourceNode: AudioBufferSourceNode, decodedAudioBuffer: AudioBuffer) => AudioNode[], // Returns array of connected nodes
-  analysisMessage?: string
+  setupEffect: (audioContext: OfflineAudioContext, sourceNode: AudioBufferSourceNode, decodedAudioBuffer: AudioBuffer) => AudioNode[], 
+  analysisMessage?: string,
+  outputChannelCount?: number // Optional: specify output channel count for OfflineAudioContext
 ): Promise<{ processedAudioDataUrl: string; analysis?: string }> => {
   const audioContext = getGlobalAudioContext();
   if (!audioContext) {
@@ -120,9 +122,11 @@ const processAudioWithEffect = async (
   const arrayBuffer = await dataUrlToArrayBuffer(audioDataUrl);
   const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
+  const targetChannelCount = outputChannelCount !== undefined ? outputChannelCount : decodedAudioBuffer.numberOfChannels;
+
   const offlineContext = new OfflineAudioContext(
-    decodedAudioBuffer.numberOfChannels,
-    decodedAudioBuffer.length,
+    targetChannelCount,
+    decodedAudioBuffer.length, // Length remains based on original buffer's samples for rate changes
     decodedAudioBuffer.sampleRate
   );
 
@@ -195,6 +199,7 @@ export const audioUtils = {
   stereoWidener: async (audioDataUrl: string, { width: widthParam }: { width: number }) => {
     return processAudioWithEffect(audioDataUrl, (offlineContext, sourceNode, decodedAudioBuffer) => {
       if (decodedAudioBuffer.numberOfChannels < 2) {
+        // If not stereo, no widening effect can be applied. Return empty chain for passthrough.
         return []; 
       }
   
@@ -203,30 +208,40 @@ export const audioUtils = {
       const splitter = offlineContext.createChannelSplitter(2);
       const merger = offlineContext.createChannelMerger(2);
   
-      const gainL_to_L = offlineContext.createGain();
-      const gainR_to_L = offlineContext.createGain();
-      const gainL_to_R = offlineContext.createGain();
-      const gainR_to_R = offlineContext.createGain();
+      // Gains for M/S processing method: L' = M+S, R' = M-S
+      // M = (L+R)/2, S = (L-R)/2
+      // For width W: M' = M, S' = S * W
+      // L_out = M' + S' = (L+R)/2 + W*(L-R)/2 = L*(1+W)/2 + R*(1-W)/2
+      // R_out = M' - S' = (L+R)/2 - W*(L-R)/2 = L*(1-W)/2 + R*(1+W)/2
+      
+      const gainL_to_L_out = offlineContext.createGain();
+      const gainR_to_L_out = offlineContext.createGain();
+      const gainL_to_R_out = offlineContext.createGain();
+      const gainR_to_R_out = offlineContext.createGain();
   
-      const W = widthParam / 100.0;
+      gainL_to_L_out.gain.value = (1 + width) / 2;
+      gainR_to_L_out.gain.value = (1 - width) / 2;
+      gainL_to_R_out.gain.value = (1 - width) / 2;
+      gainR_to_R_out.gain.value = (1 + width) / 2;
+      
+      // Connect left input of source to splitter
+      // sourceNode.connect(splitter); // Source connects to splitter in the processAudioWithEffect wrapper logic implicitly
+      
+      // Left output channel processing
+      splitter.connect(gainL_to_L_out, 0, 0); // Original Left to gain for L_out
+      splitter.connect(gainR_to_L_out, 1, 0); // Original Right to gain for L_out
+      gainL_to_L_out.connect(merger, 0, 0);   // Connect to Left of Merger
+      gainR_to_L_out.connect(merger, 0, 0);   // Connect to Left of Merger
   
-      gainL_to_L.gain.value = (1 + W) / 2.0;
-      gainR_to_L.gain.value = (1 - W) / 2.0;
+      // Right output channel processing
+      splitter.connect(gainL_to_R_out, 0, 0); // Original Left to gain for R_out
+      splitter.connect(gainR_to_R_out, 1, 0); // Original Right to gain for R_out
+      gainL_to_R_out.connect(merger, 0, 1);   // Connect to Right of Merger
+      gainR_to_R_out.connect(merger, 0, 1);   // Connect to Right of Merger
   
-      gainL_to_R.gain.value = (1 - W) / 2.0;
-      gainR_to_R.gain.value = (1 + W) / 2.0;
-        
-      splitter.connect(gainL_to_L, 0, 0); 
-      splitter.connect(gainR_to_L, 1, 0);
-      gainL_to_L.connect(merger, 0, 0);
-      gainR_to_L.connect(merger, 0, 0); 
-  
-      splitter.connect(gainL_to_R, 0, 0);
-      splitter.connect(gainR_to_R, 1, 0);
-      gainL_to_R.connect(merger, 0, 1);
-      gainR_to_R.connect(merger, 0, 1); 
-  
-      return [splitter, gainL_to_L, gainR_to_L, gainL_to_R, gainR_to_R, merger];
+      // The setupEffect should return the first and last nodes of the main chain if source isn't directly connected to destination
+      // Here, source -> splitter, and merger -> destination (implicitly)
+      return [splitter, gainL_to_L_out, gainR_to_L_out, gainL_to_R_out, gainR_to_R_out, merger];
     }, `Stereo Widener: Width set to ${widthParam}%. Applied only if audio is stereo.`);
   },
   
@@ -261,6 +276,7 @@ export const audioUtils = {
       highFilter.frequency.setValueAtTime(4000, context.currentTime); 
       highFilter.gain.setValueAtTime(high, context.currentTime);
       
+      // Chain the filters: source -> lowFilter -> midFilter -> highFilter -> destination
       return [lowFilter, midFilter, highFilter];
     }, `Frequency Sculptor: Low ${low}dB @ 250Hz, Mid ${mid}dB @ 1kHz, High ${high}dB @ 4kHz.`);
   },
@@ -274,6 +290,7 @@ export const audioUtils = {
 
     const playbackRate = Math.pow(2, semitones / 12);
     const clampedPlaybackRate = Math.max(0.1, Math.min(playbackRate, 4)); 
+    // Adjust length based on playback rate to maintain pitch shift effect across entire duration
     const newLength = Math.max(1, Math.round(decodedAudioBuffer.length / clampedPlaybackRate));
 
     const offlineContext = new OfflineAudioContext(
@@ -308,12 +325,12 @@ export const audioUtils = {
 
     let tailExtensionFactor = 0;
     if (clampedFeedback > 0) {
-        const numSignificantTaps = clampedFeedback > 0.1 ? Math.abs(Math.log(0.001) / Math.log(clampedFeedback)) : 5;
+        const numSignificantTaps = clampedFeedback > 0.01 ? Math.abs(Math.log(0.001) / Math.log(clampedFeedback)) : 5;
         tailExtensionFactor = numSignificantTaps * clampedDelay;
     } else {
         tailExtensionFactor = clampedDelay * 2; 
     }
-    const tailExtensionSeconds = Math.min(tailExtensionFactor, 30); 
+    const tailExtensionSeconds = Math.min(tailExtensionFactor, 30); // Cap tail extension
     
     const extendedLength = decodedAudioBuffer.length + Math.floor(audioContext.sampleRate * tailExtensionSeconds);
     
@@ -326,7 +343,7 @@ export const audioUtils = {
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
 
-    const delayNode = offlineContext.createDelay(clampedDelay + 1); 
+    const delayNode = offlineContext.createDelay(clampedDelay + 1); // Max delay time
     delayNode.delayTime.setValueAtTime(clampedDelay, 0);
 
     const feedbackNode = offlineContext.createGain();
@@ -346,13 +363,13 @@ export const audioUtils = {
     wetNode.connect(offlineContext.destination);
 
     delayNode.connect(feedbackNode);
-    feedbackNode.connect(delayNode); 
+    feedbackNode.connect(delayNode); // Feedback loop
     
     sourceNode.start(0);
     const renderedBuffer = await offlineContext.startRendering();
     const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
     
-    return { processedAudioDataUrl, analysis: `Echo: Delay ${clampedDelay*1000}ms, Feedback ${(clampedFeedback*100).toFixed(0)}%, Mix ${(clampedMix*100).toFixed(0)}% wet.` };
+    return { processedAudioDataUrl, analysis: `Echo: Delay ${(clampedDelay*1000).toFixed(0)}ms, Feedback ${(clampedFeedback*100).toFixed(0)}%, Mix ${(clampedMix*100).toFixed(0)}% wet.` };
   },
 
   reversePlayback: async (audioDataUrl: string, params: {}) => {
@@ -365,6 +382,7 @@ export const audioUtils = {
     const numChannels = decodedAudioBuffer.numberOfChannels;
     const length = decodedAudioBuffer.length;
 
+    // Create a new buffer to hold the reversed audio data
     const reversedBuffer = audioContext.createBuffer(
       numChannels,
       length,
@@ -374,15 +392,17 @@ export const audioUtils = {
     for (let i = 0; i < numChannels; i++) {
       const channelData = decodedAudioBuffer.getChannelData(i);
       const reversedChannelData = reversedBuffer.getChannelData(i);
+      // Make a copy before reversing to avoid modifying the original buffer's underlying data if it's shared.
       const originalChannelDataCopy = new Float32Array(channelData); 
       for (let j = 0; j < length; j++) {
         reversedChannelData[j] = originalChannelDataCopy[length - 1 - j];
       }
     }
     
+    // Use an OfflineAudioContext to "play" the reversed buffer into a new one for export
     const offlineContext = new OfflineAudioContext(numChannels, length, decodedAudioBuffer.sampleRate);
     const sourceNode = offlineContext.createBufferSource();
-    sourceNode.buffer = reversedBuffer; 
+    sourceNode.buffer = reversedBuffer; // Assign the already reversed buffer
     sourceNode.connect(offlineContext.destination);
     sourceNode.start(0);
 
@@ -398,7 +418,8 @@ export const audioUtils = {
     const arrayBuffer = await dataUrlToArrayBuffer(audioDataUrl);
     const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
     
-    const newTempo = Math.max(0.1, Math.min(tempo, 4)); 
+    const newTempo = Math.max(0.1, Math.min(tempo, 4)); // Clamp tempo
+    // Adjust length based on tempo to process entire duration correctly
     const newLength = Math.max(1, Math.round(decodedAudioBuffer.length / newTempo));
     
     const offlineContext = new OfflineAudioContext(
@@ -421,7 +442,7 @@ export const audioUtils = {
   },
 
   gainController: async (audioDataUrl: string, { gain }: { gain: number }) => {
-    const gainValue = Math.pow(10, gain / 20); 
+    const gainValue = Math.pow(10, gain / 20); // Convert dB to linear gain
     return processAudioWithEffect(audioDataUrl, (context, source, buffer) => {
       const gainNode = context.createGain();
       gainNode.gain.setValueAtTime(gainValue, context.currentTime);
@@ -430,29 +451,34 @@ export const audioUtils = {
   },
 
   rhythmDetector: async (audioDataUrl: string, params: {}) => {
+    // This is a placeholder. Real BPM detection is complex.
     const analysis = "BPM Analysis: Feature not fully implemented. Placeholder result: Estimated 120 BPM.";
     return { processedAudioDataUrl: audioDataUrl, analysis }; 
   },
 
   dreamscapeMaker: async (audioDataUrl: string, params: {}) => {
+    // Chain effects: slow down, then add reverb
     const slowedResult = await audioUtils.paceAdjuster(audioDataUrl, { tempo: 0.75 });
+    // Using echo as a simple reverb substitute
     const dreamResult = await audioUtils.echoGenerator(slowedResult.processedAudioDataUrl, { delay: 200, feedback: 0.4, mix: 0.35 });
     return { ...dreamResult, analysis: "Dreamscape Maker: Applied slow down and echo." };
   },
 
-  frequencyTuner: async (audioDataUrl: string, params: {}) => { 
-    const pitchShiftRatio = 432 / 440; 
+  frequencyTuner: async (audioDataUrl: string, params: {}) => { // Assuming params has 'targetPitch' like 432
+    const pitchShiftRatio = 432 / 440; // Example for A4=432Hz from A4=440Hz
     const semitones = 12 * Math.log2(pitchShiftRatio);
     const result = await audioUtils.keyTransposer(audioDataUrl, { semitones });
     return { ...result, analysis: `Tuned to 432Hz (approx. ${semitones.toFixed(2)} semitones shift).` };
   },
 
+  // Bass Boost Presets using subharmonicIntensifier logic
   subtleSubwoofer: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 20 }),
   gentleBassBoost: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 40 }),
   mediumBassEnhancement: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 60 }),
   intenseBassAmplifier: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 80 }),
   maximumBassOverdrive: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 100 }),
 
+  // Reverb Presets using echoGenerator logic
   vocalAmbience: (d, p) => audioUtils.echoGenerator(d, { delay: 80, feedback: 0.2, mix: 0.2 }),
   washroomEcho: (d, p) => audioUtils.echoGenerator(d, { delay: 150, feedback: 0.5, mix: 0.4 }),
   compactRoomReflector: (d, p) => audioUtils.echoGenerator(d, { delay: 100, feedback: 0.3, mix: 0.25 }),
@@ -464,21 +490,23 @@ export const audioUtils = {
   automatedSweep: async (audioDataUrl: string, { speed }: { speed: number }) => {
      return processAudioWithEffect(audioDataUrl, (context, sourceNode, buffer) => {
         if (buffer.numberOfChannels < 2) {
+            // Effect only applicable to stereo. Return empty chain for passthrough.
             return []; 
         }
         const panner = context.createStereoPanner();
         const lfo = context.createOscillator();
         lfo.type = 'sine';
-        const clampedSpeed = Math.max(0.05, Math.min(speed, 10)); 
+        const clampedSpeed = Math.max(0.05, Math.min(speed, 10)); // Clamp speed for sensibility
         lfo.frequency.setValueAtTime(clampedSpeed, context.currentTime); 
         
-        const lfoGain = context.createGain(); 
-        lfoGain.gain.value = 1; 
+        const lfoGain = context.createGain(); // LFO output is -1 to 1, panner expects -1 to 1.
+        lfoGain.gain.value = 1; // No gain needed if LFO output range matches panner's.
         lfo.connect(lfoGain);
-        lfoGain.connect(panner.pan);
+        lfoGain.connect(panner.pan); // Connect LFO (via gain if needed) to pan parameter
         
         lfo.start();
         
+        // Source -> Panner -> Destination
         return [panner]; 
     }, `Automated Sweep: Speed ${speed}Hz. (Applied only if audio is stereo)`);
   },
@@ -492,9 +520,11 @@ export const audioUtils = {
     const numChannels = decodedAudioBuffer.numberOfChannels;
 
     if (numChannels < 2) {
+      // Not stereo, so swapping L/R has no meaning.
       return { processedAudioDataUrl: audioDataUrl, analysis: "Channel Router: Audio is not stereo. No changes made." };
     }
 
+    // Only proceed if stereo or more channels
     const offlineContext = new OfflineAudioContext(numChannels, decodedAudioBuffer.length, decodedAudioBuffer.sampleRate);
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
@@ -504,13 +534,13 @@ export const audioUtils = {
 
     sourceNode.connect(splitter);
     
-    // Swap L (0) and R (1)
-    splitter.connect(merger, 0, 1); // Left input (channel 0) to Right output (channel 1)
-    splitter.connect(merger, 1, 0); // Right input (channel 1) to Left output (channel 0)
+    // Swap L (channel 0) and R (channel 1)
+    splitter.connect(merger, 0, 1); // Route source's channel 0 (Left) to merger's channel 1 (Right)
+    splitter.connect(merger, 1, 0); // Route source's channel 1 (Right) to merger's channel 0 (Left)
     
-    // Pass through other channels if they exist
+    // Pass through other channels if they exist (e.g., for 5.1 audio, C, LFE, Ls, Rs)
     for (let i = 2; i < numChannels; i++) {
-        splitter.connect(merger, i, i);
+        splitter.connect(merger, i, i); // Route source's channel i to merger's channel i
     }
     
     merger.connect(offlineContext.destination);
@@ -532,8 +562,9 @@ export const audioUtils = {
     const numChannels = decodedAudioBuffer.numberOfChannels;
     const sampleRate = decodedAudioBuffer.sampleRate;
 
-    let sTimeSeconds = parseFloat(String(startTimeMinutes)) * 60;
-    let eTimeSeconds = parseFloat(String(endTimeMinutes)) * 60;
+    // Ensure inputs are numbers and convert minutes to seconds
+    let sTimeSeconds = Number(startTimeMinutes) * 60;
+    let eTimeSeconds = Number(endTimeMinutes) * 60;
     
     if (isNaN(sTimeSeconds) || isNaN(eTimeSeconds) || sTimeSeconds < 0 || eTimeSeconds < 0) {
       return { 
@@ -542,6 +573,7 @@ export const audioUtils = {
       };
     }
 
+    // Clamp times to the duration of the audio
     sTimeSeconds = Math.min(sTimeSeconds, originalDurationSeconds);
     eTimeSeconds = Math.min(eTimeSeconds, originalDurationSeconds);
     
@@ -553,6 +585,7 @@ export const audioUtils = {
     }
     
     const splitDurationSeconds = eTimeSeconds - sTimeSeconds; 
+    // Calculate the length of the output buffer in samples for the OfflineAudioContext
     const contextLengthInSamples = Math.max(1, Math.floor(splitDurationSeconds * sampleRate));
 
     const offlineContext = new OfflineAudioContext(
@@ -565,17 +598,20 @@ export const audioUtils = {
     bufferSource.buffer = decodedAudioBuffer;
     bufferSource.connect(offlineContext.destination);
     
+    // Start playing from sTimeSeconds for a duration of splitDurationSeconds
     bufferSource.start(0, sTimeSeconds, splitDurationSeconds); 
 
     const renderedBuffer = await offlineContext.startRendering();
     const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
 
     let analysisMessage: string;
-    if (renderedBuffer.duration > 0.001) { 
+    if (renderedBuffer.duration > 0.001) { // Check if the rendered buffer has a meaningful duration
       analysisMessage = `Audio Splitter: Extracted segment from ${sTimeSeconds.toFixed(2)}s (${startTimeMinutes.toFixed(2)}min) to ${eTimeSeconds.toFixed(2)}s (${endTimeMinutes.toFixed(2)}min). New duration: ${renderedBuffer.duration.toFixed(2)}s.`;
     } else {
+      // If the segment is too small or results in no audio, report it and potentially return original.
       analysisMessage = `Audio Splitter: Extracted segment from ${sTimeSeconds.toFixed(2)}s (${startTimeMinutes.toFixed(2)}min) to ${eTimeSeconds.toFixed(2)}s (${endTimeMinutes.toFixed(2)}min) resulted in a very short or empty audio clip (duration: ${renderedBuffer.duration.toFixed(4)}s). Original audio unchanged if displayed.`;
-      return { processedAudioDataUrl: audioDataUrl, analysis: analysisMessage }; // Return original if segment is too small
+      // Consider returning the original audioDataUrl if the split is effectively empty
+      return { processedAudioDataUrl: audioDataUrl, analysis: analysisMessage };
     }
     
     return {
@@ -583,41 +619,71 @@ export const audioUtils = {
       analysis: analysisMessage
     };
   },
-  channelCompressor: async (audioDataUrl: string, { channels }: { channels: 'mono' | 'stereo' }) => {
-    if (channels === 'stereo') { 
-      return { processedAudioDataUrl: audioDataUrl, analysis: "Channel Compressor: Stereo passthrough requested. No changes made if already stereo or more channels. Mono audio will remain mono." };
-    }
-    
+  channelCompressor: async (audioDataUrl: string, { channels: targetChannels }: { channels: 'mono' | 'stereo' }) => {
     const audioContext = getGlobalAudioContext();
     if (!audioContext) throw new Error("AudioContext not supported");
-    
+  
     const arrayBuffer = await dataUrlToArrayBuffer(audioDataUrl);
     const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-    if (decodedAudioBuffer.numberOfChannels === 1 && channels === 'mono') { 
-        return { processedAudioDataUrl: audioDataUrl, analysis: "Channel Compressor: Audio is already mono. No changes made." };
+    const sourceChannels = decodedAudioBuffer.numberOfChannels;
+  
+    let analysis = "";
+    let outputChannelCount = sourceChannels; // Default to source channels
+  
+    if (targetChannels === 'mono') {
+      if (sourceChannels === 1) {
+        analysis = "Channel Compressor: Audio is already mono. No changes made.";
+        return { processedAudioDataUrl: audioDataUrl, analysis };
+      }
+      outputChannelCount = 1;
+      analysis = `Channel Compressor: Audio converted to mono from ${sourceChannels} channels.`;
+    } else if (targetChannels === 'stereo') {
+      if (sourceChannels === 1) {
+        // Mono input, "stereo" output selected. Keep it mono.
+        // If upmixing to dual-mono (same signal on L and R of a stereo file) was desired,
+        // outputChannelCount would be 2, and WAV encoding would handle duplication.
+        // For "passthrough" style, keeping it mono is more aligned.
+        analysis = "Channel Compressor: Input is mono, selected stereo output. Audio remains mono.";
+        return { processedAudioDataUrl: audioDataUrl, analysis }; 
+      } else if (sourceChannels === 2) {
+        analysis = "Channel Compressor: Audio is already stereo. No changes made.";
+        return { processedAudioDataUrl: audioDataUrl, analysis };
+      } else { // sourceChannels > 2
+        outputChannelCount = 2; // Downmix to stereo
+        analysis = `Channel Compressor: Audio downmixed from ${sourceChannels} channels to stereo.`;
+      }
+    } else {
+      // Should not happen with current UI, but as a fallback
+      analysis = "Channel Compressor: Invalid target channel configuration.";
+      return { processedAudioDataUrl: audioDataUrl, analysis };
     }
-
-    const offlineContext = new OfflineAudioContext(1, decodedAudioBuffer.length, decodedAudioBuffer.sampleRate);
+  
+    // If we need to process (i.e., change channel count)
+    const offlineContext = new OfflineAudioContext(
+      outputChannelCount, 
+      decodedAudioBuffer.length, 
+      decodedAudioBuffer.sampleRate
+    );
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
-    
     sourceNode.connect(offlineContext.destination);
     sourceNode.start(0);
     
     const renderedBuffer = await offlineContext.startRendering();
     const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
-    return { processedAudioDataUrl, analysis: `Channel Compressor: Audio converted to mono from ${decodedAudioBuffer.numberOfChannels} channels.` };
+    return { processedAudioDataUrl, analysis };
   },
   spatialAudioEffect: async (audioDataUrl: string, { depth }: { depth: number }) => {
+    // This is a very basic "spatial" effect using StereoPanner. True spatial audio is far more complex.
     return processAudioWithEffect(audioDataUrl, (context, sourceNode, buffer) => {
-        if (buffer.numberOfChannels < 2) return []; 
+        if (buffer.numberOfChannels < 2) return []; // Panner only works on stereo
         
         const panner = context.createStereoPanner();
+        // Convert depth (0-100) to pan value (-1 to 1). 50 depth = 0 pan (center).
         const panValue = (depth - 50) / 50; 
         panner.pan.setValueAtTime(Math.max(-1, Math.min(1, panValue)), context.currentTime);
 
-        return [panner];
+        return [panner]; // source -> panner -> destination
     }, `Spatial Audio Effect: Pan set to ${((depth - 50) / 50).toFixed(2)}. (Applied only if audio is stereo)`);
   },
 };
