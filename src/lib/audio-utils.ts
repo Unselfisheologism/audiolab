@@ -18,43 +18,36 @@ async function dataUrlToArrayBuffer(dataUrl: string): Promise<ArrayBuffer> {
 
 // Helper function to convert AudioBuffer to WAV Data URL
 async function audioBufferToWavDataUrl(audioBuffer: AudioBuffer): Promise<string> {
-  // Simple WAV encoder
-  const numChannels = audioBuffer.numberOfChannels;
+  const inputNumChannels = audioBuffer.numberOfChannels;
   const sampleRate = audioBuffer.sampleRate;
-  const format = 1; // PCM
+  const length = audioBuffer.length;
   const bitDepth = 16;
 
-  const wavOutputChannels = audioBuffer.numberOfChannels;
+  let interleaved: Int16Array;
+  let outputNumChannelsWav: number;
 
-
-  const blockAlign = wavOutputChannels * (bitDepth / 8);
-  const byteRate = sampleRate * blockAlign;
-
-  let interleaved = new Int16Array(0);
-  const length = audioBuffer.length;
-
-  if (wavOutputChannels === 1) {
+  if (inputNumChannels === 1) {
+    outputNumChannelsWav = 1;
     const channelData = audioBuffer.getChannelData(0);
     interleaved = new Int16Array(length);
     for (let i = 0; i < length; i++) {
       interleaved[i] = Math.max(-1, Math.min(1, channelData[i])) * 32767;
     }
-  } else if (wavOutputChannels >= 2) { 
+  } else { // inputNumChannels >= 2
+    outputNumChannelsWav = 2; // Output a stereo WAV, taking first two channels
     const leftChannel = audioBuffer.getChannelData(0);
-    const rightChannel = audioBuffer.numberOfChannels > 1 ? audioBuffer.getChannelData(1) : leftChannel;
+    const rightChannel = inputNumChannels > 1 ? audioBuffer.getChannelData(1) : leftChannel; 
     
-    interleaved = new Int16Array(length * 2); // We are creating a stereo WAV
+    interleaved = new Int16Array(length * 2);
     for (let i = 0; i < length; i++) {
       interleaved[i * 2] = Math.max(-1, Math.min(1, leftChannel[i])) * 32767;
       interleaved[i * 2 + 1] = Math.max(-1, Math.min(1, rightChannel[i])) * 32767;
     }
   }
   
-  const dataSize = interleaved.length * (bitDepth / 8);
-  const actualWavBlockAlign = (wavOutputChannels >= 2 ? 2 : 1) * (bitDepth / 8);
-  const actualWavByteRate = sampleRate * actualWavBlockAlign;
-  const actualWavNumChannels = wavOutputChannels >= 2 ? 2 : 1;
-
+  const dataSize = interleaved.byteLength;
+  const blockAlign = outputNumChannelsWav * (bitDepth / 8);
+  const byteRate = sampleRate * blockAlign;
 
   const buffer = new ArrayBuffer(44 + dataSize);
   const view = new DataView(buffer);
@@ -63,12 +56,12 @@ async function audioBufferToWavDataUrl(audioBuffer: AudioBuffer): Promise<string
   view.setUint32(4, 36 + dataSize, true);
   writeString(view, 8, 'WAVE');
   writeString(view, 12, 'fmt ');
-  view.setUint32(16, 16, true);
-  view.setUint16(20, format, true);
-  view.setUint16(22, actualWavNumChannels, true); 
+  view.setUint32(16, 16, true); // PCM
+  view.setUint16(20, 1, true); // PCM format
+  view.setUint16(22, outputNumChannelsWav, true);
   view.setUint32(24, sampleRate, true);
-  view.setUint32(28, actualWavByteRate, true); 
-  view.setUint16(32, actualWavBlockAlign, true); 
+  view.setUint32(28, byteRate, true);
+  view.setUint16(32, blockAlign, true);
   view.setUint16(34, bitDepth, true);
   writeString(view, 36, 'data');
   view.setUint32(40, dataSize, true);
@@ -99,6 +92,9 @@ const getGlobalAudioContext = (() => {
       if (!audioContextInstance || audioContextInstance.state === 'closed') {
         audioContextInstance = new (window.AudioContext || (window as any).webkitAudioContext)();
       }
+       if (audioContextInstance && audioContextInstance.state === 'suspended') {
+        audioContextInstance.resume().catch(e => console.error("Error resuming global AudioContext:", e));
+      }
     }
     return audioContextInstance;
   };
@@ -122,6 +118,11 @@ const processAudioWithEffect = async (
 
   const arrayBuffer = await dataUrlToArrayBuffer(audioDataUrl);
   const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+  if (decodedAudioBuffer.length === 0) {
+    console.warn("Decoded audio buffer has zero length. Skipping effect processing.");
+    return { processedAudioDataUrl: audioDataUrl, analysis: "Audio is empty, no effect applied." };
+  }
 
   const targetChannelCount = outputChannelCountForContext !== undefined ? outputChannelCountForContext : decodedAudioBuffer.numberOfChannels;
 
@@ -159,9 +160,9 @@ export const audioUtils = {
       const biquadFilter = context.createBiquadFilter();
       biquadFilter.type = 'peaking';
       const filterFreq = Math.max(20, 1000 + (frequency * 40)); 
-      biquadFilter.frequency.value = filterFreq;
-      biquadFilter.Q.value = 1.5; 
-      biquadFilter.gain.value = frequency; 
+      biquadFilter.frequency.setValueAtTime(filterFreq, 0); // Use time 0
+      biquadFilter.Q.setValueAtTime(1.5, 0); // Use time 0
+      biquadFilter.gain.setValueAtTime(frequency, 0); // Use time 0
       return [biquadFilter];
     }, `Altered resonance: Peaking filter with ${frequency}dB gain around ${ (1000 + (frequency * 40)).toFixed(0) }Hz.`);
   },
@@ -173,6 +174,8 @@ export const audioUtils = {
     const arrayBuffer = await dataUrlToArrayBuffer(audioDataUrl);
     const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
     
+    if (decodedAudioBuffer.length === 0) return { processedAudioDataUrl: audioDataUrl, analysis: "Audio is empty."};
+
     const newRate = Math.max(0.1, Math.min(rate, 4)); 
     const numSamples = Math.max(1, Math.ceil(decodedAudioBuffer.length / newRate));
 
@@ -184,7 +187,7 @@ export const audioUtils = {
 
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
-    sourceNode.playbackRate.value = newRate;
+    sourceNode.playbackRate.setValueAtTime(newRate, 0); // Use time 0
     
     sourceNode.connect(offlineContext.destination);
     sourceNode.start(0);
@@ -211,11 +214,11 @@ export const audioUtils = {
       const gainR_to_R_out = offlineContext.createGain();
       const gainL_to_R_out_inverted = offlineContext.createGain(); 
 
-      gainL_to_L_out.gain.value = 1 + k;
-      gainR_to_L_out_inverted.gain.value = -k;
+      gainL_to_L_out.gain.setValueAtTime(1 + k, 0); // Use time 0
+      gainR_to_L_out_inverted.gain.setValueAtTime(-k, 0); // Use time 0
 
-      gainR_to_R_out.gain.value = 1 + k;
-      gainL_to_R_out_inverted.gain.value = -k;
+      gainR_to_R_out.gain.setValueAtTime(1 + k, 0); // Use time 0
+      gainL_to_R_out_inverted.gain.setValueAtTime(-k, 0); // Use time 0
       
       splitter.connect(gainL_to_L_out, 0, 0); 
       gainL_to_L_out.connect(merger, 0, 0);  
@@ -236,12 +239,12 @@ export const audioUtils = {
   },
   
   subharmonicIntensifier: async (audioDataUrl: string, { intensity: intensityParam }: { intensity: number }) => {
-    const gainDb = (intensityParam / 100) * 12; // Max 12dB boost for intensity 100
+    const gainDb = (intensityParam / 100) * 12; 
     return processAudioWithEffect(audioDataUrl, (offlineContext, sourceNode, decodedAudioBuffer) => {
       const lowshelfFilter = offlineContext.createBiquadFilter();
       lowshelfFilter.type = 'lowshelf';
-      lowshelfFilter.frequency.value = 120; // Frequencies below 120Hz are boosted
-      lowshelfFilter.gain.value = gainDb;   // Amount of boost in dB
+      lowshelfFilter.frequency.setValueAtTime(120, 0); // Use time 0
+      lowshelfFilter.gain.setValueAtTime(gainDb, 0);   // Use time 0
       return [lowshelfFilter];
     }, `Applied Subharmonic Intensifier: Low-shelf filter at 120Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityParam}%).`);
   },
@@ -250,19 +253,19 @@ export const audioUtils = {
      return processAudioWithEffect(audioDataUrl, (context, source, buffer) => {
       const lowFilter = context.createBiquadFilter();
       lowFilter.type = 'lowshelf';
-      lowFilter.frequency.value = 250; 
-      lowFilter.gain.value = low;
+      lowFilter.frequency.setValueAtTime(250, 0); // Use time 0
+      lowFilter.gain.setValueAtTime(low, 0); // Use time 0
 
       const midFilter = context.createBiquadFilter();
       midFilter.type = 'peaking';
-      midFilter.frequency.value = 1000; 
-      midFilter.Q.value = 1; 
-      midFilter.gain.value = mid;
+      midFilter.frequency.setValueAtTime(1000, 0); // Use time 0
+      midFilter.Q.setValueAtTime(1, 0); // Use time 0
+      midFilter.gain.setValueAtTime(mid, 0); // Use time 0
 
       const highFilter = context.createBiquadFilter();
       highFilter.type = 'highshelf';
-      highFilter.frequency.value = 4000; 
-      highFilter.gain.value = high;
+      highFilter.frequency.setValueAtTime(4000, 0); // Use time 0
+      highFilter.gain.setValueAtTime(high, 0); // Use time 0
       
       return [lowFilter, midFilter, highFilter];
     }, `Frequency Sculptor: Low ${low}dB @ 250Hz, Mid ${mid}dB @ 1kHz, High ${high}dB @ 4kHz.`);
@@ -274,6 +277,8 @@ export const audioUtils = {
 
     const arrayBuffer = await dataUrlToArrayBuffer(audioDataUrl);
     const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    if (decodedAudioBuffer.length === 0) return { processedAudioDataUrl: audioDataUrl, analysis: "Audio is empty."};
+
 
     const playbackRate = Math.pow(2, semitones / 12);
     const clampedPlaybackRate = Math.max(0.1, Math.min(playbackRate, 4)); 
@@ -288,7 +293,7 @@ export const audioUtils = {
 
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
-    sourceNode.playbackRate.value = clampedPlaybackRate; 
+    sourceNode.playbackRate.setValueAtTime(clampedPlaybackRate, 0); // Use time 0
     
     sourceNode.connect(offlineContext.destination);
     sourceNode.start(0);
@@ -305,6 +310,8 @@ export const audioUtils = {
 
     const arrayBuffer = await dataUrlToArrayBuffer(audioDataUrl);
     const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    if (decodedAudioBuffer.length === 0) return { processedAudioDataUrl: audioDataUrl, analysis: "Audio is empty."};
+
 
     const clampedDelay = Math.max(0.001, Math.min(delay / 1000, audioContext.sampleRate)); 
     const clampedFeedback = Math.max(0, Math.min(feedback, 0.95)); 
@@ -331,16 +338,16 @@ export const audioUtils = {
     sourceNode.buffer = decodedAudioBuffer;
 
     const delayNode = offlineContext.createDelay(clampedDelay + 1); 
-    delayNode.delayTime.value = clampedDelay;
+    delayNode.delayTime.setValueAtTime(clampedDelay, 0); // Use time 0
 
     const feedbackNode = offlineContext.createGain();
-    feedbackNode.gain.value = clampedFeedback;
+    feedbackNode.gain.setValueAtTime(clampedFeedback, 0); // Use time 0
 
     const dryNode = offlineContext.createGain();
-    dryNode.gain.value = 1 - clampedMix;
+    dryNode.gain.setValueAtTime(1 - clampedMix, 0); // Use time 0
     
     const wetNode = offlineContext.createGain();
-    wetNode.gain.value = clampedMix;
+    wetNode.gain.setValueAtTime(clampedMix, 0); // Use time 0
     
     sourceNode.connect(dryNode);
     dryNode.connect(offlineContext.destination);
@@ -365,6 +372,8 @@ export const audioUtils = {
 
     const arrayBuffer = await dataUrlToArrayBuffer(audioDataUrl);
     const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    if (decodedAudioBuffer.length === 0) return { processedAudioDataUrl: audioDataUrl, analysis: "Audio is empty."};
+
 
     const numChannels = decodedAudioBuffer.numberOfChannels;
     const length = decodedAudioBuffer.length;
@@ -401,6 +410,7 @@ export const audioUtils = {
 
     const arrayBuffer = await dataUrlToArrayBuffer(audioDataUrl);
     const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    if (decodedAudioBuffer.length === 0) return { processedAudioDataUrl: audioDataUrl, analysis: "Audio is empty."};
     
     const newTempo = Math.max(0.1, Math.min(tempo, 4)); 
     const newLength = Math.max(1, Math.round(decodedAudioBuffer.length / newTempo));
@@ -413,7 +423,7 @@ export const audioUtils = {
 
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
-    sourceNode.playbackRate.value = newTempo; 
+    sourceNode.playbackRate.setValueAtTime(newTempo, 0); // Use time 0
     
     sourceNode.connect(offlineContext.destination);
     sourceNode.start(0);
@@ -428,7 +438,7 @@ export const audioUtils = {
     const gainValue = Math.pow(10, gain / 20); 
     return processAudioWithEffect(audioDataUrl, (context, source, buffer) => {
       const gainNode = context.createGain();
-      gainNode.gain.value = gainValue;
+      gainNode.gain.setValueAtTime(gainValue, 0); // Use time 0
       return [gainNode];
     }, `Gain adjusted by ${gain}dB (linear gain: ${gainValue.toFixed(2)}).`);
   },
@@ -475,7 +485,7 @@ export const audioUtils = {
       }
 
       if (peaks.length < 2) {
-        return { processedAudioDataUrl: audioDataUrl, analysis: "Not enough distinct peaks found to determine BPM." };
+        return { processedAudioDataUrl: audioDataUrl, analysis: "BPM: N/A\nInterval: N/A (Not enough peaks)" };
       }
 
       const intervalsInSeconds = [];
@@ -484,7 +494,7 @@ export const audioUtils = {
       }
 
       if (intervalsInSeconds.length === 0) {
-        return { processedAudioDataUrl: audioDataUrl, analysis: "Could not calculate intervals between peaks." };
+        return { processedAudioDataUrl: audioDataUrl, analysis: "BPM: N/A\nInterval: N/A (No intervals)" };
       }
 
       const intervalCounts: { [key: string]: number } = {};
@@ -526,19 +536,19 @@ export const audioUtils = {
             }
 
             if (mostCommonIntervalSec <= 0 || mostCommonIntervalSec < 60/240 || mostCommonIntervalSec > 60/40) {
-                 return { processedAudioDataUrl: audioDataUrl, analysis: "Could not determine a consistent beat interval." };
+                 return { processedAudioDataUrl: audioDataUrl, analysis: "BPM: N/A\nInterval: N/A (No consistent beat)" };
             }
         }
       }
 
       const bpm = 60 / mostCommonIntervalSec;
-      const analysis = `BPM: ${bpm.toFixed(1)}, Interval: ${mostCommonIntervalSec.toFixed(2)}s`;
+      const analysis = `BPM: ${bpm.toFixed(1)}\nInterval: ${mostCommonIntervalSec.toFixed(2)}s`;
       
       return { processedAudioDataUrl: audioDataUrl, analysis };
 
     } catch (error) {
       console.error("Error in rhythmDetector:", error);
-      return { processedAudioDataUrl: audioDataUrl, analysis: `Error during BPM processing - ${error.message || 'Unknown error'}` };
+      return { processedAudioDataUrl: audioDataUrl, analysis: `BPM: N/A\nInterval: N/A (Error: ${error.message || 'Unknown'})` };
     }
   },
 
@@ -577,10 +587,10 @@ export const audioUtils = {
         const lfo = context.createOscillator();
         lfo.type = 'sine';
         const clampedSpeed = Math.max(0.05, Math.min(speed, 10)); 
-        lfo.frequency.value = clampedSpeed;
+        lfo.frequency.setValueAtTime(clampedSpeed, 0); // Use time 0
         
         const lfoGain = context.createGain(); 
-        lfoGain.gain.value = 1; 
+        lfoGain.gain.setValueAtTime(1, 0); // Use time 0
         
         lfo.connect(lfoGain);
         lfoGain.connect(panner.pan); 
@@ -600,6 +610,13 @@ export const audioUtils = {
     const originalDurationSeconds = decodedAudioBuffer.duration;
     const numChannels = decodedAudioBuffer.numberOfChannels;
     const sampleRate = decodedAudioBuffer.sampleRate;
+
+    if (decodedAudioBuffer.length === 0) {
+      return { 
+        processedAudioDataUrl: audioDataUrl, 
+        analysis: `Audio Splitter: Audio is empty. No changes made.` 
+      };
+    }
 
     let sTimeSeconds = Number(startTimeMinutes) * 60;
     let eTimeSeconds = Number(endTimeMinutes) * 60;
@@ -644,7 +661,7 @@ export const audioUtils = {
 
     const renderedBuffer = await offlineContext.startRendering();
     
-    if (renderedBuffer.duration < 0.001) {
+    if (renderedBuffer.duration < 0.001) { // Check actual rendered duration
          return {
             processedAudioDataUrl: audioDataUrl, 
             analysis: `Audio Splitter: Extracted segment from ${sTimeSeconds.toFixed(2)}s to ${eTimeSeconds.toFixed(2)}s resulted in an empty audio clip. Original audio duration: ${originalDurationSeconds.toFixed(2)}s. No changes made.`
@@ -663,8 +680,9 @@ export const audioUtils = {
     return processAudioWithEffect(audioDataUrl, (context, sourceNode, buffer) => {
         const panner = context.createStereoPanner();
         const panValue = (depth - 50) / 50; 
-        panner.pan.value = Math.max(-1, Math.min(1, panValue));
+        panner.pan.setValueAtTime(Math.max(-1, Math.min(1, panValue)), 0); // Use time 0 and clamp
         return [panner]; 
     }, `Spatial Audio Effect: Pan set to ${((depth - 50) / 50).toFixed(2)}. Output will be stereo.`, 2); 
   },
 };
+
