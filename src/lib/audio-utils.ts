@@ -195,11 +195,10 @@ export const audioUtils = {
   stereoWidener: async (audioDataUrl: string, { width: widthParam }: { width: number }) => {
     return processAudioWithEffect(audioDataUrl, (offlineContext, sourceNode, decodedAudioBuffer) => {
       if (decodedAudioBuffer.numberOfChannels < 2) {
-        // Return empty array, processAudioWithEffect will handle pass-through
         return []; 
       }
   
-      const width = widthParam / 100; // Convert percentage to 0-2 range
+      const width = widthParam / 100; 
   
       const splitter = offlineContext.createChannelSplitter(2);
       const merger = offlineContext.createChannelMerger(2);
@@ -209,27 +208,35 @@ export const audioUtils = {
       const gainL_to_R = offlineContext.createGain();
       const gainR_to_R = offlineContext.createGain();
   
-      gainL_to_L.gain.value = (1 + width) / 2;
-      gainR_to_L.gain.value = (1 - width) / 2;
-      gainL_to_R.gain.value = (1 - width) / 2;
-      gainR_to_R.gain.value = (1 + width) / 2;
-      
-      // sourceNode is already connected to splitter by the wrapper
-      // No, sourceNode needs to be connected to the first node in the chain by the user of processAudioWithEffect
-      // The setupEffect callback receives the sourceNode. It should connect it.
-      // The wrapper processAudioWithEffect connects sourceNode to the returned chain's head.
-      // So the first element of the returned array should be the one sourceNode connects to.
-      // In this case, the splitter is the first element.
+      // Mid component gain for both output channels
+      const midGain = (1 + (1 - width)) / 2; // Example logic, can be adjusted
+      // Side component gain adjustment
+      const sideGain = (width) / 2;
   
-      splitter.connect(gainL_to_L, 0); 
-      splitter.connect(gainR_to_L, 1); 
-      gainL_to_L.connect(merger, 0, 0); 
-      gainR_to_L.connect(merger, 0, 0); 
+      // L_out = L_in * ( (1+W)/2 ) + R_in * ( (1-W)/2 )
+      // R_out = L_in * ( (1-W)/2 ) + R_in * ( (1+W)/2 )
+      // Where W is desired width factor (0=mono, 1=original, >1 wider)
+      // The parameter 'width' from UI is 0-200. Let's map it to 0-2 for W.
+      // widthParam 0   -> W = 0   (mono)
+      // widthParam 100 -> W = 1   (original stereo)
+      // widthParam 200 -> W = 2   (exaggerated stereo)
+      const W = widthParam / 100.0;
   
-      splitter.connect(gainL_to_R, 0); 
-      splitter.connect(gainR_to_R, 1); 
-      gainL_to_R.connect(merger, 0, 1); 
-      gainR_to_R.connect(merger, 0, 1);
+      gainL_to_L.gain.value = (1 + W) / 2.0;
+      gainR_to_L.gain.value = (1 - W) / 2.0;
+  
+      gainL_to_R.gain.value = (1 - W) / 2.0;
+      gainR_to_R.gain.value = (1 + W) / 2.0;
+        
+      splitter.connect(gainL_to_L, 0, 0); 
+      splitter.connect(gainR_to_L, 1, 0);
+      gainL_to_L.connect(merger, 0, 0);
+      gainR_to_L.connect(merger, 0, 0); // Summing into left channel of merger
+  
+      splitter.connect(gainL_to_R, 0, 0);
+      splitter.connect(gainR_to_R, 1, 0);
+      gainL_to_R.connect(merger, 0, 1);
+      gainR_to_R.connect(merger, 0, 1); // Summing into right channel of merger
   
       return [splitter, gainL_to_L, gainR_to_L, gainL_to_R, gainR_to_R, merger];
     }, `Stereo Widener: Width set to ${widthParam}%. Applied only if audio is stereo.`);
@@ -237,14 +244,15 @@ export const audioUtils = {
   
   subharmonicIntensifier: async (audioDataUrl: string, { intensity: intensityParam }: { intensity: number }) => {
     const gainDb = (intensityParam / 100) * 12; // Max 12dB boost for intensity 100
-
     return processAudioWithEffect(audioDataUrl, (offlineContext, sourceNode, decodedAudioBuffer) => {
-      const lowshelfFilter = offlineContext.createBiquadFilter();
-      lowshelfFilter.type = 'lowshelf';
-      lowshelfFilter.frequency.setValueAtTime(120, offlineContext.currentTime); 
-      lowshelfFilter.gain.setValueAtTime(gainDb, offlineContext.currentTime);
-      return [lowshelfFilter];
-    }, `Applied Subharmonic Intensifier: Low-shelf filter at 120Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityParam}%).`);
+        const lowshelfFilter = offlineContext.createBiquadFilter();
+        lowshelfFilter.type = 'lowshelf';
+        lowshelfFilter.frequency.setValueAtTime(120, offlineContext.currentTime); 
+        lowshelfFilter.gain.setValueAtTime(gainDb, offlineContext.currentTime);
+        return [lowshelfFilter];
+      }, 
+      `Applied Subharmonic Intensifier: Low-shelf filter at 120Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityParam}%).`
+    );
   },
 
   frequencySculptor: async (audioDataUrl: string, { low, mid, high }: { low: number, mid: number, high: number }) => {
@@ -341,21 +349,7 @@ export const audioUtils = {
     
     const wetNode = offlineContext.createGain();
     wetNode.gain.setValueAtTime(clampedMix, 0);
-
-    // Connections for processAudioWithEffect: return array of nodes, first is input, last is output to destination
-    // sourceNode -> dryNode -> destination
-    // sourceNode -> delayNode -> wetNode -> destination
-    //              delayNode -> feedbackNode -> delayNode (loop)
     
-    // The processAudioWithEffect wrapper will handle:
-    // source.connect(returnedChain[0])
-    // returnedChain[returnedChain.length-1].connect(destination)
-
-    // So, we must make sure the returned chain represents the "main" path.
-    // This effect has parallel paths (dry and wet) and a feedback loop.
-    // It's too complex for the simple chain model of processAudioWithEffect.
-    // Thus, we'll handle connections manually here.
-
     sourceNode.connect(dryNode);
     dryNode.connect(offlineContext.destination);
 
@@ -398,10 +392,9 @@ export const audioUtils = {
       }
     }
     
-    // This effect doesn't use processAudioWithEffect as it creates a new buffer directly.
     const offlineContext = new OfflineAudioContext(numChannels, length, decodedAudioBuffer.sampleRate);
     const sourceNode = offlineContext.createBufferSource();
-    sourceNode.buffer = reversedBuffer; // Use the reversed buffer
+    sourceNode.buffer = reversedBuffer; 
     sourceNode.connect(offlineContext.destination);
     sourceNode.start(0);
 
@@ -491,14 +484,14 @@ export const audioUtils = {
         const clampedSpeed = Math.max(0.05, Math.min(speed, 10)); 
         lfo.frequency.setValueAtTime(clampedSpeed, context.currentTime); 
         
-        const lfoGain = context.createGain(); // To control LFO amplitude, StereoPanner expects -1 to 1
+        const lfoGain = context.createGain(); 
         lfoGain.gain.value = 1; 
         lfo.connect(lfoGain);
         lfoGain.connect(panner.pan);
         
         lfo.start();
         
-        return [panner]; // LFO is part of the setup, panner is the effect node
+        return [panner]; 
     }, `Automated Sweep: Speed ${speed}Hz. (Applied only if audio is stereo)`);
   },
 
@@ -514,7 +507,6 @@ export const audioUtils = {
       return { processedAudioDataUrl: audioDataUrl, analysis: "Channel Router: Audio is not stereo. No changes made." };
     }
 
-    // This effect is complex for processAudioWithEffect, handle manually.
     const offlineContext = new OfflineAudioContext(numChannels, decodedAudioBuffer.length, decodedAudioBuffer.sampleRate);
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
@@ -524,11 +516,9 @@ export const audioUtils = {
 
     sourceNode.connect(splitter);
     
-    // Swap L (channel 0) and R (channel 1)
-    splitter.connect(merger, 0, 1); // Original Left (0) goes to Merged Right (1)
-    splitter.connect(merger, 1, 0); // Original Right (1) goes to Merged Left (0)
+    splitter.connect(merger, 0, 1); 
+    splitter.connect(merger, 1, 0); 
     
-    // Pass through other channels if they exist
     for (let i = 2; i < numChannels; i++) {
         splitter.connect(merger, i, i);
     }
@@ -585,19 +575,16 @@ export const audioUtils = {
     bufferSource.buffer = decodedAudioBuffer;
     bufferSource.connect(offlineContext.destination);
     
-    // Start playing from sTimeSeconds for a duration of splitDurationSeconds
     bufferSource.start(0, sTimeSeconds, splitDurationSeconds); 
 
     const renderedBuffer = await offlineContext.startRendering();
     const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
 
     let analysisMessage: string;
-    if (renderedBuffer.duration > 0.001) { // Check if the buffer has meaningful length
+    if (renderedBuffer.duration > 0.001) { 
       analysisMessage = `Audio Splitter: Extracted segment from ${sTimeSeconds.toFixed(2)}s (${startTimeMinutes.toFixed(2)}min) to ${eTimeSeconds.toFixed(2)}s (${endTimeMinutes.toFixed(2)}min). New duration: ${renderedBuffer.duration.toFixed(2)}s.`;
     } else {
       analysisMessage = `Audio Splitter: Extracted segment from ${sTimeSeconds.toFixed(2)}s (${startTimeMinutes.toFixed(2)}min) to ${eTimeSeconds.toFixed(2)}s (${endTimeMinutes.toFixed(2)}min) resulted in a very short or empty audio clip (duration: ${renderedBuffer.duration.toFixed(4)}s). Original audio unchanged if displayed.`;
-       // To avoid confusion, if the result is effectively empty, maybe return original URL or specific empty indicator.
-       // For now, it returns the (potentially tiny) split audio.
     }
     
     return {
@@ -607,12 +594,43 @@ export const audioUtils = {
   },
 
   voiceExtractor: async (audioDataUrl: string, params: {}) => {
-    // True voice extraction is a very complex task, often requiring ML models.
-    // This is a placeholder and will not actually extract vocals.
-    return { 
-      processedAudioDataUrl: audioDataUrl, 
-      analysis: "Voice Extractor: This is a placeholder feature. True vocal extraction is a complex process requiring advanced algorithms (often AI-based) and is not implemented in this version. No changes have been made to the audio." 
-    };
+    const audioContext = getGlobalAudioContext();
+    if (!audioContext) throw new Error("AudioContext not supported");
+
+    const arrayBuffer = await dataUrlToArrayBuffer(audioDataUrl);
+    const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    const numChannels = decodedAudioBuffer.numberOfChannels;
+    const length = decodedAudioBuffer.length;
+    const sampleRate = decodedAudioBuffer.sampleRate;
+
+    let analysisMessage: string;
+
+    if (numChannels === 1) {
+      analysisMessage = "Voice Extractor: Input audio is mono. True vocal extraction from mono audio is complex and often requires advanced techniques not implemented here. No changes made to the audio.";
+      return { processedAudioDataUrl: audioDataUrl, analysis: analysisMessage };
+    }
+
+    // Attempt center channel extraction for stereo
+    // This creates a mono output by averaging L and R: (L+R)/2
+    // It's a very basic form of "center" extraction.
+    const offlineContext = new OfflineAudioContext(1, length, sampleRate); // Output is mono
+    const sourceNode = offlineContext.createBufferSource();
+    sourceNode.buffer = decodedAudioBuffer;
+
+    // If more than 2 channels, it will mix down the first two.
+    // We want to effectively do (L+R)/2 which is what happens when you connect stereo to mono destination.
+    // No need for explicit splitter/merger for simple (L+R)/2 to mono.
+    // The OfflineAudioContext with 1 channel will mix down a stereo source.
+
+    sourceNode.connect(offlineContext.destination);
+    sourceNode.start(0);
+    
+    const renderedBuffer = await offlineContext.startRendering();
+    const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
+    
+    analysisMessage = "Voice Extractor: Attempted center channel extraction (mono output). This basic method aims to isolate centrally panned elements like vocals but may also include other centered instruments (e.g., bass, kick, snare). Results vary greatly depending on the original mix.";
+    
+    return { processedAudioDataUrl, analysis: analysisMessage };
   },
 
   channelCompressor: async (audioDataUrl: string, { channels }: { channels: 'mono' | 'stereo' }) => {
@@ -630,7 +648,6 @@ export const audioUtils = {
         return { processedAudioDataUrl: audioDataUrl, analysis: "Channel Compressor: Audio is already mono. No changes made." };
     }
 
-    // Forcing to mono. OfflineAudioContext with 1 channel naturally mixes down.
     const offlineContext = new OfflineAudioContext(1, decodedAudioBuffer.length, decodedAudioBuffer.sampleRate);
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
@@ -647,7 +664,6 @@ export const audioUtils = {
         if (buffer.numberOfChannels < 2) return []; 
         
         const panner = context.createStereoPanner();
-        // Depth 0 = -1 (full left), 50 = 0 (center), 100 = 1 (full right)
         const panValue = (depth - 50) / 50; 
         panner.pan.setValueAtTime(Math.max(-1, Math.min(1, panValue)), context.currentTime);
 
