@@ -1,6 +1,7 @@
 
 
 
+
 // In a real app, these would interact with Web Audio API or a backend service
 
 export type AudioProcessingFunction = (
@@ -92,20 +93,24 @@ const alterResonance: AudioProcessingFunction = async (audioDataUrl, params) => 
   sourceNode.buffer = decodedAudioBuffer;
 
   const filterNode = offlineContext.createBiquadFilter();
-  filterNode.type = 'peaking';
+  filterNode.type = 'peaking'; // Use 'peaking' for resonance boost/cut
 
-  const BASE_PEAKING_FILTER_HZ = 1000; 
-  const Q_VALUE = 5; 
-  const GAIN_VALUE = 12; // Increased gain for more noticeable effect
+  const BASE_PEAKING_FILTER_HZ = 1000; // A common mid-range frequency
+  const Q_VALUE = 5; // A moderate Q for noticeable but not overly narrow peak
+  const GAIN_VALUE = 6; // Gain in dB. Positive boosts, negative cuts.
 
   const frequencyShiftParam = params.frequency || 0; 
-  // Ensure frequencyShiftParam is a number, providing a default if it's not (e.g. from initial state)
   const numericFrequencyShift = typeof frequencyShiftParam === 'number' ? frequencyShiftParam : 0;
+  // Adjust center frequency based on semitone shift: F_new = F_old * 2^(semitones/12)
   const centerFrequency = BASE_PEAKING_FILTER_HZ * Math.pow(2, numericFrequencyShift / 12);
   
   filterNode.frequency.setValueAtTime(centerFrequency, offlineContext.currentTime);
   filterNode.Q.setValueAtTime(Q_VALUE, offlineContext.currentTime);
+  // Use the 'gain' parameter of the peaking filter to control the boost/cut
+  // For simplicity, let's assume a fixed boost when shifting, or a cut if an additional param was provided.
+  // Here, we'll apply a fixed gain to make the shift audible.
   filterNode.gain.setValueAtTime(GAIN_VALUE, offlineContext.currentTime);
+
 
   sourceNode.connect(filterNode);
   filterNode.connect(offlineContext.destination);
@@ -114,7 +119,7 @@ const alterResonance: AudioProcessingFunction = async (audioDataUrl, params) => 
   const renderedBuffer = await offlineContext.startRendering();
   const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
   
-  const analysis = `Applied Resonance Alteration: Peaking filter centered at ${centerFrequency.toFixed(2)} Hz, Q=${Q_VALUE}, Gain=${GAIN_VALUE}dB. Original shift param: ${numericFrequencyShift}.`;
+  const analysis = `Applied Resonance Alteration: Peaking filter centered at ${centerFrequency.toFixed(2)} Hz, Q=${Q_VALUE}, Gain=${GAIN_VALUE}dB. Shift param: ${numericFrequencyShift} semitones.`;
   
   await audioContext.close();
 
@@ -134,11 +139,12 @@ const temporalModification: AudioProcessingFunction = async (audioDataUrl, param
   }
 
   // The new duration will be original duration / rate
-  const newDurationInSamples = Math.floor(decodedAudioBuffer.length / rate);
+  // The length of the OfflineAudioContext needs to be adjusted for the new duration
+  const newLengthInSamples = Math.floor(decodedAudioBuffer.length / rate);
 
   const offlineContext = new OfflineAudioContext(
     decodedAudioBuffer.numberOfChannels,
-    newDurationInSamples, // Adjust length of context for the new duration
+    newLengthInSamples, // Use the new calculated length
     decodedAudioBuffer.sampleRate // Sample rate remains the same
   );
 
@@ -147,12 +153,18 @@ const temporalModification: AudioProcessingFunction = async (audioDataUrl, param
   sourceNode.playbackRate.value = rate; // This changes speed and pitch
 
   sourceNode.connect(offlineContext.destination);
-  sourceNode.start(0);
+  sourceNode.start(0); // Start immediately in the offline context
 
+  // If rate > 1 (faster), the source will finish before newLengthInSamples.
+  // If rate < 1 (slower), the source will play longer than its original length,
+  // but will be cut off by newLengthInSamples.
+  // The source duration is effectively audioBuffer.duration / playbackRate.
+  // We are rendering for `newLengthInSamples / sampleRate` seconds.
+  
   const renderedBuffer = await offlineContext.startRendering();
   const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
   
-  const analysis = `Applied Temporal Modification: Playback rate set to ${rate.toFixed(2)}x. Note: This also affects pitch.`;
+  const analysis = `Applied Temporal Modification: Playback rate set to ${rate.toFixed(2)}x. This affects both speed and pitch. New duration: ${(renderedBuffer.duration).toFixed(2)}s.`;
   
   await audioContext.close();
 
@@ -166,8 +178,7 @@ const automatedSweep: AudioProcessingFunction = async (audioDataUrl, params) => 
   const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
   const offlineContext = new OfflineAudioContext(
-    // For StereoPannerNode to work, the context must be stereo (2 channels)
-    2, // Force stereo output
+    2, // StereoPannerNode requires stereo output
     decodedAudioBuffer.length,
     decodedAudioBuffer.sampleRate
   );
@@ -177,24 +188,30 @@ const automatedSweep: AudioProcessingFunction = async (audioDataUrl, params) => 
 
   const pannerNode = offlineContext.createStereoPanner();
 
+  // LFO (Low-Frequency Oscillator) to control the panning
   const lfo = offlineContext.createOscillator();
-  lfo.type = 'sine'; 
-  const sweepSpeed = params.speed || 1; 
+  lfo.type = 'sine'; // Smooth panning motion
+  const sweepSpeed = params.speed || 0.5; // Default sweep speed in Hz (e.g., 0.5 Hz = 2 seconds per full cycle)
   lfo.frequency.setValueAtTime(sweepSpeed, offlineContext.currentTime);
 
+  // GainNode to scale LFO output to -1 to 1 range for pannerNode.pan
   const lfoGain = offlineContext.createGain();
-  lfoGain.gain.value = 1; 
-  
-  lfo.connect(lfoGain);
-  lfoGain.connect(pannerNode.pan);
+  lfoGain.gain.setValueAtTime(1.0, offlineContext.currentTime); // LFO output is -1 to 1, so gain of 1 is fine
 
-  // If original audio is mono, it needs to be upmixed to stereo before panner for effect
+  lfo.connect(lfoGain);
+  lfoGain.connect(pannerNode.pan); // Connect LFO (via gain) to the pan parameter
+
+  // Handle mono or stereo input
   if (decodedAudioBuffer.numberOfChannels === 1) {
+    // If mono, connect source to both inputs of panner to make it effectively dual-mono before panning
+    // This is implicitly handled if source connects directly to panner which upmixes mono.
+    // Or, more explicitly:
     const merger = offlineContext.createChannelMerger(2);
-    sourceNode.connect(merger, 0, 0); // Connect source to left input of merger
-    sourceNode.connect(merger, 0, 1); // Connect source to right input of merger
+    sourceNode.connect(merger, 0, 0); // connect source to left input of merger
+    sourceNode.connect(merger, 0, 1); // connect source to right input of merger (same signal)
     merger.connect(pannerNode);
   } else {
+    // If stereo, connect directly
     sourceNode.connect(pannerNode);
   }
   
@@ -213,6 +230,71 @@ const automatedSweep: AudioProcessingFunction = async (audioDataUrl, params) => 
   return { processedAudioDataUrl, analysis };
 };
 
+const stereoWidener: AudioProcessingFunction = async (audioDataUrl, params) => {
+  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const response = await fetch(audioDataUrl);
+  const arrayBuffer = await response.arrayBuffer();
+  const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+  const widthParam = params.width !== undefined ? params.width : 100; // Default width is 100 (original stereo image)
+  const widthFactor = widthParam / 100.0; // Scale from 0-200 (UI) to 0.0-2.0 (processing factor)
+
+  // Output context will always be stereo for this effect
+  const offlineContext = new OfflineAudioContext(
+    2, // Stereo output
+    decodedAudioBuffer.length,
+    decodedAudioBuffer.sampleRate
+  );
+
+  const inputLChannelData = decodedAudioBuffer.getChannelData(0);
+  // If input is mono, use the same data for the right channel. If stereo, get channel 1.
+  const inputRChannelData = decodedAudioBuffer.numberOfChannels > 1 ? decodedAudioBuffer.getChannelData(1) : inputLChannelData;
+
+  const length = decodedAudioBuffer.length;
+  const processedL = new Float32Array(length);
+  const processedR = new Float32Array(length);
+
+  for (let i = 0; i < length; i++) {
+    const lSample = inputLChannelData[i];
+    const rSample = inputRChannelData[i];
+
+    const midSignal = (lSample + rSample) * 0.5;
+    const sideSignal = (lSample - rSample) * 0.5;
+
+    const newSideSignal = sideSignal * widthFactor;
+
+    let newLSample = midSignal + newSideSignal;
+    let newRSample = midSignal - newSideSignal;
+
+    // Clip samples to prevent exceeding -1.0 to 1.0 range
+    newLSample = Math.max(-1.0, Math.min(1.0, newLSample));
+    newRSample = Math.max(-1.0, Math.min(1.0, newRSample));
+
+    processedL[i] = newLSample;
+    processedR[i] = newRSample;
+  }
+
+  // Create a new AudioBuffer in the offlineContext to hold the processed stereo audio
+  const outputBuffer = offlineContext.createBuffer(2, length, decodedAudioBuffer.sampleRate);
+  outputBuffer.copyToChannel(processedL, 0, 0); // Copy processed left channel data
+  outputBuffer.copyToChannel(processedR, 1, 0); // Copy processed right channel data
+  
+  // "Play" this buffer through the offline context to render it
+  const sourceNode = offlineContext.createBufferSource();
+  sourceNode.buffer = outputBuffer;
+  sourceNode.connect(offlineContext.destination);
+  sourceNode.start(0);
+
+  const renderedBuffer = await offlineContext.startRendering();
+  const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
+  
+  const analysis = `Applied Stereo Widener: Width set to ${widthParam}%. Factor: ${widthFactor.toFixed(2)}.`;
+  
+  await audioContext.close(); // Close the temporary online AudioContext used for decoding
+
+  return { processedAudioDataUrl, analysis };
+};
+
 
 const simulateProcessing = async (audioDataUrl: string, operationName: string, params: Record<string, any>): Promise<{ processedAudioDataUrl: string; analysis?: string }> => {
   console.log(`Simulating ${operationName} with params:`, params);
@@ -225,7 +307,7 @@ export const audioUtils: Record<string, AudioProcessingFunction> = {
   alterResonance: alterResonance,
   temporalModification: temporalModification,
   automatedSweep: automatedSweep,
-  stereoWidener: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Stereo Widener', params),
+  stereoWidener: stereoWidener,
   subharmonicIntensifier: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Subharmonic Intensifier', params),
   frequencySculptor: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Frequency Sculptor', params),
   keyTransposer: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Key Transposer', params),
