@@ -237,7 +237,7 @@ export const effectsList: Effect[] = [
     icon: Shuffle,
     controlType: 'slider',
     parameters: [
-      { name: 'speed', label: 'Sweep Speed', type: 'slider', defaultValue: 1, min: 0.1, max: 5, step: 0.1 }
+      { name: 'speed', label: 'Sweep Speed (Hz)', type: 'slider', defaultValue: 0.5, min: 0.1, max: 5, step: 0.1 }
     ],
     handlerKey: 'automatedSweep',
     groupName: 'Spatial Effects',
@@ -245,20 +245,23 @@ export const effectsList: Effect[] = [
   {
     id: 'channelRouter',
     name: 'Channel Router',
-    description: 'Shift audio from one channel to another (e.g., L to R). Placeholder.',
+    description: 'Shift audio from one channel to another (e.g., L to R). Currently swaps L/R for stereo.',
     icon: GitFork,
     controlType: 'button',
-    actionLabel: 'Configure Routing (Placeholder)',
+    actionLabel: 'Swap L/R Channels',
     handlerKey: 'channelRouter',
     groupName: 'Utility Tools',
   },
   {
     id: 'audioSplitter',
     name: 'Audio Splitter',
-    description: 'Extract sections from an audio file. Placeholder.',
+    description: 'Extract sections from an audio file by specifying start and end times.',
     icon: Scissors,
-    controlType: 'button',
-    actionLabel: 'Split Audio (Placeholder)',
+    controlType: 'group',
+    parameters: [
+      { name: 'startTime', label: 'Start Time (s)', type: 'number_input', defaultValue: 0, min: 0, step: 0.01 },
+      { name: 'endTime', label: 'End Time (s)', type: 'number_input', defaultValue: 5, min: 0, step: 0.01 }
+    ],
     handlerKey: 'audioSplitter',
     groupName: 'Utility Tools',
   },
