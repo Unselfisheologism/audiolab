@@ -22,17 +22,18 @@ import {
   Headphones,
   TrendingDown,
   HelpingHand,
+  CassetteTape, // Added CassetteTape
 } from 'lucide-react';
 
 export const effectsList: Effect[] = [
   // Creative Presets
   {
     id: 'dreamscapeMaker',
-    name: "Lo-fi", // Changed from "Slow 'n Reverb"
+    name: "Lo-fi",
     description: 'Create a slowed and reverb effect for ethereal soundscapes.',
-    icon: Moon,
+    icon: CassetteTape, // Changed from Moon to CassetteTape
     controlType: 'button',
-    actionLabel: "Apply Lo-fi Effect", // Changed from "Apply Slow 'n Reverb"
+    actionLabel: "Apply Lo-fi Effect",
     handlerKey: 'dreamscapeMaker',
     groupName: 'Creative Presets',
   },
@@ -280,3 +281,4 @@ export const fallbackIcon = HelpingHand;
 // - Frequency Visualizer: Component in MainDisplayPanel
 // - Amplitude Plotter: Component in MainDisplayPanel
 // - AI Tools: Removed
+
