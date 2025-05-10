@@ -1,4 +1,5 @@
 
+
 // In a real app, these would interact with Web Audio API or a backend service
 
 export type AudioProcessingFunction = (
@@ -76,6 +77,7 @@ function writeString(view: DataView, offset: number, string: string) {
 
 const alterResonance: AudioProcessingFunction = async (audioDataUrl, params) => {
   const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  await resumeAudioContext(audioContext);
   const response = await fetch(audioDataUrl);
   const arrayBuffer = await response.arrayBuffer();
   const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
@@ -85,6 +87,7 @@ const alterResonance: AudioProcessingFunction = async (audioDataUrl, params) => 
     decodedAudioBuffer.length,
     decodedAudioBuffer.sampleRate
   );
+  await resumeAudioContext(offlineContext);
 
   const sourceNode = offlineContext.createBufferSource();
   sourceNode.buffer = decodedAudioBuffer;
@@ -93,22 +96,18 @@ const alterResonance: AudioProcessingFunction = async (audioDataUrl, params) => 
   filterNode.type = 'peaking'; 
 
   const BASE_PEAKING_FILTER_HZ = 1000; 
-  const Q_VALUE = 1.5; // Slightly broader Q for more noticeable resonance change
-  const GAIN_VALUE_MAX = 12; // Max gain for resonance
+  const Q_VALUE = 1.5; 
+  const GAIN_VALUE_MAX = 12; 
 
   const frequencyShiftParam = params.frequency || 0; 
   const numericFrequencyShift = typeof frequencyShiftParam === 'number' ? frequencyShiftParam : 0;
   
-  // Map semitone shift to gain. More shift = more gain, up to GAIN_VALUE_MAX
-  // Let's make it so 0 shift = 0 gain (no change), and +/-12 semitones = +/-GAIN_VALUE_MAX
   const gain = (numericFrequencyShift / 12) * GAIN_VALUE_MAX;
-
   const centerFrequency = BASE_PEAKING_FILTER_HZ * Math.pow(2, numericFrequencyShift / 12);
   
   filterNode.frequency.setValueAtTime(centerFrequency, offlineContext.currentTime);
   filterNode.Q.setValueAtTime(Q_VALUE, offlineContext.currentTime);
   filterNode.gain.setValueAtTime(gain, offlineContext.currentTime);
-
 
   sourceNode.connect(filterNode);
   filterNode.connect(offlineContext.destination);
@@ -126,6 +125,7 @@ const alterResonance: AudioProcessingFunction = async (audioDataUrl, params) => 
 
 const temporalModification: AudioProcessingFunction = async (audioDataUrl, params) => {
   const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  await resumeAudioContext(audioContext);
   const response = await fetch(audioDataUrl);
   const arrayBuffer = await response.arrayBuffer();
   const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
@@ -143,6 +143,7 @@ const temporalModification: AudioProcessingFunction = async (audioDataUrl, param
     newLengthInSamples, 
     decodedAudioBuffer.sampleRate 
   );
+  await resumeAudioContext(offlineContext);
 
   const sourceNode = offlineContext.createBufferSource();
   sourceNode.buffer = decodedAudioBuffer;
@@ -163,6 +164,7 @@ const temporalModification: AudioProcessingFunction = async (audioDataUrl, param
 
 const automatedSweep: AudioProcessingFunction = async (audioDataUrl, params) => {
   const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  await resumeAudioContext(audioContext);
   const response = await fetch(audioDataUrl);
   const arrayBuffer = await response.arrayBuffer();
   const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
@@ -180,6 +182,7 @@ const automatedSweep: AudioProcessingFunction = async (audioDataUrl, params) => 
     decodedAudioBuffer.length,
     decodedAudioBuffer.sampleRate
   );
+  await resumeAudioContext(offlineContext);
 
   const sourceNode = offlineContext.createBufferSource();
   sourceNode.buffer = decodedAudioBuffer;
@@ -215,6 +218,7 @@ const automatedSweep: AudioProcessingFunction = async (audioDataUrl, params) => 
 
 const stereoWidener: AudioProcessingFunction = async (audioDataUrl, params) => {
   const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  await resumeAudioContext(audioContext);
   const response = await fetch(audioDataUrl);
   const arrayBuffer = await response.arrayBuffer();
   const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
@@ -235,9 +239,10 @@ const stereoWidener: AudioProcessingFunction = async (audioDataUrl, params) => {
     decodedAudioBuffer.length,
     decodedAudioBuffer.sampleRate
   );
+  await resumeAudioContext(offlineContext);
 
   const inputLChannelData = decodedAudioBuffer.getChannelData(0);
-  const inputRChannelData = decodedAudioBuffer.getChannelData(1); // Assume stereo
+  const inputRChannelData = decodedAudioBuffer.getChannelData(1); 
 
   const length = decodedAudioBuffer.length;
   const processedL = new Float32Array(length);
@@ -283,6 +288,7 @@ const stereoWidener: AudioProcessingFunction = async (audioDataUrl, params) => {
 
 const subharmonicIntensifier: AudioProcessingFunction = async (audioDataUrl, params) => {
   const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  await resumeAudioContext(audioContext);
   const response = await fetch(audioDataUrl);
   const arrayBuffer = await response.arrayBuffer();
   const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
@@ -292,6 +298,7 @@ const subharmonicIntensifier: AudioProcessingFunction = async (audioDataUrl, par
     decodedAudioBuffer.length,
     decodedAudioBuffer.sampleRate
   );
+  await resumeAudioContext(offlineContext);
 
   const sourceNode = offlineContext.createBufferSource();
   sourceNode.buffer = decodedAudioBuffer;
@@ -299,12 +306,10 @@ const subharmonicIntensifier: AudioProcessingFunction = async (audioDataUrl, par
   const lowshelfFilter = offlineContext.createBiquadFilter();
   lowshelfFilter.type = 'lowshelf';
   
-  const intensityValue = Number(params.intensity || 0); 
-  // Make the gain more aggressive. Max 24dB boost.
-  const gainDb = (intensityValue / 100) * 24; 
+  const intensityParam = Number(params.intensity || 0); 
+  const gainDb = (intensityParam / 100) * 18; // Max 18dB boost
 
-  // Target deeper lows for subharmonic effect
-  lowshelfFilter.frequency.setValueAtTime(80, offlineContext.currentTime); 
+  lowshelfFilter.frequency.setValueAtTime(80, offlineContext.currentTime); // Target deeper lows
   lowshelfFilter.gain.setValueAtTime(gainDb, offlineContext.currentTime);
 
   sourceNode.connect(lowshelfFilter);
@@ -314,7 +319,7 @@ const subharmonicIntensifier: AudioProcessingFunction = async (audioDataUrl, par
   const renderedBuffer = await offlineContext.startRendering();
   const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
   
-  const analysis = `Applied Subharmonic Intensifier: Low-shelf filter at 80Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityValue}%).`;
+  const analysis = `Applied Subharmonic Intensifier: Low-shelf filter at 80Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityParam}%).`;
   
   await audioContext.close();
 
@@ -323,6 +328,7 @@ const subharmonicIntensifier: AudioProcessingFunction = async (audioDataUrl, par
 
 const frequencySculptor: AudioProcessingFunction = async (audioDataUrl, params) => {
   const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  await resumeAudioContext(audioContext);
   const response = await fetch(audioDataUrl);
   const arrayBuffer = await response.arrayBuffer();
   const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
@@ -332,6 +338,7 @@ const frequencySculptor: AudioProcessingFunction = async (audioDataUrl, params) 
     decodedAudioBuffer.length,
     decodedAudioBuffer.sampleRate
   );
+  await resumeAudioContext(offlineContext);
 
   const sourceNode = offlineContext.createBufferSource();
   sourceNode.buffer = decodedAudioBuffer;
@@ -342,21 +349,20 @@ const frequencySculptor: AudioProcessingFunction = async (audioDataUrl, params) 
 
   const lowFilter = offlineContext.createBiquadFilter();
   lowFilter.type = 'lowshelf';
-  lowFilter.frequency.setValueAtTime(250, offlineContext.currentTime); // Typical low-shelf crossover
+  lowFilter.frequency.setValueAtTime(250, offlineContext.currentTime);
   lowFilter.gain.setValueAtTime(lowGain, offlineContext.currentTime);
 
   const midFilter = offlineContext.createBiquadFilter();
   midFilter.type = 'peaking';
-  midFilter.frequency.setValueAtTime(1000, offlineContext.currentTime); // Typical mid frequency
-  midFilter.Q.setValueAtTime(1, offlineContext.currentTime); // Standard Q value
+  midFilter.frequency.setValueAtTime(1000, offlineContext.currentTime);
+  midFilter.Q.setValueAtTime(1, offlineContext.currentTime); 
   midFilter.gain.setValueAtTime(midGain, offlineContext.currentTime);
 
   const highFilter = offlineContext.createBiquadFilter();
   highFilter.type = 'highshelf';
-  highFilter.frequency.setValueAtTime(4000, offlineContext.currentTime); // Typical high-shelf crossover
+  highFilter.frequency.setValueAtTime(4000, offlineContext.currentTime); 
   highFilter.gain.setValueAtTime(highGain, offlineContext.currentTime);
 
-  // Connect nodes in series: source -> low -> mid -> high -> destination
   sourceNode.connect(lowFilter);
   lowFilter.connect(midFilter);
   midFilter.connect(highFilter);
@@ -369,6 +375,47 @@ const frequencySculptor: AudioProcessingFunction = async (audioDataUrl, params) 
 
   const analysis = `Applied Frequency Sculptor: Low: ${lowGain}dB @ 250Hz (Shelf), Mid: ${midGain}dB @ 1000Hz (Peak), High: ${highGain}dB @ 4000Hz (Shelf).`;
 
+  await audioContext.close();
+  return { processedAudioDataUrl, analysis };
+};
+
+const keyTransposer: AudioProcessingFunction = async (audioDataUrl, params) => {
+  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  await resumeAudioContext(audioContext);
+  const response = await fetch(audioDataUrl);
+  const arrayBuffer = await response.arrayBuffer();
+  const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+  const semitones = Number(params.semitones || 0);
+  const playbackRate = Math.pow(2, semitones / 12);
+
+  if (playbackRate <= 0) {
+    await audioContext.close();
+    throw new Error("Playback rate (derived from semitones) must be greater than 0.");
+  }
+  
+  // Adjust the length of the offline context based on the playback rate
+  const newLengthInSamples = Math.floor(decodedAudioBuffer.length / playbackRate);
+
+  const offlineContext = new OfflineAudioContext(
+    decodedAudioBuffer.numberOfChannels,
+    newLengthInSamples,
+    decodedAudioBuffer.sampleRate
+  );
+  await resumeAudioContext(offlineContext);
+
+  const sourceNode = offlineContext.createBufferSource();
+  sourceNode.buffer = decodedAudioBuffer;
+  sourceNode.playbackRate.value = playbackRate;
+
+  sourceNode.connect(offlineContext.destination);
+  sourceNode.start(0);
+
+  const renderedBuffer = await offlineContext.startRendering();
+  const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
+
+  const analysis = `Applied Key Transposer: Shifted by ${semitones} semitones. Playback rate: ${playbackRate.toFixed(3)}x. This also affects tempo. New duration: ${(renderedBuffer.duration).toFixed(2)}s.`;
+  
   await audioContext.close();
   return { processedAudioDataUrl, analysis };
 };
@@ -388,7 +435,7 @@ export const audioUtils: Record<string, AudioProcessingFunction> = {
   stereoWidener: stereoWidener,
   subharmonicIntensifier: subharmonicIntensifier,
   frequencySculptor: frequencySculptor,
-  keyTransposer: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Key Transposer', params),
+  keyTransposer: keyTransposer,
   echoGenerator: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Echo Generator', params),
   reversePlayback: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Reverse Playback', params),
   channelRouter: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Channel Router', params),
@@ -427,7 +474,7 @@ export const fileToDataUrl = (file: File): Promise<string> => {
 };
 
 // Helper to ensure AudioContext is resumed if it's suspended
-export const resumeAudioContext = async (audioContext: AudioContext | OfflineAudioContext) => {
+export const resumeAudioContext = async (audioContext: AudioContext | OfflineAudioContext | null) => {
   if (audioContext instanceof AudioContext && audioContext.state === 'suspended') {
     try {
       await audioContext.resume();
