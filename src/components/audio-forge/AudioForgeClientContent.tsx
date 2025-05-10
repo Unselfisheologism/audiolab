@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
@@ -6,7 +5,7 @@ import { AppHeader } from './AppHeader';
 import { AudioControlsPanel } from './AudioControlsPanel';
 import { MainDisplayPanel } from './MainDisplayPanel';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import type { EffectSettings } from '@/types/audio-forge';
 import { useToast } from '@/hooks/use-toast';
 import { audioUtils, fileToDataUrl } from '@/lib/audio-utils';
@@ -21,6 +20,7 @@ export default function AudioForgeClientContent() {
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   const [analysisSourceEffectId, setAnalysisSourceEffectId] = useState<string | null>(null);
   
+  const [originalAudioBuffer, setOriginalAudioBuffer] = useState<AudioBuffer | null>(null);
   const [processedAudioBuffer, setProcessedAudioBuffer] = useState<AudioBuffer | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const isMobile = useIsMobile();
@@ -45,9 +45,9 @@ export default function AudioForgeClientContent() {
     }
   }, []);
 
-  const loadAudioBufferForVisualizer = useCallback(async (dataUrl: string | null) => {
+  const loadAudioBuffer = useCallback(async (dataUrl: string | null, setBuffer: React.Dispatch<React.SetStateAction<AudioBuffer | null>>) => {
     if (!dataUrl || !audioContextRef.current) {
-      setProcessedAudioBuffer(null);
+      setBuffer(null);
       return;
     }
     try {
@@ -57,17 +57,21 @@ export default function AudioForgeClientContent() {
          console.warn("AudioContext was closed, reinitializing for visualizer.");
          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
       }
-      const audioBuffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
-      setProcessedAudioBuffer(audioBuffer);
+      const audioBufferInstance = await audioContextRef.current.decodeAudioData(arrayBuffer);
+      setBuffer(audioBufferInstance);
     } catch (error) {
       console.error("Error decoding audio data for visualizer:", error);
-      setProcessedAudioBuffer(null);
+      setBuffer(null);
     }
   }, []); 
 
   useEffect(() => {
-    loadAudioBufferForVisualizer(processedAudioDataUrl);
-  }, [processedAudioDataUrl, loadAudioBufferForVisualizer]);
+    loadAudioBuffer(originalAudioDataUrl, setOriginalAudioBuffer);
+  }, [originalAudioDataUrl, loadAudioBuffer]);
+
+  useEffect(() => {
+    loadAudioBuffer(processedAudioDataUrl, setProcessedAudioBuffer);
+  }, [processedAudioDataUrl, loadAudioBuffer]);
 
 
   const handleFileSelect = useCallback(async (file: File | null) => {
@@ -94,9 +98,10 @@ export default function AudioForgeClientContent() {
       setProcessedAudioDataUrl(null);
       setAnalysisResult(null);
       setAnalysisSourceEffectId(null);
+      setOriginalAudioBuffer(null);
       setProcessedAudioBuffer(null); 
     }
-  }, [toast]);
+  }, [toast, loadAudioBuffer]);
 
   const handleParameterChange = useCallback((effectId: string, paramName: string, value: any) => {
     setEffectSettings(prev => ({
@@ -176,7 +181,8 @@ export default function AudioForgeClientContent() {
   const mainDisplayPanelProps = {
     originalAudioDataUrl: originalAudioDataUrl,
     processedAudioDataUrl: processedAudioDataUrl,
-    audioBuffer: processedAudioBuffer,
+    originalAudioBuffer: originalAudioBuffer,
+    processedAudioBuffer: processedAudioBuffer,
     onExport: handleExport,
     isLoading: isLoading,
     analysisResult: analysisResult,
@@ -198,7 +204,9 @@ export default function AudioForgeClientContent() {
             </div>
             <Sheet open={isEffectsSheetOpen} onOpenChange={setIsEffectsSheetOpen}>
               <SheetContent side="left" className="w-[85vw] max-w-md p-0 flex flex-col">
-                <SheetTitle className="sr-only">Audio Effects Panel</SheetTitle>
+                <SheetHeader className="p-4 border-b">
+                  <SheetTitle>Audio Effects</SheetTitle>
+                </SheetHeader>
                 <AudioControlsPanel {...audioControlsPanelProps} />
               </SheetContent>
             </Sheet>

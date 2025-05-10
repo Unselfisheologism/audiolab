@@ -1,4 +1,3 @@
-
 'use client';
 import React, { useState } from 'react';
 import { AudioPlayer } from './AudioPlayer';
@@ -14,7 +13,8 @@ import { effectsList } from '@/app/audio-forge/effects';
 interface MainDisplayPanelProps {
   originalAudioDataUrl: string | null;
   processedAudioDataUrl: string | null;
-  audioBuffer: AudioBuffer | null; 
+  originalAudioBuffer: AudioBuffer | null; 
+  processedAudioBuffer: AudioBuffer | null; 
   onExport: (format: string, quality: string) => void;
   isLoading: boolean;
   analysisResult: string | null;
@@ -25,26 +25,26 @@ interface MainDisplayPanelProps {
 export function MainDisplayPanel({
   originalAudioDataUrl,
   processedAudioDataUrl,
-  audioBuffer,
+  originalAudioBuffer,
+  processedAudioBuffer,
   onExport,
   isLoading,
   analysisResult,
   analysisSourceEffectId,
   originalFileName
 }: MainDisplayPanelProps) {
+  const [isOriginalAudioPlaying, setIsOriginalAudioPlaying] = useState(false);
   const [isProcessedAudioPlaying, setIsProcessedAudioPlaying] = useState(false);
 
   const shouldShowGlobalAnalysisReport = () => {
     if (!analysisResult) return false;
-    if (!analysisSourceEffectId) return true; // Generic analysis, show it
+    if (!analysisSourceEffectId) return true; 
     
     const effect = effectsList.find(e => e.id === analysisSourceEffectId);
-    // If the effect that produced the analysis is configured to show its own report (outputsAnalysis is true),
-    // then the global report should NOT show it.
     if (effect && effect.outputsAnalysis) {
       return false;
     }
-    return true; // Otherwise, show it (e.g. analysis from a tool not in its card)
+    return true; 
   };
 
 
@@ -52,7 +52,12 @@ export function MainDisplayPanel({
     <ScrollArea className="h-full p-4">
       <div className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <AudioPlayer title="Original Audio" audioSrc={originalAudioDataUrl} fileName={originalFileName ? `original_${originalFileName}` : "original_audio.wav"} />
+          <AudioPlayer 
+            title="Original Audio" 
+            audioSrc={originalAudioDataUrl} 
+            fileName={originalFileName ? `original_${originalFileName}` : "original_audio.wav"}
+            onPlayStateChange={setIsOriginalAudioPlaying}
+          />
           <AudioPlayer 
             title="Processed Audio" 
             audioSrc={processedAudioDataUrl} 
@@ -62,7 +67,9 @@ export function MainDisplayPanel({
         </div>
         
         <VisualizerSection 
-          audioBuffer={audioBuffer} 
+          originalAudioBuffer={originalAudioBuffer}
+          processedAudioBuffer={processedAudioBuffer} 
+          isOriginalAudioPlaying={isOriginalAudioPlaying}
           isProcessedAudioPlaying={isProcessedAudioPlaying}
         />
 
