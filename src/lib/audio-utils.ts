@@ -1,5 +1,7 @@
 
 // @ts-nocheck
+import type { EffectSettings } from '@/types/audio-forge';
+
 // Helper function to convert ArrayBuffer to Base64 Data URL
 export async function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -239,12 +241,12 @@ export const audioUtils = {
   },
   
   subharmonicIntensifier: async (audioDataUrl: string, { intensity: intensityParam }: { intensity: number }) => {
-    const gainDb = (intensityParam / 100) * 12; 
+    const gainDb = (intensityParam / 100) * 12;
     return processAudioWithEffect(audioDataUrl, (offlineContext, sourceNode, decodedAudioBuffer) => {
       const lowshelfFilter = offlineContext.createBiquadFilter();
       lowshelfFilter.type = 'lowshelf';
-      lowshelfFilter.frequency.value = 120;
-      lowshelfFilter.gain.value = gainDb;
+      lowshelfFilter.frequency.value = 120; // Target low frequencies
+      lowshelfFilter.gain.value = gainDb; // Apply gain
       return [lowshelfFilter];
     }, `Applied Subharmonic Intensifier: Low-shelf filter at 120Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityParam}%).`);
   },
@@ -497,9 +499,8 @@ export const audioUtils = {
         return { processedAudioDataUrl: audioDataUrl, analysis: "BPM: N/A\nInterval: N/A (No intervals)" };
       }
 
-      // More robust BPM estimation: find most common interval
       const intervalCounts: { [key: string]: number } = {};
-      const intervalPrecision = 0.01; // Group intervals into bins of 10ms
+      const intervalPrecision = 0.01; 
 
       intervalsInSeconds.forEach(interval => {
         const bin = (Math.round(interval / intervalPrecision) * intervalPrecision).toFixed(2);
@@ -515,16 +516,13 @@ export const audioUtils = {
         }
       }
       
-      // Heuristic to ensure interval is within a plausible musical range (e.g., 40-240 BPM)
-      // Interval = 60 / BPM. So for 40 BPM, interval = 1.5s. For 240 BPM, interval = 0.25s.
-      if (mostCommonIntervalSec <= 0 || mostCommonIntervalSec < 60/240 || mostCommonIntervalSec > 60/40 ) { // If outside 0.25s - 1.5s
-        // Try to find a plausible interval if the most common one is out of range
+      if (mostCommonIntervalSec <= 0 || mostCommonIntervalSec < 60/240 || mostCommonIntervalSec > 60/40 ) { 
         let plausibleInterval = 0;
         let highestPlausibleCount = 0;
 
         for (const intervalStr in intervalCounts) {
             const currentInterval = parseFloat(intervalStr);
-            if (currentInterval >= 60/240 && currentInterval <= 60/40) { // Check if within plausible range
+            if (currentInterval >= 60/240 && currentInterval <= 60/40) { 
                 if (intervalCounts[intervalStr] > highestPlausibleCount) {
                     highestPlausibleCount = intervalCounts[intervalStr];
                     plausibleInterval = currentInterval;
@@ -534,20 +532,15 @@ export const audioUtils = {
         if (plausibleInterval > 0) {
             mostCommonIntervalSec = plausibleInterval;
         } else {
-            // If no single interval is plausible, attempt halving/doubling the original most common.
-            // This is a very basic heuristic.
-            if (mostCommonIntervalSec > 0) { // ensure it's not zero from start
+            if (mostCommonIntervalSec > 0) { 
                 if (mostCommonIntervalSec * 2 >= 60/240 && mostCommonIntervalSec * 2 <= 60/40) mostCommonIntervalSec *=2;
                 else if (mostCommonIntervalSec / 2 >= 60/240 && mostCommonIntervalSec / 2 <= 60/40) mostCommonIntervalSec /=2;
             }
-
-            // If still out of range or zero, consider it undetermined
             if (mostCommonIntervalSec <= 0 || mostCommonIntervalSec < 60/240 || mostCommonIntervalSec > 60/40) {
                  return { processedAudioDataUrl: audioDataUrl, analysis: "BPM: N/A\nInterval: N/A (No consistent beat in typical range)" };
             }
         }
       }
-
 
       const bpm = 60 / mostCommonIntervalSec;
       const analysis = `BPM: ${bpm.toFixed(1)}\nInterval: ${mostCommonIntervalSec.toFixed(2)}s`;
@@ -573,19 +566,43 @@ export const audioUtils = {
     return { ...result, analysis: `Tuned to 432Hz (shifted by approx. ${semitones.toFixed(2)} semitones from 440Hz standard).` };
   },
 
-  subtleSubwoofer: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 35 }), 
-  gentleBassBoost: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 40 }),
-  mediumBassEnhancement: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 60 }),
-  intenseBassAmplifier: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 80 }),
-  maximumBassOverdrive: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 100 }),
+  subtleSubwoofer: async (audioDataUrl: string, params: EffectSettings) => { // Note: params is ignored by this preset logic
+    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 35 });
+  },
+  gentleBassBoost: async (audioDataUrl: string, params: EffectSettings) => {
+    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 40 });
+  },
+  mediumBassEnhancement: async (audioDataUrl: string, params: EffectSettings) => {
+    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 60 });
+  },
+  intenseBassAmplifier: async (audioDataUrl: string, params: EffectSettings) => {
+    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 80 });
+  },
+  maximumBassOverdrive: async (audioDataUrl: string, params: EffectSettings) => {
+    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 100 });
+  },
 
-  vocalAmbience: (d, p) => audioUtils.echoGenerator(d, { delay: 80, feedback: 0.2, mix: 0.2 }),
-  washroomEcho: (d, p) => audioUtils.echoGenerator(d, { delay: 150, feedback: 0.5, mix: 0.4 }),
-  compactRoomReflector: (d, p) => audioUtils.echoGenerator(d, { delay: 100, feedback: 0.3, mix: 0.25 }),
-  averageRoomReverberator: (d, p) => audioUtils.echoGenerator(d, { delay: 250, feedback: 0.4, mix: 0.3 }),
-  grandRoomReverb: (d, p) => audioUtils.echoGenerator(d, { delay: 400, feedback: 0.45, mix: 0.35 }),
-  chapelEchoes: (d, p) => audioUtils.echoGenerator(d, { delay: 600, feedback: 0.5, mix: 0.3 }),
-  cathedralAcoustics: (d, p) => audioUtils.echoGenerator(d, { delay: 800, feedback: 0.55, mix: 0.25 }),
+  vocalAmbience: async (audioDataUrl: string, params: EffectSettings) => {
+    return audioUtils.echoGenerator(audioDataUrl, { delay: 80, feedback: 0.2, mix: 0.2 });
+  },
+  washroomEcho: async (audioDataUrl: string, params: EffectSettings) => {
+    return audioUtils.echoGenerator(audioDataUrl, { delay: 150, feedback: 0.5, mix: 0.4 });
+  },
+  compactRoomReflector: async (audioDataUrl: string, params: EffectSettings) => {
+    return audioUtils.echoGenerator(audioDataUrl, { delay: 100, feedback: 0.3, mix: 0.25 });
+  },
+  averageRoomReverberator: async (audioDataUrl: string, params: EffectSettings) => {
+    return audioUtils.echoGenerator(audioDataUrl, { delay: 250, feedback: 0.4, mix: 0.3 });
+  },
+  grandRoomReverb: async (audioDataUrl: string, params: EffectSettings) => {
+    return audioUtils.echoGenerator(audioDataUrl, { delay: 400, feedback: 0.45, mix: 0.35 });
+  },
+  chapelEchoes: async (audioDataUrl: string, params: EffectSettings) => {
+    return audioUtils.echoGenerator(audioDataUrl, { delay: 600, feedback: 0.5, mix: 0.3 });
+  },
+  cathedralAcoustics: async (audioDataUrl: string, params: EffectSettings) => {
+    return audioUtils.echoGenerator(audioDataUrl, { delay: 800, feedback: 0.55, mix: 0.25 });
+  },
 
   automatedSweep: async (audioDataUrl: string, { speed }: { speed: number }) => {
      return processAudioWithEffect(audioDataUrl, (context, sourceNode, buffer) => {
@@ -669,7 +686,7 @@ export const audioUtils = {
 
     const renderedBuffer = await offlineContext.startRendering();
     
-    if (renderedBuffer.duration < 0.001) { // Check actual rendered duration
+    if (renderedBuffer.duration < 0.001) { 
          return {
             processedAudioDataUrl: audioDataUrl, 
             analysis: `Audio Splitter: Extracted segment from ${sTimeSeconds.toFixed(2)}s to ${eTimeSeconds.toFixed(2)}s resulted in an empty audio clip. Original audio duration: ${originalDurationSeconds.toFixed(2)}s. No changes made.`
@@ -693,5 +710,3 @@ export const audioUtils = {
     }, `Spatial Audio Effect: Pan set to ${((depth - 50) / 50).toFixed(2)}. Output will be stereo.`, 2); 
   },
 };
-
-    
