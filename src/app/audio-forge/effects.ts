@@ -266,17 +266,6 @@ export const effectsList: Effect[] = [
     groupName: 'Utility Tools',
   },
   {
-    id: 'voiceExtractor',
-    name: 'Voice Extractor',
-    description: 'Attempts to isolate vocals by focusing on center-panned audio and typical vocal frequencies. Results vary.',
-    icon: Mic,
-    controlType: 'button',
-    actionLabel: 'Extract Vocals',
-    handlerKey: 'voiceExtractor',
-    groupName: 'Utility Tools',
-    outputsAnalysis: true, 
-  },
-  {
     id: 'channelCompressor',
     name: 'Channel Compressor',
     description: 'Decrease channel count (e.g., stereo to mono). Placeholder.',

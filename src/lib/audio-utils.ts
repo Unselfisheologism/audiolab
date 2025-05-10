@@ -583,61 +583,6 @@ export const audioUtils = {
       analysis: analysisMessage
     };
   },
-
-  voiceExtractor: async (audioDataUrl: string, params: {}) => {
-    const audioContext = getGlobalAudioContext();
-    if (!audioContext) throw new Error("AudioContext not supported");
-
-    const arrayBuffer = await dataUrlToArrayBuffer(audioDataUrl);
-    const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-    const numChannels = decodedAudioBuffer.numberOfChannels;
-    const length = decodedAudioBuffer.length;
-    const sampleRate = decodedAudioBuffer.sampleRate;
-
-    let analysisMessage: string;
-
-    // Output will be mono
-    const offlineContext = new OfflineAudioContext(1, length, sampleRate);
-    const sourceNode = offlineContext.createBufferSource();
-    sourceNode.buffer = decodedAudioBuffer;
-
-    // Create a high-pass filter to cut lows (e.g., rumble, some non-vocal bass)
-    const highPassFilter = offlineContext.createBiquadFilter();
-    highPassFilter.type = 'highpass';
-    highPassFilter.frequency.setValueAtTime(100, offlineContext.currentTime); // Cut frequencies below 100Hz
-    highPassFilter.Q.setValueAtTime(0.7071, offlineContext.currentTime); // Butterworth Q for flat passband
-
-
-    // Create a low-pass filter to cut highs (e.g., cymbals, some instrumental shimmer)
-    const lowPassFilter = offlineContext.createBiquadFilter();
-    lowPassFilter.type = 'lowpass';
-    lowPassFilter.frequency.setValueAtTime(10000, offlineContext.currentTime); // Cut frequencies above 10kHz
-    lowPassFilter.Q.setValueAtTime(0.7071, offlineContext.currentTime); // Butterworth Q
-
-
-    // Connect the nodes: source -> highPass -> lowPass -> destination
-    // If the original audio is mono, it will pass through the filters.
-    // If the original audio is stereo, connecting it to the mono offlineContext's destination
-    // effectively downmixes it to (L+R)/2. This downmixed (center) signal is then filtered.
-    sourceNode.connect(highPassFilter);
-    highPassFilter.connect(lowPassFilter);
-    lowPassFilter.connect(offlineContext.destination);
-    
-    sourceNode.start(0);
-    
-    const renderedBuffer = await offlineContext.startRendering();
-    const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
-    
-    if (numChannels === 1) {
-        analysisMessage = "Voice Extractor: Input audio is mono. Applied band-pass filter (approx. 100Hz-10kHz) to emphasize typical vocal frequencies. True vocal isolation from mono audio is complex and this method has limitations.";
-    } else {
-        analysisMessage = "Voice Extractor: Attempted center channel extraction with band-pass filtering (approx. 100Hz-10kHz). This basic method aims to isolate centrally panned vocals by downmixing to mono and filtering. Results vary greatly; other centered instruments (e.g., bass, kick, snare) or wide stereo vocals might still be present or affected.";
-    }
-    
-    return { processedAudioDataUrl, analysis: analysisMessage };
-  },
-
-
   channelCompressor: async (audioDataUrl: string, { channels }: { channels: 'mono' | 'stereo' }) => {
     if (channels === 'stereo') { 
       return { processedAudioDataUrl: audioDataUrl, analysis: "Channel Compressor: Stereo passthrough requested. No changes made if already stereo or more channels. Mono audio will remain mono." };
