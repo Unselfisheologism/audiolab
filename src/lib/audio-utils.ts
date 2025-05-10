@@ -1,5 +1,6 @@
 
 
+
 // In a real app, these would interact with Web Audio API or a backend service
 
 export type AudioProcessingFunction = (
@@ -136,6 +137,7 @@ const temporalModification: AudioProcessingFunction = async (audioDataUrl, param
     throw new Error("Playback rate must be greater than 0.");
   }
 
+  // Adjust length of OfflineAudioContext based on new playback rate
   const newLengthInSamples = Math.floor(decodedAudioBuffer.length / rate);
 
   const offlineContext = new OfflineAudioContext(
@@ -195,7 +197,7 @@ const automatedSweep: AudioProcessingFunction = async (audioDataUrl, params) => 
   lfo.frequency.setValueAtTime(sweepSpeed, offlineContext.currentTime);
 
   const lfoGain = offlineContext.createGain();
-  lfoGain.gain.setValueAtTime(1.0, offlineContext.currentTime); 
+  lfoGain.gain.setValueAtTime(1.0, offlineContext.currentTime); // Panner expects -1 to 1
 
   lfo.connect(lfoGain);
   lfoGain.connect(pannerNode.pan); 
@@ -232,34 +234,40 @@ const stereoWidener: AudioProcessingFunction = async (audioDataUrl, params) => {
   }
 
   const widthParam = params.width !== undefined ? Number(params.width) : 100; 
-  const widthFactor = widthParam / 100.0; 
+  const widthFactor = widthParam / 100.0; // Convert percentage to factor
 
   const offlineContext = new OfflineAudioContext(
-    2, 
+    2, // Ensure output is stereo
     decodedAudioBuffer.length,
     decodedAudioBuffer.sampleRate
   );
   await resumeAudioContext(offlineContext);
 
+  // Get channel data. For stereo widener, we specifically operate on L and R.
   const inputLChannelData = decodedAudioBuffer.getChannelData(0);
-  const inputRChannelData = decodedAudioBuffer.getChannelData(1); 
+  const inputRChannelData = decodedAudioBuffer.getChannelData(1); // Assuming channel 1 is Right
 
   const length = decodedAudioBuffer.length;
   const processedL = new Float32Array(length);
   const processedR = new Float32Array(length);
 
+  // M/S processing for stereo width
   for (let i = 0; i < length; i++) {
     const lSample = inputLChannelData[i];
     const rSample = inputRChannelData[i];
 
+    // Mid = (L+R)/2, Side = (L-R)/2
     const midSignal = (lSample + rSample) * 0.5;
     const sideSignal = (lSample - rSample) * 0.5;
 
+    // Adjust side signal based on widthFactor
     const newSideSignal = sideSignal * widthFactor;
 
+    // New L = Mid + NewSide, New R = Mid - NewSide
     let newLSample = midSignal + newSideSignal;
     let newRSample = midSignal - newSideSignal;
 
+    // Basic clipping to prevent overload, more sophisticated limiting might be needed
     newLSample = Math.max(-1.0, Math.min(1.0, newLSample));
     newRSample = Math.max(-1.0, Math.min(1.0, newRSample));
 
@@ -268,9 +276,10 @@ const stereoWidener: AudioProcessingFunction = async (audioDataUrl, params) => {
   }
 
   const outputBuffer = offlineContext.createBuffer(2, length, decodedAudioBuffer.sampleRate);
-  outputBuffer.copyToChannel(processedL, 0, 0); 
-  outputBuffer.copyToChannel(processedR, 1, 0); 
+  outputBuffer.copyToChannel(processedL, 0, 0); // Copy to channel 0 (Left)
+  outputBuffer.copyToChannel(processedR, 1, 0); // Copy to channel 1 (Right)
   
+  // Use a BufferSource to play the processed buffer through the OfflineAudioContext
   const sourceNode = offlineContext.createBufferSource();
   sourceNode.buffer = outputBuffer;
   sourceNode.connect(offlineContext.destination);
@@ -307,7 +316,8 @@ const subharmonicIntensifier: AudioProcessingFunction = async (audioDataUrl, par
   lowshelfFilter.type = 'lowshelf';
   
   const intensityParam = Number(params.intensity || 0); 
-  const gainDb = (intensityParam / 100) * 18; // Max 18dB boost, adjustable
+  // Convert intensity (0-100) to dB gain (0 to +18dB, for example)
+  const gainDb = (intensityParam / 100) * 18; 
 
   lowshelfFilter.frequency.setValueAtTime(120, offlineContext.currentTime); // Boost frequencies below 120Hz
   lowshelfFilter.gain.setValueAtTime(gainDb, offlineContext.currentTime);
@@ -359,7 +369,7 @@ const frequencySculptor: AudioProcessingFunction = async (audioDataUrl, params) 
   const midFilter = offlineContext.createBiquadFilter();
   midFilter.type = 'peaking';
   midFilter.frequency.setValueAtTime(1000, offlineContext.currentTime); // Target mid frequencies
-  midFilter.Q.setValueAtTime(1, offlineContext.currentTime); 
+  midFilter.Q.setValueAtTime(1, offlineContext.currentTime); // Moderate Q for general shaping
   midFilter.gain.setValueAtTime(midGain, offlineContext.currentTime);
 
   const highFilter = offlineContext.createBiquadFilter();
@@ -392,6 +402,7 @@ const keyTransposer: AudioProcessingFunction = async (audioDataUrl, params) => {
   const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
   const semitones = Number(params.semitones || 0);
+  // Transposing by N semitones changes playback rate by 2^(N/12)
   const playbackRate = Math.pow(2, semitones / 12);
 
   if (playbackRate <= 0) {
@@ -399,6 +410,7 @@ const keyTransposer: AudioProcessingFunction = async (audioDataUrl, params) => {
     throw new Error("Playback rate (derived from semitones) must be greater than 0.");
   }
   
+  // Adjust length of OfflineAudioContext based on new playback rate
   const newLengthInSamples = Math.floor(decodedAudioBuffer.length / playbackRate);
 
   const offlineContext = new OfflineAudioContext(
@@ -449,6 +461,8 @@ const paceAdjuster: AudioProcessingFunction = async (audioDataUrl, params) => {
 
   const sourceNode = offlineContext.createBufferSource();
   sourceNode.buffer = decodedAudioBuffer;
+  // For simple pace adjustment that also affects pitch, playbackRate is used.
+  // True time-stretching without pitch change requires more complex algorithms (e.g., Phase Vocoder).
   sourceNode.playbackRate.value = tempoAdjust;
 
   sourceNode.connect(offlineContext.destination);
@@ -473,7 +487,8 @@ const echoGenerator: AudioProcessingFunction = async (audioDataUrl, params) => {
   const offlineContext = new OfflineAudioContext(
     decodedAudioBuffer.numberOfChannels,
     // Extend duration to accommodate delay tail. Max delay 1s + original duration.
-    decodedAudioBuffer.length + decodedAudioBuffer.sampleRate * 2, // Max delay 2s
+    // Max delay is 2 seconds in DelayNode, add buffer for it.
+    decodedAudioBuffer.length + decodedAudioBuffer.sampleRate * 2, 
     decodedAudioBuffer.sampleRate
   );
   await resumeAudioContext(offlineContext);
@@ -483,7 +498,7 @@ const echoGenerator: AudioProcessingFunction = async (audioDataUrl, params) => {
 
   const delayTimeMs = Number(params.delay || 300);
   const feedbackAmount = Number(params.feedback || 0.5);
-  const mixAmount = Number(params.mix || 0.5);
+  const mixAmount = Number(params.mix || 0.5); // Wet/dry mix
 
   const delayNode = offlineContext.createDelay(2.0); // Max delay time 2 seconds
   delayNode.delayTime.setValueAtTime(delayTimeMs / 1000, offlineContext.currentTime);
@@ -533,18 +548,20 @@ const reversePlayback: AudioProcessingFunction = async (audioDataUrl, params) =>
   const offlineContext = new OfflineAudioContext(numChannels, length, sampleRate);
   await resumeAudioContext(offlineContext);
   
+  // Create a new buffer to hold the reversed audio data
   const reversedBuffer = offlineContext.createBuffer(numChannels, length, sampleRate);
 
   for (let channel = 0; channel < numChannels; channel++) {
     const originalChannelData = decodedAudioBuffer.getChannelData(channel);
     const reversedChannelData = reversedBuffer.getChannelData(channel);
+    // Copy data in reverse order
     for (let i = 0; i < length; i++) {
       reversedChannelData[i] = originalChannelData[length - 1 - i];
     }
   }
   
   const sourceNode = offlineContext.createBufferSource();
-  sourceNode.buffer = reversedBuffer;
+  sourceNode.buffer = reversedBuffer; // Use the reversed buffer
   sourceNode.connect(offlineContext.destination);
   sourceNode.start(0);
 
@@ -554,6 +571,48 @@ const reversePlayback: AudioProcessingFunction = async (audioDataUrl, params) =>
   const analysis = `Applied Reverse Playback: Audio has been reversed.`;
   
   await audioContext.close();
+  return { processedAudioDataUrl, analysis };
+};
+
+const gainController: AudioProcessingFunction = async (audioDataUrl, params) => {
+  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  await resumeAudioContext(audioContext);
+  const response = await fetch(audioDataUrl);
+  const arrayBuffer = await response.arrayBuffer();
+  const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+  const offlineContext = new OfflineAudioContext(
+    decodedAudioBuffer.numberOfChannels,
+    decodedAudioBuffer.length,
+    decodedAudioBuffer.sampleRate
+  );
+  await resumeAudioContext(offlineContext);
+
+  const sourceNode = offlineContext.createBufferSource();
+  sourceNode.buffer = decodedAudioBuffer;
+
+  const gainNode = offlineContext.createGain();
+  
+  const gainDb = Number(params.gain || 0); 
+  const linearGain = Math.pow(10, gainDb / 20); // Convert dB to linear gain
+
+  gainNode.gain.setValueAtTime(linearGain, offlineContext.currentTime);
+
+  // Connect the nodes
+  sourceNode.connect(gainNode);
+  gainNode.connect(offlineContext.destination);
+
+  // Start the source node
+  sourceNode.start(0);
+
+  // Render the audio
+  const renderedBuffer = await offlineContext.startRendering();
+  const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
+  
+  const analysis = `Applied Gain Controller: Gain set to ${gainDb.toFixed(1)}dB (Linear gain: ${linearGain.toFixed(3)}).`;
+  
+  await audioContext.close();
+
   return { processedAudioDataUrl, analysis };
 };
 
@@ -576,10 +635,10 @@ export const audioUtils: Record<string, AudioProcessingFunction> = {
   paceAdjuster: paceAdjuster,
   echoGenerator: echoGenerator,
   reversePlayback: reversePlayback,
+  gainController: gainController,
   channelRouter: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Channel Router', params),
   audioSplitter: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Audio Splitter', params),
   voiceExtractor: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Voice Extractor', params),
-  gainController: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Gain Controller', params),
   rhythmDetector: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Rhythm Detector', { ...params, analysis: "Detected BPM: 120 (placeholder)" }),
   channelCompressor: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Channel Compressor', params),
   spatialAudioEffect: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Spatial Audio Effect', params),
@@ -621,3 +680,4 @@ export const resumeAudioContext = async (audioContext: AudioContext | OfflineAud
     }
   }
 };
+
