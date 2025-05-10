@@ -160,9 +160,9 @@ export const audioUtils = {
       const biquadFilter = context.createBiquadFilter();
       biquadFilter.type = 'peaking';
       const filterFreq = Math.max(20, 1000 + (frequency * 40)); 
-      biquadFilter.frequency.setValueAtTime(filterFreq, 0); // Use time 0
-      biquadFilter.Q.setValueAtTime(1.5, 0); // Use time 0
-      biquadFilter.gain.setValueAtTime(frequency, 0); // Use time 0
+      biquadFilter.frequency.value = filterFreq;
+      biquadFilter.Q.value = 1.5;
+      biquadFilter.gain.value = frequency;
       return [biquadFilter];
     }, `Altered resonance: Peaking filter with ${frequency}dB gain around ${ (1000 + (frequency * 40)).toFixed(0) }Hz.`);
   },
@@ -187,7 +187,7 @@ export const audioUtils = {
 
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
-    sourceNode.playbackRate.setValueAtTime(newRate, 0); // Use time 0
+    sourceNode.playbackRate.value = newRate;
     
     sourceNode.connect(offlineContext.destination);
     sourceNode.start(0);
@@ -214,11 +214,11 @@ export const audioUtils = {
       const gainR_to_R_out = offlineContext.createGain();
       const gainL_to_R_out_inverted = offlineContext.createGain(); 
 
-      gainL_to_L_out.gain.setValueAtTime(1 + k, 0); // Use time 0
-      gainR_to_L_out_inverted.gain.setValueAtTime(-k, 0); // Use time 0
+      gainL_to_L_out.gain.value = 1 + k;
+      gainR_to_L_out_inverted.gain.value = -k;
 
-      gainR_to_R_out.gain.setValueAtTime(1 + k, 0); // Use time 0
-      gainL_to_R_out_inverted.gain.setValueAtTime(-k, 0); // Use time 0
+      gainR_to_R_out.gain.value = 1 + k;
+      gainL_to_R_out_inverted.gain.value = -k;
       
       splitter.connect(gainL_to_L_out, 0, 0); 
       gainL_to_L_out.connect(merger, 0, 0);  
@@ -243,8 +243,8 @@ export const audioUtils = {
     return processAudioWithEffect(audioDataUrl, (offlineContext, sourceNode, decodedAudioBuffer) => {
       const lowshelfFilter = offlineContext.createBiquadFilter();
       lowshelfFilter.type = 'lowshelf';
-      lowshelfFilter.frequency.setValueAtTime(120, 0); // Use time 0
-      lowshelfFilter.gain.setValueAtTime(gainDb, 0);   // Use time 0
+      lowshelfFilter.frequency.value = 120;
+      lowshelfFilter.gain.value = gainDb;
       return [lowshelfFilter];
     }, `Applied Subharmonic Intensifier: Low-shelf filter at 120Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityParam}%).`);
   },
@@ -253,19 +253,19 @@ export const audioUtils = {
      return processAudioWithEffect(audioDataUrl, (context, source, buffer) => {
       const lowFilter = context.createBiquadFilter();
       lowFilter.type = 'lowshelf';
-      lowFilter.frequency.setValueAtTime(250, 0); // Use time 0
-      lowFilter.gain.setValueAtTime(low, 0); // Use time 0
+      lowFilter.frequency.value = 250;
+      lowFilter.gain.value = low;
 
       const midFilter = context.createBiquadFilter();
       midFilter.type = 'peaking';
-      midFilter.frequency.setValueAtTime(1000, 0); // Use time 0
-      midFilter.Q.setValueAtTime(1, 0); // Use time 0
-      midFilter.gain.setValueAtTime(mid, 0); // Use time 0
+      midFilter.frequency.value = 1000;
+      midFilter.Q.value = 1;
+      midFilter.gain.value = mid;
 
       const highFilter = context.createBiquadFilter();
       highFilter.type = 'highshelf';
-      highFilter.frequency.setValueAtTime(4000, 0); // Use time 0
-      highFilter.gain.setValueAtTime(high, 0); // Use time 0
+      highFilter.frequency.value = 4000;
+      highFilter.gain.value = high;
       
       return [lowFilter, midFilter, highFilter];
     }, `Frequency Sculptor: Low ${low}dB @ 250Hz, Mid ${mid}dB @ 1kHz, High ${high}dB @ 4kHz.`);
@@ -293,7 +293,7 @@ export const audioUtils = {
 
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
-    sourceNode.playbackRate.setValueAtTime(clampedPlaybackRate, 0); // Use time 0
+    sourceNode.playbackRate.value = clampedPlaybackRate;
     
     sourceNode.connect(offlineContext.destination);
     sourceNode.start(0);
@@ -338,16 +338,16 @@ export const audioUtils = {
     sourceNode.buffer = decodedAudioBuffer;
 
     const delayNode = offlineContext.createDelay(clampedDelay + 1); 
-    delayNode.delayTime.setValueAtTime(clampedDelay, 0); // Use time 0
+    delayNode.delayTime.value = clampedDelay;
 
     const feedbackNode = offlineContext.createGain();
-    feedbackNode.gain.setValueAtTime(clampedFeedback, 0); // Use time 0
+    feedbackNode.gain.value = clampedFeedback;
 
     const dryNode = offlineContext.createGain();
-    dryNode.gain.setValueAtTime(1 - clampedMix, 0); // Use time 0
+    dryNode.gain.value = 1 - clampedMix;
     
     const wetNode = offlineContext.createGain();
-    wetNode.gain.setValueAtTime(clampedMix, 0); // Use time 0
+    wetNode.gain.value = clampedMix;
     
     sourceNode.connect(dryNode);
     dryNode.connect(offlineContext.destination);
@@ -423,7 +423,7 @@ export const audioUtils = {
 
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
-    sourceNode.playbackRate.setValueAtTime(newTempo, 0); // Use time 0
+    sourceNode.playbackRate.value = newTempo;
     
     sourceNode.connect(offlineContext.destination);
     sourceNode.start(0);
@@ -438,7 +438,7 @@ export const audioUtils = {
     const gainValue = Math.pow(10, gain / 20); 
     return processAudioWithEffect(audioDataUrl, (context, source, buffer) => {
       const gainNode = context.createGain();
-      gainNode.gain.setValueAtTime(gainValue, 0); // Use time 0
+      gainNode.gain.value = gainValue;
       return [gainNode];
     }, `Gain adjusted by ${gain}dB (linear gain: ${gainValue.toFixed(2)}).`);
   },
@@ -454,7 +454,7 @@ export const audioUtils = {
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
       
       if (audioBuffer.length === 0) {
-        return { processedAudioDataUrl: audioDataUrl, analysis: "BPM Analysis: Audio buffer is empty." };
+        return { processedAudioDataUrl: audioDataUrl, analysis: "BPM: N/A\nInterval: N/A (Audio empty)" };
       }
       
       const channelData = audioBuffer.getChannelData(0); 
@@ -471,12 +471,12 @@ export const audioUtils = {
       const threshold = dynamicThreshold > 0.05 ? dynamicThreshold : 0.05;
 
       const peaks = [];
-      const minPeakDistanceSamples = Math.floor(sampleRate * 0.20); 
+      const minPeakDistanceSamples = Math.floor(sampleRate * 0.20); // 200ms, BPM range 40-240 implies interval 0.25s-1.5s
 
       let lastPeakSampleIndex = -minPeakDistanceSamples; 
 
       for (let i = 1; i < channelData.length - 1; i++) {
-        if (channelData[i] > channelData[i-1] && channelData[i] > channelData[i+1]) {
+        if (channelData[i] > channelData[i-1] && channelData[i] > channelData[i+1]) { // Basic peak detection
           if (channelData[i] > threshold && (i - lastPeakSampleIndex) > minPeakDistanceSamples) {
             peaks.push(i); 
             lastPeakSampleIndex = i;
@@ -497,8 +497,9 @@ export const audioUtils = {
         return { processedAudioDataUrl: audioDataUrl, analysis: "BPM: N/A\nInterval: N/A (No intervals)" };
       }
 
+      // More robust BPM estimation: find most common interval
       const intervalCounts: { [key: string]: number } = {};
-      const intervalPrecision = 0.01; 
+      const intervalPrecision = 0.01; // Group intervals into bins of 10ms
 
       intervalsInSeconds.forEach(interval => {
         const bin = (Math.round(interval / intervalPrecision) * intervalPrecision).toFixed(2);
@@ -514,13 +515,16 @@ export const audioUtils = {
         }
       }
       
-      if (mostCommonIntervalSec <= 0 || mostCommonIntervalSec < 60/240 || mostCommonIntervalSec > 60/40 ) {
+      // Heuristic to ensure interval is within a plausible musical range (e.g., 40-240 BPM)
+      // Interval = 60 / BPM. So for 40 BPM, interval = 1.5s. For 240 BPM, interval = 0.25s.
+      if (mostCommonIntervalSec <= 0 || mostCommonIntervalSec < 60/240 || mostCommonIntervalSec > 60/40 ) { // If outside 0.25s - 1.5s
+        // Try to find a plausible interval if the most common one is out of range
         let plausibleInterval = 0;
         let highestPlausibleCount = 0;
 
         for (const intervalStr in intervalCounts) {
             const currentInterval = parseFloat(intervalStr);
-            if (currentInterval >= 60/240 && currentInterval <= 60/40) { 
+            if (currentInterval >= 60/240 && currentInterval <= 60/40) { // Check if within plausible range
                 if (intervalCounts[intervalStr] > highestPlausibleCount) {
                     highestPlausibleCount = intervalCounts[intervalStr];
                     plausibleInterval = currentInterval;
@@ -530,16 +534,20 @@ export const audioUtils = {
         if (plausibleInterval > 0) {
             mostCommonIntervalSec = plausibleInterval;
         } else {
-            if (mostCommonIntervalSec > 0) {
+            // If no single interval is plausible, attempt halving/doubling the original most common.
+            // This is a very basic heuristic.
+            if (mostCommonIntervalSec > 0) { // ensure it's not zero from start
                 if (mostCommonIntervalSec * 2 >= 60/240 && mostCommonIntervalSec * 2 <= 60/40) mostCommonIntervalSec *=2;
                 else if (mostCommonIntervalSec / 2 >= 60/240 && mostCommonIntervalSec / 2 <= 60/40) mostCommonIntervalSec /=2;
             }
 
+            // If still out of range or zero, consider it undetermined
             if (mostCommonIntervalSec <= 0 || mostCommonIntervalSec < 60/240 || mostCommonIntervalSec > 60/40) {
-                 return { processedAudioDataUrl: audioDataUrl, analysis: "BPM: N/A\nInterval: N/A (No consistent beat)" };
+                 return { processedAudioDataUrl: audioDataUrl, analysis: "BPM: N/A\nInterval: N/A (No consistent beat in typical range)" };
             }
         }
       }
+
 
       const bpm = 60 / mostCommonIntervalSec;
       const analysis = `BPM: ${bpm.toFixed(1)}\nInterval: ${mostCommonIntervalSec.toFixed(2)}s`;
@@ -587,10 +595,10 @@ export const audioUtils = {
         const lfo = context.createOscillator();
         lfo.type = 'sine';
         const clampedSpeed = Math.max(0.05, Math.min(speed, 10)); 
-        lfo.frequency.setValueAtTime(clampedSpeed, 0); // Use time 0
+        lfo.frequency.value = clampedSpeed;
         
         const lfoGain = context.createGain(); 
-        lfoGain.gain.setValueAtTime(1, 0); // Use time 0
+        lfoGain.gain.value = 1;
         
         lfo.connect(lfoGain);
         lfoGain.connect(panner.pan); 
@@ -680,9 +688,10 @@ export const audioUtils = {
     return processAudioWithEffect(audioDataUrl, (context, sourceNode, buffer) => {
         const panner = context.createStereoPanner();
         const panValue = (depth - 50) / 50; 
-        panner.pan.setValueAtTime(Math.max(-1, Math.min(1, panValue)), 0); // Use time 0 and clamp
+        panner.pan.value = Math.max(-1, Math.min(1, panValue));
         return [panner]; 
     }, `Spatial Audio Effect: Pan set to ${((depth - 50) / 50).toFixed(2)}. Output will be stereo.`, 2); 
   },
 };
 
+    
