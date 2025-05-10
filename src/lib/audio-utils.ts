@@ -159,9 +159,9 @@ export const audioUtils = {
       const biquadFilter = context.createBiquadFilter();
       biquadFilter.type = 'peaking';
       const filterFreq = Math.max(20, 1000 + (frequency * 40)); 
-      biquadFilter.frequency.setValueAtTime(filterFreq, context.currentTime); 
-      biquadFilter.Q.setValueAtTime(1.5, context.currentTime); 
-      biquadFilter.gain.setValueAtTime(frequency, context.currentTime); 
+      biquadFilter.frequency.value = filterFreq;
+      biquadFilter.Q.value = 1.5; 
+      biquadFilter.gain.value = frequency; 
       return [biquadFilter];
     }, `Altered resonance: Peaking filter with ${frequency}dB gain around ${ (1000 + (frequency * 40)).toFixed(0) }Hz.`);
   },
@@ -184,7 +184,7 @@ export const audioUtils = {
 
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
-    sourceNode.playbackRate.setValueAtTime(newRate, 0);
+    sourceNode.playbackRate.value = newRate;
     
     sourceNode.connect(offlineContext.destination);
     sourceNode.start(0);
@@ -240,8 +240,8 @@ export const audioUtils = {
     return processAudioWithEffect(audioDataUrl, (offlineContext, sourceNode, decodedAudioBuffer) => {
       const lowshelfFilter = offlineContext.createBiquadFilter();
       lowshelfFilter.type = 'lowshelf';
-      lowshelfFilter.frequency.setValueAtTime(120, offlineContext.currentTime);
-      lowshelfFilter.gain.setValueAtTime(gainDb, offlineContext.currentTime);
+      lowshelfFilter.frequency.value = 120; // Frequencies below 120Hz are boosted
+      lowshelfFilter.gain.value = gainDb;   // Amount of boost in dB
       return [lowshelfFilter];
     }, `Applied Subharmonic Intensifier: Low-shelf filter at 120Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityParam}%).`);
   },
@@ -250,19 +250,19 @@ export const audioUtils = {
      return processAudioWithEffect(audioDataUrl, (context, source, buffer) => {
       const lowFilter = context.createBiquadFilter();
       lowFilter.type = 'lowshelf';
-      lowFilter.frequency.setValueAtTime(250, context.currentTime); 
-      lowFilter.gain.setValueAtTime(low, context.currentTime);
+      lowFilter.frequency.value = 250; 
+      lowFilter.gain.value = low;
 
       const midFilter = context.createBiquadFilter();
       midFilter.type = 'peaking';
-      midFilter.frequency.setValueAtTime(1000, context.currentTime); 
-      midFilter.Q.setValueAtTime(1, context.currentTime); 
-      midFilter.gain.setValueAtTime(mid, context.currentTime);
+      midFilter.frequency.value = 1000; 
+      midFilter.Q.value = 1; 
+      midFilter.gain.value = mid;
 
       const highFilter = context.createBiquadFilter();
       highFilter.type = 'highshelf';
-      highFilter.frequency.setValueAtTime(4000, context.currentTime); 
-      highFilter.gain.setValueAtTime(high, context.currentTime);
+      highFilter.frequency.value = 4000; 
+      highFilter.gain.value = high;
       
       return [lowFilter, midFilter, highFilter];
     }, `Frequency Sculptor: Low ${low}dB @ 250Hz, Mid ${mid}dB @ 1kHz, High ${high}dB @ 4kHz.`);
@@ -288,7 +288,7 @@ export const audioUtils = {
 
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
-    sourceNode.playbackRate.setValueAtTime(clampedPlaybackRate, 0); 
+    sourceNode.playbackRate.value = clampedPlaybackRate; 
     
     sourceNode.connect(offlineContext.destination);
     sourceNode.start(0);
@@ -331,16 +331,16 @@ export const audioUtils = {
     sourceNode.buffer = decodedAudioBuffer;
 
     const delayNode = offlineContext.createDelay(clampedDelay + 1); 
-    delayNode.delayTime.setValueAtTime(clampedDelay, 0);
+    delayNode.delayTime.value = clampedDelay;
 
     const feedbackNode = offlineContext.createGain();
-    feedbackNode.gain.setValueAtTime(clampedFeedback, 0);
+    feedbackNode.gain.value = clampedFeedback;
 
     const dryNode = offlineContext.createGain();
-    dryNode.gain.setValueAtTime(1 - clampedMix, 0);
+    dryNode.gain.value = 1 - clampedMix;
     
     const wetNode = offlineContext.createGain();
-    wetNode.gain.setValueAtTime(clampedMix, 0);
+    wetNode.gain.value = clampedMix;
     
     sourceNode.connect(dryNode);
     dryNode.connect(offlineContext.destination);
@@ -413,7 +413,7 @@ export const audioUtils = {
 
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
-    sourceNode.playbackRate.setValueAtTime(newTempo, 0); 
+    sourceNode.playbackRate.value = newTempo; 
     
     sourceNode.connect(offlineContext.destination);
     sourceNode.start(0);
@@ -428,7 +428,7 @@ export const audioUtils = {
     const gainValue = Math.pow(10, gain / 20); 
     return processAudioWithEffect(audioDataUrl, (context, source, buffer) => {
       const gainNode = context.createGain();
-      gainNode.gain.setValueAtTime(gainValue, context.currentTime);
+      gainNode.gain.value = gainValue;
       return [gainNode];
     }, `Gain adjusted by ${gain}dB (linear gain: ${gainValue.toFixed(2)}).`);
   },
@@ -555,7 +555,7 @@ export const audioUtils = {
     return { ...result, analysis: `Tuned to 432Hz (shifted by approx. ${semitones.toFixed(2)} semitones from 440Hz standard).` };
   },
 
-  subtleSubwoofer: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 35 }), // Increased from 20 to 35
+  subtleSubwoofer: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 35 }), 
   gentleBassBoost: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 40 }),
   mediumBassEnhancement: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 60 }),
   intenseBassAmplifier: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 80 }),
@@ -571,16 +571,16 @@ export const audioUtils = {
 
   automatedSweep: async (audioDataUrl: string, { speed }: { speed: number }) => {
      return processAudioWithEffect(audioDataUrl, (context, sourceNode, buffer) => {
-        if (buffer.numberOfChannels < 1) return []; // Needs at least one channel to pan
+        if (buffer.numberOfChannels < 1) return []; 
 
         const panner = context.createStereoPanner();
         const lfo = context.createOscillator();
         lfo.type = 'sine';
         const clampedSpeed = Math.max(0.05, Math.min(speed, 10)); 
-        lfo.frequency.setValueAtTime(clampedSpeed, context.currentTime); 
+        lfo.frequency.value = clampedSpeed;
         
         const lfoGain = context.createGain(); 
-        lfoGain.gain.value = 1; // Pan full range from -1 to 1
+        lfoGain.gain.value = 1; 
         
         lfo.connect(lfoGain);
         lfoGain.connect(panner.pan); 
@@ -588,7 +588,7 @@ export const audioUtils = {
         lfo.start();
         
         return [panner]; 
-    }, `Automated Sweep: Speed ${speed}Hz. Output will be stereo.`, 2); // Force output to stereo
+    }, `Automated Sweep: Speed ${speed}Hz. Output will be stereo.`, 2); 
   },
 
   audioSplitter: async (audioDataUrl: string, { startTime: startTimeMinutes, endTime: endTimeMinutes }: { startTime: number, endTime: number }) => {
@@ -640,7 +640,6 @@ export const audioUtils = {
     bufferSource.buffer = decodedAudioBuffer;
     bufferSource.connect(offlineContext.destination);
     
-    // Start playing from sTimeSeconds for a duration of splitDurationSeconds
     bufferSource.start(0, sTimeSeconds, splitDurationSeconds); 
 
     const renderedBuffer = await offlineContext.startRendering();
@@ -663,10 +662,9 @@ export const audioUtils = {
   spatialAudioEffect: async (audioDataUrl: string, { depth }: { depth: number }) => {
     return processAudioWithEffect(audioDataUrl, (context, sourceNode, buffer) => {
         const panner = context.createStereoPanner();
-        // Pan value from -1 (left) to 1 (right). Depth 0 = -1, 50 = 0, 100 = 1.
         const panValue = (depth - 50) / 50; 
-        panner.pan.setValueAtTime(Math.max(-1, Math.min(1, panValue)), context.currentTime);
+        panner.pan.value = Math.max(-1, Math.min(1, panValue));
         return [panner]; 
-    }, `Spatial Audio Effect: Pan set to ${((depth - 50) / 50).toFixed(2)}. Output will be stereo.`, 2); // Force output to stereo
+    }, `Spatial Audio Effect: Pan set to ${((depth - 50) / 50).toFixed(2)}. Output will be stereo.`, 2); 
   },
 };
