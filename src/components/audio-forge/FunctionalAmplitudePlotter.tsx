@@ -90,9 +90,10 @@ export function FunctionalAmplitudePlotter({ audioBuffer }: FunctionalAmplitudeP
   return (
     <Card className="shadow-md">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <LineChartIcon className="text-primary" />
-          Amplitude Plotter
+        <CardTitle className="flex items-baseline gap-2">
+          <LineChartIcon className="text-primary h-5 w-5" />
+          <span className="text-xl">Amplitude Plotter</span>
+          <span className="text-sm text-muted-foreground ml-1">(Static)</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="h-[200px]">
