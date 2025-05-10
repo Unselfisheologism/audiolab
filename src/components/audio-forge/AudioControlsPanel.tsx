@@ -1,3 +1,4 @@
+
 import type React from 'react';
 import { FileUploadArea } from './FileUploadArea';
 import { EffectCard } from './EffectCard';
@@ -14,6 +15,8 @@ interface AudioControlsPanelProps {
   effectSettings: Record<string, EffectSettings>;
   isLoading: boolean;
   isAudioLoaded: boolean;
+  analysisResult: string | null;
+  analysisSourceEffectId: string | null;
 }
 
 export function AudioControlsPanel({
@@ -24,6 +27,8 @@ export function AudioControlsPanel({
   effectSettings,
   isLoading,
   isAudioLoaded,
+  analysisResult,
+  analysisSourceEffectId,
 }: AudioControlsPanelProps) {
   
   const getEffectSettings = (effectId: string): EffectSettings => {
@@ -67,8 +72,10 @@ export function AudioControlsPanel({
                       onApplyEffect={onApplyEffect}
                       onParameterChange={onParameterChange}
                       currentSettings={getEffectSettings(effect.id)}
-                      isLoading={isLoading} // Pass global isLoading
+                      isLoading={isLoading} 
                       isAudioLoaded={isAudioLoaded}
+                      analysisResult={analysisResult}
+                      analysisSourceEffectId={analysisSourceEffectId}
                     />
                   ))}
                 </div>

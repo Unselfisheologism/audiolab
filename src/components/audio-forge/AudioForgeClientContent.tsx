@@ -17,6 +17,7 @@ export default function AudioForgeClientContent() {
   const [processedAudioDataUrl, setProcessedAudioDataUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+  const [analysisSourceEffectId, setAnalysisSourceEffectId] = useState<string | null>(null);
   
   const [processedAudioBuffer, setProcessedAudioBuffer] = useState<AudioBuffer | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -38,12 +39,6 @@ export default function AudioForgeClientContent() {
     if (typeof window !== 'undefined' && !audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
-    // No global cleanup for audioContextRef here as it's used throughout the component's life.
-    // It can be closed on unmount if necessary, but for now, it persists.
-    // return () => {
-    //   audioContextRef.current?.close().catch(e => console.error("Failed to close AudioContext", e));
-    //   audioContextRef.current = null;
-    // }
   }, []);
 
   const loadAudioBufferForVisualizer = useCallback(async (dataUrl: string | null) => {
@@ -51,11 +46,9 @@ export default function AudioForgeClientContent() {
       setProcessedAudioBuffer(null);
       return;
     }
-    // setIsLoading(true); // This isLoading is for main processing, visualizer is secondary
     try {
       const response = await fetch(dataUrl);
       const arrayBuffer = await response.arrayBuffer();
-      // Ensure context is active
       if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
          console.warn("AudioContext was closed, reinitializing for visualizer.");
          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -64,12 +57,9 @@ export default function AudioForgeClientContent() {
       setProcessedAudioBuffer(audioBuffer);
     } catch (error) {
       console.error("Error decoding audio data for visualizer:", error);
-      // toast({ title: "Visualizer Error", description: "Could not load audio for visualization.", variant: "destructive" });
       setProcessedAudioBuffer(null);
-    } finally {
-      // setIsLoading(false);
     }
-  }, []); // Removed toast from deps for this specific loader
+  }, []); 
 
   useEffect(() => {
     loadAudioBufferForVisualizer(processedAudioDataUrl);
@@ -85,6 +75,7 @@ export default function AudioForgeClientContent() {
         setOriginalAudioDataUrl(dataUrl);
         setProcessedAudioDataUrl(dataUrl); 
         setAnalysisResult(null);
+        setAnalysisSourceEffectId(null);
         toast({ title: "Audio Loaded", description: `${file.name} is ready for forging.` });
       } catch (error) {
         console.error("Error loading file:", error);
@@ -98,7 +89,8 @@ export default function AudioForgeClientContent() {
       setOriginalAudioDataUrl(null);
       setProcessedAudioDataUrl(null);
       setAnalysisResult(null);
-      setProcessedAudioBuffer(null); // Clear buffer if file is cleared
+      setAnalysisSourceEffectId(null);
+      setProcessedAudioBuffer(null); 
     }
   }, [toast]);
 
@@ -120,14 +112,16 @@ export default function AudioForgeClientContent() {
 
     setIsLoading(true);
     setAnalysisResult(null); 
+    setAnalysisSourceEffectId(null);
     const currentAudio = processedAudioDataUrl || originalAudioDataUrl; 
 
     try {
       let result: { processedAudioDataUrl: string; analysis?: string } = { processedAudioDataUrl: currentAudio };
       const effect = effectsList.find(e => e.id === effectId || e.parameters?.find(p => p.handlerKey === effectId));
       const actualHandlerKey = effect?.parameters?.find(p => p.handlerKey === effectId)?.handlerKey || effect?.handlerKey || effectId;
+      const parentEffectId = effect?.id || null;
       
-      const combinedParams = { ...(effectSettings[effect?.id ?? effectId] || {}), ...params };
+      const combinedParams = { ...(effectSettings[parentEffectId ?? effectId] || {}), ...params };
 
       if (audioUtils[actualHandlerKey]) {
         result = await audioUtils[actualHandlerKey](currentAudio, combinedParams);
@@ -138,11 +132,16 @@ export default function AudioForgeClientContent() {
       setProcessedAudioDataUrl(result.processedAudioDataUrl);
       if (result.analysis) {
         setAnalysisResult(result.analysis);
+        if (effect?.outputsAnalysis) {
+          setAnalysisSourceEffectId(parentEffectId);
+        }
       }
       toast({ title: "Effect Applied", description: `${effect?.name || actualHandlerKey} processing complete.` });
     } catch (error) {
       console.error(`Error applying effect ${effectId}:`, error);
       toast({ title: "Processing Error", description: `Could not apply ${effect?.name || effectId}.`, variant: "destructive" });
+      setAnalysisResult(null);
+      setAnalysisSourceEffectId(null);
     } finally {
       setIsLoading(false);
     }
@@ -170,6 +169,8 @@ export default function AudioForgeClientContent() {
             effectSettings={effectSettings}
             isLoading={isLoading}
             isAudioLoaded={!!originalAudioDataUrl}
+            analysisResult={analysisResult}
+            analysisSourceEffectId={analysisSourceEffectId}
           />
         </ResizablePanel>
         <ResizableHandle withHandle />
@@ -181,6 +182,7 @@ export default function AudioForgeClientContent() {
             onExport={handleExport}
             isLoading={isLoading}
             analysisResult={analysisResult}
+            analysisSourceEffectId={analysisSourceEffectId}
             originalFileName={originalAudioFile?.name}
           />
         </ResizablePanel>

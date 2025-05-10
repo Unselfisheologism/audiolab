@@ -19,9 +19,20 @@ interface EffectCardProps {
   currentSettings: EffectSettings;
   isLoading: boolean;
   isAudioLoaded: boolean;
+  analysisResult?: string | null;
+  analysisSourceEffectId?: string | null;
 }
 
-export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSettings, isLoading, isAudioLoaded }: EffectCardProps) {
+export function EffectCard({ 
+  effect, 
+  onApplyEffect, 
+  onParameterChange, 
+  currentSettings, 
+  isLoading, 
+  isAudioLoaded,
+  analysisResult,
+  analysisSourceEffectId 
+}: EffectCardProps) {
   const IconComponent = effect.icon || fallbackIcon;
 
   const handleSliderChange = (paramName: string, value: number[]) => {
@@ -33,17 +44,33 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
     let value: string | number = event.target.value;
 
     if (paramConfig?.type === 'number_input') {
-      // Allow empty string for clearing input, otherwise parse
       if (event.target.value === '') {
-        value = NaN; // Or some other indicator for "empty means reset to default or invalid"
+        value = ""; // Keep as empty string for controlled input
       } else {
         const parsedValue = parseFloat(event.target.value);
-        value = isNaN(parsedValue) ? NaN : parsedValue; // Keep NaN if parsing fails
+        // If parsing results in NaN, keep it as NaN to be handled by validation or default logic later
+        // Otherwise, use the parsed number.
+        value = isNaN(parsedValue) ? event.target.value : parsedValue; 
       }
     }
     onParameterChange(effect.id, paramName, value);
   };
   
+  const handleInputBlur = (paramName: string, event: React.FocusEvent<HTMLInputElement>) => {
+    const paramConfig = effect.parameters?.find(p => p.name === paramName);
+    if (paramConfig?.type === 'number_input') {
+      let value = parseFloat(event.target.value);
+      if (isNaN(value)) {
+        value = paramConfig.defaultValue as number; // Reset to default if invalid
+      } else {
+        if (paramConfig.min !== undefined) value = Math.max(paramConfig.min, value);
+        if (paramConfig.max !== undefined) value = Math.min(paramConfig.max, value);
+      }
+      onParameterChange(effect.id, paramName, value);
+    }
+  };
+
+
   const handleSelectChange = (paramName: string, value: string) => {
     onParameterChange(effect.id, paramName, value);
   };
@@ -61,7 +88,7 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
           <div key={param.name} className="space-y-2">
             <div className="flex justify-between items-center">
               <Label htmlFor={`${effect.id}-${param.name}`}>{param.label}</Label>
-              <span className="text-sm text-muted-foreground">{rawValue}</span>
+              <span className="text-sm text-muted-foreground">{Number(rawValue).toFixed(param.step && param.step < 1 ? 2 : 0)}</span>
             </div>
             <Slider
               id={`${effect.id}-${param.name}`}
@@ -75,20 +102,18 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
           </div>
         );
       case 'number_input':
-        // If rawValue is NaN (e.g., from parseFloat('') or invalid input), pass "" to Input
-        // Otherwise, pass the rawValue.
-        const displayValue = (typeof rawValue === 'number' && isNaN(rawValue)) ? "" : rawValue;
         return (
           <div key={param.name} className="space-y-2">
             <Label htmlFor={`${effect.id}-${param.name}`}>{param.label}</Label>
             <Input
               id={`${effect.id}-${param.name}`}
               type="number"
-              value={displayValue as string | number} 
+              value={rawValue === "" || (typeof rawValue === 'number' && isNaN(rawValue)) ? "" : String(rawValue)}
               min={param.min}
               max={param.max}
               step={param.step}
               onChange={(e) => handleInputChange(param.name, e)}
+              onBlur={(e) => handleInputBlur(param.name, e)}
               disabled={isLoading || !isAudioLoaded}
               className="w-full"
             />
@@ -99,7 +124,7 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
           <div key={param.name} className="space-y-2">
             <Label htmlFor={`${effect.id}-${param.name}`}>{param.label}</Label>
             <Select
-              value={rawValue as string}
+              value={String(rawValue)}
               onValueChange={(val) => handleSelectChange(param.name, val)}
               disabled={isLoading || !isAudioLoaded}
             >
@@ -128,8 +153,7 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
             />
           </div>
         );
-      // For 'button' type under parameters (used for preset groups)
-      case 'button': // This case is specific for grouped buttons within a card
+      case 'button': 
         return (
             <Button
               key={param.name}
@@ -148,10 +172,10 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
   };
   
   const shouldShowApplyButton = 
-    effect.parameters && effect.parameters.length > 0 && // Has parameters
-    !(effect.controlType === 'button' && effect.actionLabel) && // Not a primary action button effect
-    !(effect.controlType === 'group' && effect.parameters.every(p => p.type === 'button')) && // Not a group of only buttons
-    effect.controlType !== 'toggle'; // Toggles usually apply instantly or don't need an apply button
+    effect.parameters && effect.parameters.length > 0 && 
+    !(effect.controlType === 'button' && effect.actionLabel) && 
+    !(effect.controlType === 'group' && effect.parameters.every(p => p.type === 'button')) && 
+    effect.controlType !== 'toggle'; 
 
   return (
     <Card className="shadow-md overflow-hidden">
@@ -164,9 +188,14 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
       </CardHeader>
       <CardContent className="space-y-4">
         {effect.parameters?.map(renderParameterControl)}
+        {effect.outputsAnalysis && effect.id === analysisSourceEffectId && analysisResult && (
+          <div className="pt-3 mt-3 border-t border-border">
+            <p className="text-sm font-semibold text-primary mb-1">Analysis Report:</p>
+            <p className="text-sm text-muted-foreground bg-muted/50 p-2 rounded-md">{analysisResult}</p>
+          </div>
+        )}
       </CardContent>
       
-      {/* Footer for primary action button effects */}
       {(effect.controlType === 'button' && effect.actionLabel && !effect.parameters?.some(p => p.type === 'button')) && (
         <CardFooter>
           <Button
@@ -174,13 +203,12 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
             disabled={isLoading || !isAudioLoaded}
             className="w-full"
           >
-            {isLoading && effect.outputsAnalysis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {isLoading && currentSettings?.isProcessingThis === effect.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             {effect.actionLabel}
           </Button>
         </CardFooter>
       )}
 
-      {/* Footer for toggle effects (no apply button, action is usually via onParameterChange) */}
       {effect.controlType === 'toggle' && effect.parameters && (
         <CardFooter className="flex items-center justify-between">
           <Label htmlFor={`${effect.id}-${effect.parameters[0].name}`}>{effect.parameters[0].label}</Label>
@@ -193,7 +221,6 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
         </CardFooter>
       )}
 
-      {/* Footer with "Apply" button for effects with parameters that need explicit application */}
       {shouldShowApplyButton && (
         <CardFooter>
           <Button
@@ -201,8 +228,8 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
             disabled={isLoading || !isAudioLoaded}
             className="w-full"
           >
-            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {isLoading ? 'Applying...' : `Apply ${effect.name}`}
+            {isLoading && currentSettings?.isProcessingThis === effect.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {isLoading && currentSettings?.isProcessingThis === effect.id ? 'Applying...' : `Apply ${effect.name}`}
           </Button>
         </CardFooter>
       )}

@@ -8,15 +8,17 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText } from 'lucide-react';
+import { effectsList } from '@/app/audio-forge/effects';
 
 
 interface MainDisplayPanelProps {
   originalAudioDataUrl: string | null;
   processedAudioDataUrl: string | null;
-  audioBuffer: AudioBuffer | null; // For visualizer
+  audioBuffer: AudioBuffer | null; 
   onExport: (format: string, quality: string) => void;
   isLoading: boolean;
   analysisResult: string | null;
+  analysisSourceEffectId: string | null;
   originalFileName?: string;
 }
 
@@ -27,9 +29,24 @@ export function MainDisplayPanel({
   onExport,
   isLoading,
   analysisResult,
+  analysisSourceEffectId,
   originalFileName
 }: MainDisplayPanelProps) {
   const [isProcessedAudioPlaying, setIsProcessedAudioPlaying] = useState(false);
+
+  const shouldShowGlobalAnalysisReport = () => {
+    if (!analysisResult) return false;
+    if (!analysisSourceEffectId) return true; // Generic analysis, show it
+    
+    const effect = effectsList.find(e => e.id === analysisSourceEffectId);
+    // If the effect that produced the analysis is configured to show its own report (outputsAnalysis is true),
+    // then the global report should NOT show it.
+    if (effect && effect.outputsAnalysis) {
+      return false;
+    }
+    return true; // Otherwise, show it (e.g. analysis from a tool not in its card)
+  };
+
 
   return (
     <ScrollArea className="h-full p-4">
@@ -49,7 +66,7 @@ export function MainDisplayPanel({
           isProcessedAudioPlaying={isProcessedAudioPlaying}
         />
 
-        {analysisResult && (
+        {shouldShowGlobalAnalysisReport() && analysisResult && (
           <Card className="shadow-md">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
