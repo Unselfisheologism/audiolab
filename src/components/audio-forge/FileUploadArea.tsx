@@ -27,7 +27,9 @@ export function FileUploadArea({ onFileSelect, selectedFile, isLoading }: FileUp
           Upload Audio
         </CardTitle>
         <CardDescription>
-          Select an audio file (e.g., MP3, WAV, WebM, Ogg, FLAC) to start forging. Accepts most common audio formats.
+          Select an audio file (e.g., MP3, WAV, WebM, OGG, FLAC, AAC, M4A) to start forging. 
+          Accepts most common audio formats. While files of any size can be selected, 
+          processing very large files may be slow or unstable due to client-side limitations.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
