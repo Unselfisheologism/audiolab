@@ -23,8 +23,7 @@ async function audioBufferToWavDataUrl(audioBuffer: AudioBuffer): Promise<string
   const sampleRate = audioBuffer.sampleRate;
   const format = 1; // PCM
   const bitDepth = 16;
-  
-  // For WAV, we'll output based on the audioBuffer's actual channel count
+
   const wavOutputChannels = audioBuffer.numberOfChannels;
 
 
@@ -40,11 +39,9 @@ async function audioBufferToWavDataUrl(audioBuffer: AudioBuffer): Promise<string
     for (let i = 0; i < length; i++) {
       interleaved[i] = Math.max(-1, Math.min(1, channelData[i])) * 32767;
     }
-  } else if (wavOutputChannels >= 2) { // Handles stereo and multi-channel if buffer has them
+  } else if (wavOutputChannels >= 2) { 
     const leftChannel = audioBuffer.getChannelData(0);
-    // If buffer is mono but wavOutputChannels is 2 (e.g. dual mono), use left for right.
-    // If buffer is stereo or more, use channel 1 for right.
-    const rightChannel = audioBuffer.numberOfChannels > 1 ? audioBuffer.getChannelData(1) : leftChannel; 
+    const rightChannel = audioBuffer.numberOfChannels > 1 ? audioBuffer.getChannelData(1) : leftChannel;
     
     interleaved = new Int16Array(length * 2); // We are creating a stereo WAV
     for (let i = 0; i < length; i++) {
@@ -54,7 +51,6 @@ async function audioBufferToWavDataUrl(audioBuffer: AudioBuffer): Promise<string
   }
   
   const dataSize = interleaved.length * (bitDepth / 8);
-  // For stereo WAV, ensure blockAlign and byteRate reflect 2 channels if wavOutputChannels was forced to 2 for dual mono.
   const actualWavBlockAlign = (wavOutputChannels >= 2 ? 2 : 1) * (bitDepth / 8);
   const actualWavByteRate = sampleRate * actualWavBlockAlign;
   const actualWavNumChannels = wavOutputChannels >= 2 ? 2 : 1;
@@ -63,24 +59,20 @@ async function audioBufferToWavDataUrl(audioBuffer: AudioBuffer): Promise<string
   const buffer = new ArrayBuffer(44 + dataSize);
   const view = new DataView(buffer);
 
-  // RIFF header
   writeString(view, 0, 'RIFF');
   view.setUint32(4, 36 + dataSize, true);
   writeString(view, 8, 'WAVE');
-  // fmt chunk
   writeString(view, 12, 'fmt ');
   view.setUint32(16, 16, true);
   view.setUint16(20, format, true);
-  view.setUint16(22, actualWavNumChannels, true); // Use actualWavNumChannels for WAV header
+  view.setUint16(22, actualWavNumChannels, true); 
   view.setUint32(24, sampleRate, true);
-  view.setUint32(28, actualWavByteRate, true); // Use actualWavByteRate
-  view.setUint16(32, actualWavBlockAlign, true); // Use actualWavBlockAlign
+  view.setUint32(28, actualWavByteRate, true); 
+  view.setUint16(32, actualWavBlockAlign, true); 
   view.setUint16(34, bitDepth, true);
-  // data chunk
   writeString(view, 36, 'data');
   view.setUint32(40, dataSize, true);
 
-  // Write PCM data
   for (let i = 0; i < interleaved.length; i++) {
     view.setInt16(44 + i * 2, interleaved[i], true);
   }
@@ -117,7 +109,7 @@ const processAudioWithEffect = async (
   audioDataUrl: string,
   setupEffect: (audioContext: OfflineAudioContext, sourceNode: AudioBufferSourceNode, decodedAudioBuffer: AudioBuffer) => AudioNode[], 
   analysisMessage?: string,
-  outputChannelCountForContext?: number // Optional: specify output channel count for OfflineAudioContext
+  outputChannelCountForContext?: number 
 ): Promise<{ processedAudioDataUrl: string; analysis?: string }> => {
   const audioContext = getGlobalAudioContext();
   if (!audioContext) {
@@ -246,15 +238,12 @@ export const audioUtils = {
   subharmonicIntensifier: async (audioDataUrl: string, { intensity: intensityParam }: { intensity: number }) => {
     const gainDb = (intensityParam / 100) * 12; // Max 12dB boost for intensity 100
     return processAudioWithEffect(audioDataUrl, (offlineContext, sourceNode, decodedAudioBuffer) => {
-        const lowshelfFilter = offlineContext.createBiquadFilter();
-        lowshelfFilter.type = 'lowshelf';
-        lowshelfFilter.frequency.setValueAtTime(120, offlineContext.currentTime); 
-        lowshelfFilter.gain.setValueAtTime(gainDb, offlineContext.currentTime);
-        
-        return [lowshelfFilter];
-      }, 
-      `Applied Subharmonic Intensifier: Low-shelf filter at 120Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityParam}%).`
-    );
+      const lowshelfFilter = offlineContext.createBiquadFilter();
+      lowshelfFilter.type = 'lowshelf';
+      lowshelfFilter.frequency.setValueAtTime(120, offlineContext.currentTime);
+      lowshelfFilter.gain.setValueAtTime(gainDb, offlineContext.currentTime);
+      return [lowshelfFilter];
+    }, `Applied Subharmonic Intensifier: Low-shelf filter at 120Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityParam}%).`);
   },
 
   frequencySculptor: async (audioDataUrl: string, { low, mid, high }: { low: number, mid: number, high: number }) => {
@@ -566,7 +555,7 @@ export const audioUtils = {
     return { ...result, analysis: `Tuned to 432Hz (shifted by approx. ${semitones.toFixed(2)} semitones from 440Hz standard).` };
   },
 
-  subtleSubwoofer: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 20 }),
+  subtleSubwoofer: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 35 }), // Increased from 20 to 35
   gentleBassBoost: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 40 }),
   mediumBassEnhancement: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 60 }),
   intenseBassAmplifier: (d, p) => audioUtils.subharmonicIntensifier(d, { intensity: 80 }),
@@ -582,7 +571,7 @@ export const audioUtils = {
 
   automatedSweep: async (audioDataUrl: string, { speed }: { speed: number }) => {
      return processAudioWithEffect(audioDataUrl, (context, sourceNode, buffer) => {
-        if (buffer.numberOfChannels < 1) return []; 
+        if (buffer.numberOfChannels < 1) return []; // Needs at least one channel to pan
 
         const panner = context.createStereoPanner();
         const lfo = context.createOscillator();
@@ -591,7 +580,7 @@ export const audioUtils = {
         lfo.frequency.setValueAtTime(clampedSpeed, context.currentTime); 
         
         const lfoGain = context.createGain(); 
-        lfoGain.gain.value = 1; 
+        lfoGain.gain.value = 1; // Pan full range from -1 to 1
         
         lfo.connect(lfoGain);
         lfoGain.connect(panner.pan); 
@@ -599,7 +588,7 @@ export const audioUtils = {
         lfo.start();
         
         return [panner]; 
-    }, `Automated Sweep: Speed ${speed}Hz. Output will be stereo.`, 2); 
+    }, `Automated Sweep: Speed ${speed}Hz. Output will be stereo.`, 2); // Force output to stereo
   },
 
   audioSplitter: async (audioDataUrl: string, { startTime: startTimeMinutes, endTime: endTimeMinutes }: { startTime: number, endTime: number }) => {
@@ -651,6 +640,7 @@ export const audioUtils = {
     bufferSource.buffer = decodedAudioBuffer;
     bufferSource.connect(offlineContext.destination);
     
+    // Start playing from sTimeSeconds for a duration of splitDurationSeconds
     bufferSource.start(0, sTimeSeconds, splitDurationSeconds); 
 
     const renderedBuffer = await offlineContext.startRendering();
@@ -673,10 +663,10 @@ export const audioUtils = {
   spatialAudioEffect: async (audioDataUrl: string, { depth }: { depth: number }) => {
     return processAudioWithEffect(audioDataUrl, (context, sourceNode, buffer) => {
         const panner = context.createStereoPanner();
+        // Pan value from -1 (left) to 1 (right). Depth 0 = -1, 50 = 0, 100 = 1.
         const panValue = (depth - 50) / 50; 
         panner.pan.setValueAtTime(Math.max(-1, Math.min(1, panValue)), context.currentTime);
         return [panner]; 
-    }, `Spatial Audio Effect: Pan set to ${((depth - 50) / 50).toFixed(2)}. Output will be stereo.`, 2); 
+    }, `Spatial Audio Effect: Pan set to ${((depth - 50) / 50).toFixed(2)}. Output will be stereo.`, 2); // Force output to stereo
   },
 };
-
