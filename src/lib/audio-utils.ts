@@ -164,7 +164,7 @@ export const audioUtils = {
       const filterFreq = Math.max(20, 1000 + (frequency * 40)); 
       biquadFilter.frequency.value = filterFreq;
       biquadFilter.Q.value = 1.5;
-      biquadFilter.gain.value = frequency;
+      biquadFilter.gain.value = frequency; // Use the passed frequency as gain
       return [biquadFilter];
     }, `Altered resonance: Peaking filter with ${frequency}dB gain around ${ (1000 + (frequency * 40)).toFixed(0) }Hz.`);
   },
@@ -208,45 +208,61 @@ export const audioUtils = {
       const width = widthParam / 100; 
       const splitter = offlineContext.createChannelSplitter(2);
       const merger = offlineContext.createChannelMerger(2);
-      const k = (width - 1) / 2;
-
-      const gainL_to_L_out = offlineContext.createGain();
-      const gainR_to_L_out_inverted = offlineContext.createGain(); 
       
-      const gainR_to_R_out = offlineContext.createGain();
-      const gainL_to_R_out_inverted = offlineContext.createGain(); 
+      // Mid-Side encoding constants
+      const mGain = 1; // Mid channel gain (sum of L and R)
+      const sGain = width; // Side channel gain (difference of L and R, scaled by width)
 
-      gainL_to_L_out.gain.value = 1 + k;
-      gainR_to_L_out_inverted.gain.value = -k;
+      // Gains for Mid channel processing
+      const gainLToMid = offlineContext.createGain();
+      gainLToMid.gain.value = 0.5 * mGain; // L * 0.5
+      const gainRToMid = offlineContext.createGain();
+      gainRToMid.gain.value = 0.5 * mGain; // R * 0.5
 
-      gainR_to_R_out.gain.value = 1 + k;
-      gainL_to_R_out_inverted.gain.value = -k;
+      // Gains for Side channel processing
+      const gainLToSide = offlineContext.createGain();
+      gainLToSide.gain.value = 0.5 * sGain;  // L * 0.5 * width
+      const gainRToSideInverted = offlineContext.createGain();
+      gainRToSideInverted.gain.value = -0.5 * sGain; // -R * 0.5 * width
       
-      splitter.connect(gainL_to_L_out, 0, 0); 
-      gainL_to_L_out.connect(merger, 0, 0);  
+      // Connect L and R to create Mid channel (M = (L+R)/2 * mGain but here mGain is 1, effectively)
+      sourceNode.connect(splitter);
+      splitter.connect(gainLToMid, 0, 0); // Left input to gainLToMid
+      splitter.connect(gainRToMid, 1, 0); // Right input to gainRToMid
 
-      splitter.connect(gainR_to_L_out_inverted, 1, 0); 
-      gainR_to_L_out_inverted.connect(merger, 0, 0); 
+      // Create Side channel (S = (L-R)/2 * sGain)
+      splitter.connect(gainLToSide, 0, 0);       // L input to gainLToSide
+      splitter.connect(gainRToSideInverted, 1, 0); // R input to gainRToSideInverted (becomes -R)
 
-      splitter.connect(gainR_to_R_out, 1, 0); 
-      gainR_to_R_out.connect(merger, 0, 1); 
+      // Output L' = M + S
+      gainLToMid.connect(merger, 0, 0);
+      gainRToMid.connect(merger, 0, 0); // Sum L and R for M part of L'
+      gainLToSide.connect(merger, 0, 0); // Add S part to L'
+      gainRToSideInverted.connect(merger, 0, 0); // Add S part to L' (effectively (L-R)*sGain/2 part)
 
-      splitter.connect(gainL_to_R_out_inverted, 0, 0); 
-      gainL_to_R_out_inverted.connect(merger, 0, 1); 
+      // Output R' = M - S
+      gainLToMid.connect(merger, 0, 1);
+      gainRToMid.connect(merger, 0, 1); // Sum L and R for M part of R'
+      // To subtract S for R', we invert S by multiplying by -1
+      const sideInverterForR = offlineContext.createGain();
+      sideInverterForR.gain.value = -1;
+      gainLToSide.connect(sideInverterForR);
+      gainRToSideInverted.connect(sideInverterForR); // S is (L*0.5*sGain) + (-R*0.5*sGain)
+      sideInverterForR.connect(merger, 0, 1); // Add -S part to R'
   
-      return [splitter, merger]; 
+      return [merger]; // Only merger is the final output node connected from source implicitly via setup
     }, `Stereo Widener: Width set to ${widthParam}%. Applied only if audio is stereo.`, 
        2 
     );
   },
   
   subharmonicIntensifier: async (audioDataUrl: string, { intensity: intensityParam }: { intensity: number }) => {
-    const gainDb = (intensityParam / 100) * 12;
+    const gainDb = (intensityParam / 100) * 12; 
     return processAudioWithEffect(audioDataUrl, (offlineContext, sourceNode, decodedAudioBuffer) => {
       const lowshelfFilter = offlineContext.createBiquadFilter();
       lowshelfFilter.type = 'lowshelf';
-      lowshelfFilter.frequency.value = 120; // Target low frequencies
-      lowshelfFilter.gain.value = gainDb; // Apply gain
+      lowshelfFilter.frequency.value = 120; 
+      lowshelfFilter.gain.value = gainDb; 
       return [lowshelfFilter];
     }, `Applied Subharmonic Intensifier: Low-shelf filter at 120Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityParam}%).`);
   },
@@ -261,7 +277,7 @@ export const audioUtils = {
       const midFilter = context.createBiquadFilter();
       midFilter.type = 'peaking';
       midFilter.frequency.value = 1000;
-      midFilter.Q.value = 1;
+      midFilter.Q.value = 0.707; // More standard Q for peaking
       midFilter.gain.value = mid;
 
       const highFilter = context.createBiquadFilter();
@@ -566,20 +582,20 @@ export const audioUtils = {
     return { ...result, analysis: `Tuned to 432Hz (shifted by approx. ${semitones.toFixed(2)} semitones from 440Hz standard).` };
   },
 
-  subtleSubwoofer: async (audioDataUrl: string, params: EffectSettings) => { // Note: params is ignored by this preset logic
-    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 35 });
+  subtleSubwoofer: async (audioDataUrl: string, params: EffectSettings) => {
+    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 20 });
   },
   gentleBassBoost: async (audioDataUrl: string, params: EffectSettings) => {
-    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 40 });
+    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 35 });
   },
   mediumBassEnhancement: async (audioDataUrl: string, params: EffectSettings) => {
     return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 60 });
   },
   intenseBassAmplifier: async (audioDataUrl: string, params: EffectSettings) => {
-    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 80 });
+    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 75 });
   },
   maximumBassOverdrive: async (audioDataUrl: string, params: EffectSettings) => {
-    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 100 });
+    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 90 });
   },
 
   vocalAmbience: async (audioDataUrl: string, params: EffectSettings) => {
@@ -606,7 +622,9 @@ export const audioUtils = {
 
   automatedSweep: async (audioDataUrl: string, { speed }: { speed: number }) => {
      return processAudioWithEffect(audioDataUrl, (context, sourceNode, buffer) => {
-        if (buffer.numberOfChannels < 1) return []; 
+        if (buffer.numberOfChannels < 2) { // Ensure audio is stereo or will be processed as stereo
+             console.warn("Automated Sweep: Input is mono. Effect will pan, but perception requires stereo playback.");
+        }
 
         const panner = context.createStereoPanner();
         const lfo = context.createOscillator();
@@ -615,7 +633,7 @@ export const audioUtils = {
         lfo.frequency.value = clampedSpeed;
         
         const lfoGain = context.createGain(); 
-        lfoGain.gain.value = 1;
+        lfoGain.gain.value = 1; // Pan from -1 to 1
         
         lfo.connect(lfoGain);
         lfoGain.connect(panner.pan); 
@@ -623,7 +641,7 @@ export const audioUtils = {
         lfo.start();
         
         return [panner]; 
-    }, `Automated Sweep: Speed ${speed}Hz. Output will be stereo.`, 2); 
+    }, `Automated Sweep: Speed ${speed}Hz. Output will be stereo.`, 2); // Force output to 2 channels
   },
 
   audioSplitter: async (audioDataUrl: string, { startTime: startTimeMinutes, endTime: endTimeMinutes }: { startTime: number, endTime: number }) => {
@@ -710,3 +728,4 @@ export const audioUtils = {
     }, `Spatial Audio Effect: Pan set to ${((depth - 50) / 50).toFixed(2)}. Output will be stereo.`, 2); 
   },
 };
+
