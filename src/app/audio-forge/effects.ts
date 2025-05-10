@@ -1,20 +1,14 @@
 
 import type { Effect } from '@/types/audio-forge';
 import {
-  UploadCloud,
   Waves,
   Clock,
-  Sparkles,
-  Wand2,
   Download,
   Expand,
   Shuffle,
   SignalLow,
   SlidersHorizontal,
-  Eraser,
-  AudioLines,
   Music2,
-  KeyRound,
   Repeat,
   Rewind,
   Spline,
@@ -22,32 +16,23 @@ import {
   Scissors,
   Volume2,
   HeartPulse,
-  FileCog,
-  BarChartBig,
-  LineChart,
-  Globe,
-  Orbit,
-  Cog,
+  Building,
   Moon,
   Copyleft,
-  Building,
-  Church,
-  Palette,
+  Headphones,
   TrendingDown,
   HelpingHand,
-  CloudCog,
-  Headphones
 } from 'lucide-react';
 
 export const effectsList: Effect[] = [
   // Creative Presets
   {
     id: 'dreamscapeMaker',
-    name: "Slow 'n Reverb",
+    name: "Lo-fi", // Changed from "Slow 'n Reverb"
     description: 'Create a slowed and reverb effect for ethereal soundscapes.',
     icon: Moon,
     controlType: 'button',
-    actionLabel: "Apply Slow 'n Reverb",
+    actionLabel: "Apply Lo-fi Effect", // Changed from "Apply Slow 'n Reverb"
     handlerKey: 'dreamscapeMaker',
     groupName: 'Creative Presets',
   },
@@ -153,7 +138,7 @@ export const effectsList: Effect[] = [
     id: 'keyTransposer',
     name: 'Key Transposer',
     description: 'Transpose the key of an audio piece.',
-    icon: Music2, // Replaced KeyRound
+    icon: Music2, 
     controlType: 'number_input',
     parameters: [
       { name: 'semitones', label: 'Semitones', type: 'number_input', defaultValue: 0, min: -12, max: 12, step: 1 }
@@ -257,7 +242,7 @@ export const effectsList: Effect[] = [
     id: 'reverbPresets',
     name: 'Reverb Presets',
     description: 'Simulate various acoustic spaces.',
-    icon: Building, // Using Building icon
+    icon: Building, 
     controlType: 'group', 
     groupName: 'Reverb Presets',
     parameters: [
@@ -266,8 +251,8 @@ export const effectsList: Effect[] = [
       { name: 'compactRoomReflector', label: 'Small Room', type: 'button', handlerKey: 'compactRoomReflector', defaultValue: '' },
       { name: 'averageRoomReverberator', label: 'Medium Room', type: 'button', handlerKey: 'averageRoomReverberator', defaultValue: '' },
       { name: 'grandRoomReverb', label: 'Large Room', type: 'button', handlerKey: 'grandRoomReverb', defaultValue: '' },
-      { name: 'chapelEchoes', label: 'Chapel Hall', type: 'button', handlerKey: 'chapelEchoes', defaultValue: '' }, // Using Church icon
-      { name: 'cathedralAcoustics', label: 'Cathedral', type: 'button', handlerKey: 'cathedralAcoustics', defaultValue: '' }, // Using Church icon
+      { name: 'chapelEchoes', label: 'Chapel Hall', type: 'button', handlerKey: 'chapelEchoes', defaultValue: '' }, 
+      { name: 'cathedralAcoustics', label: 'Cathedral', type: 'button', handlerKey: 'cathedralAcoustics', defaultValue: '' }, 
     ]
   },
 ];
@@ -294,7 +279,4 @@ export const fallbackIcon = HelpingHand;
 // - Format Shifter: Part of ExportPanel
 // - Frequency Visualizer: Component in MainDisplayPanel
 // - Amplitude Plotter: Component in MainDisplayPanel
-// - Channel Router: Removed
-// - Voice Extractor: Removed
-// - Channel Compressor: Removed
 // - AI Tools: Removed
