@@ -1,3 +1,4 @@
+
 // In a real app, these would interact with Web Audio API or a backend service
 
 export type AudioProcessingFunction = (
@@ -92,17 +93,21 @@ const alterResonance: AudioProcessingFunction = async (audioDataUrl, params) => 
   filterNode.type = 'peaking'; 
 
   const BASE_PEAKING_FILTER_HZ = 1000; 
-  const Q_VALUE = 5; 
-  const GAIN_VALUE = 6; 
+  const Q_VALUE = 1.5; // Slightly broader Q for more noticeable resonance change
+  const GAIN_VALUE_MAX = 12; // Max gain for resonance
 
   const frequencyShiftParam = params.frequency || 0; 
   const numericFrequencyShift = typeof frequencyShiftParam === 'number' ? frequencyShiftParam : 0;
   
+  // Map semitone shift to gain. More shift = more gain, up to GAIN_VALUE_MAX
+  // Let's make it so 0 shift = 0 gain (no change), and +/-12 semitones = +/-GAIN_VALUE_MAX
+  const gain = (numericFrequencyShift / 12) * GAIN_VALUE_MAX;
+
   const centerFrequency = BASE_PEAKING_FILTER_HZ * Math.pow(2, numericFrequencyShift / 12);
   
   filterNode.frequency.setValueAtTime(centerFrequency, offlineContext.currentTime);
   filterNode.Q.setValueAtTime(Q_VALUE, offlineContext.currentTime);
-  filterNode.gain.setValueAtTime(GAIN_VALUE, offlineContext.currentTime);
+  filterNode.gain.setValueAtTime(gain, offlineContext.currentTime);
 
 
   sourceNode.connect(filterNode);
@@ -112,7 +117,7 @@ const alterResonance: AudioProcessingFunction = async (audioDataUrl, params) => 
   const renderedBuffer = await offlineContext.startRendering();
   const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
   
-  const analysis = `Applied Resonance Alteration: Peaking filter centered at ${centerFrequency.toFixed(2)} Hz, Q=${Q_VALUE}, Gain=${GAIN_VALUE}dB. Shift param: ${numericFrequencyShift} semitones.`;
+  const analysis = `Applied Resonance Alteration: Peaking filter centered at ${centerFrequency.toFixed(2)} Hz, Q=${Q_VALUE}, Gain=${gain.toFixed(1)}dB. Shift param: ${numericFrequencyShift} semitones.`;
   
   await audioContext.close();
 
@@ -294,10 +299,12 @@ const subharmonicIntensifier: AudioProcessingFunction = async (audioDataUrl, par
   const lowshelfFilter = offlineContext.createBiquadFilter();
   lowshelfFilter.type = 'lowshelf';
   
-  const intensityValue = Number(params.intensity || 0); // Ensure intensity is a number, default to 0
-  const gainDb = (intensityValue / 100) * 18; // Max 18dB boost for more noticeable effect
+  const intensityValue = Number(params.intensity || 0); 
+  // Make the gain more aggressive. Max 24dB boost.
+  const gainDb = (intensityValue / 100) * 24; 
 
-  lowshelfFilter.frequency.setValueAtTime(120, offlineContext.currentTime); // Boost frequencies below 120Hz
+  // Target deeper lows for subharmonic effect
+  lowshelfFilter.frequency.setValueAtTime(80, offlineContext.currentTime); 
   lowshelfFilter.gain.setValueAtTime(gainDb, offlineContext.currentTime);
 
   sourceNode.connect(lowshelfFilter);
@@ -307,16 +314,62 @@ const subharmonicIntensifier: AudioProcessingFunction = async (audioDataUrl, par
   const renderedBuffer = await offlineContext.startRendering();
   const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
   
-  const analysis = `Applied Subharmonic Intensifier: Low-shelf filter at 120Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityValue.toFixed(0)}%).`;
+  const analysis = `Applied Subharmonic Intensifier: Low-shelf filter at 80Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityValue}%).`;
   
-  // It's good practice to close the primary AudioContext after use.
-  // If it was intentionally removed before, ensure it's managed correctly elsewhere or add it back if scoped to this function.
-  // For now, leaving it as per the prior state where it was absent in this specific function in the provided files.
-  // If resource leaks become an issue, this is a place to check.
-  // However, for consistency with other similar functions, let's add it.
   await audioContext.close();
 
+  return { processedAudioDataUrl, analysis };
+};
 
+const frequencySculptor: AudioProcessingFunction = async (audioDataUrl, params) => {
+  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const response = await fetch(audioDataUrl);
+  const arrayBuffer = await response.arrayBuffer();
+  const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+  const offlineContext = new OfflineAudioContext(
+    decodedAudioBuffer.numberOfChannels,
+    decodedAudioBuffer.length,
+    decodedAudioBuffer.sampleRate
+  );
+
+  const sourceNode = offlineContext.createBufferSource();
+  sourceNode.buffer = decodedAudioBuffer;
+
+  const lowGain = Number(params.low || 0);
+  const midGain = Number(params.mid || 0);
+  const highGain = Number(params.high || 0);
+
+  const lowFilter = offlineContext.createBiquadFilter();
+  lowFilter.type = 'lowshelf';
+  lowFilter.frequency.setValueAtTime(250, offlineContext.currentTime); // Typical low-shelf crossover
+  lowFilter.gain.setValueAtTime(lowGain, offlineContext.currentTime);
+
+  const midFilter = offlineContext.createBiquadFilter();
+  midFilter.type = 'peaking';
+  midFilter.frequency.setValueAtTime(1000, offlineContext.currentTime); // Typical mid frequency
+  midFilter.Q.setValueAtTime(1, offlineContext.currentTime); // Standard Q value
+  midFilter.gain.setValueAtTime(midGain, offlineContext.currentTime);
+
+  const highFilter = offlineContext.createBiquadFilter();
+  highFilter.type = 'highshelf';
+  highFilter.frequency.setValueAtTime(4000, offlineContext.currentTime); // Typical high-shelf crossover
+  highFilter.gain.setValueAtTime(highGain, offlineContext.currentTime);
+
+  // Connect nodes in series: source -> low -> mid -> high -> destination
+  sourceNode.connect(lowFilter);
+  lowFilter.connect(midFilter);
+  midFilter.connect(highFilter);
+  highFilter.connect(offlineContext.destination);
+
+  sourceNode.start(0);
+
+  const renderedBuffer = await offlineContext.startRendering();
+  const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
+
+  const analysis = `Applied Frequency Sculptor: Low: ${lowGain}dB @ 250Hz (Shelf), Mid: ${midGain}dB @ 1000Hz (Peak), High: ${highGain}dB @ 4000Hz (Shelf).`;
+
+  await audioContext.close();
   return { processedAudioDataUrl, analysis };
 };
 
@@ -334,7 +387,7 @@ export const audioUtils: Record<string, AudioProcessingFunction> = {
   automatedSweep: automatedSweep,
   stereoWidener: stereoWidener,
   subharmonicIntensifier: subharmonicIntensifier,
-  frequencySculptor: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Frequency Sculptor', params),
+  frequencySculptor: frequencySculptor,
   keyTransposer: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Key Transposer', params),
   echoGenerator: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Echo Generator', params),
   reversePlayback: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Reverse Playback', params),
