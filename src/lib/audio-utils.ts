@@ -1,5 +1,7 @@
 
 
+
+
 // In a real app, these would interact with Web Audio API or a backend service
 
 export type AudioProcessingFunction = (
@@ -307,19 +309,23 @@ const subharmonicIntensifier: AudioProcessingFunction = async (audioDataUrl, par
   lowshelfFilter.type = 'lowshelf';
   
   const intensityParam = Number(params.intensity || 0); 
-  const gainDb = (intensityParam / 100) * 18; // Max 18dB boost
+  const gainDb = (intensityParam / 100) * 18; // Max 18dB boost, adjustable
 
-  lowshelfFilter.frequency.setValueAtTime(80, offlineContext.currentTime); // Target deeper lows
+  lowshelfFilter.frequency.setValueAtTime(120, offlineContext.currentTime); // Boost frequencies below 120Hz
   lowshelfFilter.gain.setValueAtTime(gainDb, offlineContext.currentTime);
 
+  // Connect the nodes
   sourceNode.connect(lowshelfFilter);
   lowshelfFilter.connect(offlineContext.destination);
+
+  // Start the source node
   sourceNode.start(0);
 
+  // Render the audio
   const renderedBuffer = await offlineContext.startRendering();
   const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
   
-  const analysis = `Applied Subharmonic Intensifier: Low-shelf filter at 80Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityParam}%).`;
+  const analysis = `Applied Subharmonic Intensifier: Low-shelf filter at 120Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityParam}%).`;
   
   await audioContext.close();
 
@@ -394,7 +400,6 @@ const keyTransposer: AudioProcessingFunction = async (audioDataUrl, params) => {
     throw new Error("Playback rate (derived from semitones) must be greater than 0.");
   }
   
-  // Adjust the length of the offline context based on the playback rate
   const newLengthInSamples = Math.floor(decodedAudioBuffer.length / playbackRate);
 
   const offlineContext = new OfflineAudioContext(
@@ -420,6 +425,45 @@ const keyTransposer: AudioProcessingFunction = async (audioDataUrl, params) => {
   return { processedAudioDataUrl, analysis };
 };
 
+const paceAdjuster: AudioProcessingFunction = async (audioDataUrl, params) => {
+  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  await resumeAudioContext(audioContext);
+  const response = await fetch(audioDataUrl);
+  const arrayBuffer = await response.arrayBuffer();
+  const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+  const tempoAdjust = Number(params.tempo || 1.0);
+  if (tempoAdjust <= 0) {
+    await audioContext.close();
+    throw new Error("Tempo adjustment factor must be greater than 0.");
+  }
+
+  // Changing playbackRate affects duration, so the OfflineAudioContext length needs adjustment.
+  const newLengthInSamples = Math.floor(decodedAudioBuffer.length / tempoAdjust);
+
+  const offlineContext = new OfflineAudioContext(
+    decodedAudioBuffer.numberOfChannels,
+    newLengthInSamples,
+    decodedAudioBuffer.sampleRate
+  );
+  await resumeAudioContext(offlineContext);
+
+  const sourceNode = offlineContext.createBufferSource();
+  sourceNode.buffer = decodedAudioBuffer;
+  sourceNode.playbackRate.value = tempoAdjust;
+
+  sourceNode.connect(offlineContext.destination);
+  sourceNode.start(0);
+
+  const renderedBuffer = await offlineContext.startRendering();
+  const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
+
+  const analysis = `Applied Pace Adjuster: Tempo adjusted by a factor of ${tempoAdjust.toFixed(2)}. Note: This method also affects pitch. New duration: ${(renderedBuffer.duration).toFixed(2)}s.`;
+  
+  await audioContext.close();
+  return { processedAudioDataUrl, analysis };
+};
+
 
 const simulateProcessing = async (audioDataUrl: string, operationName: string, params: Record<string, any>): Promise<{ processedAudioDataUrl: string; analysis?: string }> => {
   console.log(`Simulating ${operationName} with params:`, params);
@@ -436,10 +480,10 @@ export const audioUtils: Record<string, AudioProcessingFunction> = {
   subharmonicIntensifier: subharmonicIntensifier,
   frequencySculptor: frequencySculptor,
   keyTransposer: keyTransposer,
+  paceAdjuster: paceAdjuster,
   echoGenerator: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Echo Generator', params),
   reversePlayback: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Reverse Playback', params),
   channelRouter: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Channel Router', params),
-  paceAdjuster: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Pace Adjuster', params),
   audioSplitter: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Audio Splitter', params),
   voiceExtractor: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Voice Extractor', params),
   gainController: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Gain Controller', params),
@@ -484,3 +528,4 @@ export const resumeAudioContext = async (audioContext: AudioContext | OfflineAud
     }
   }
 };
+
