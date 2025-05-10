@@ -38,7 +38,8 @@ import {
   Palette,
   TrendingDown,
   HelpingHand,
-  CloudCog
+  CloudCog,
+  Headphones // Added for 8D audio
 } from 'lucide-react';
 
 export const effectsList: Effect[] = [
@@ -67,6 +68,7 @@ export const effectsList: Effect[] = [
     handlerKey: 'temporalModification',
     groupName: 'Core Effects',
   },
+  // Spatial Effects
   {
     id: 'stereoWidener',
     name: 'Stereo Widener',
@@ -79,6 +81,31 @@ export const effectsList: Effect[] = [
     handlerKey: 'stereoWidener',
     groupName: 'Spatial Effects',
   },
+  {
+    id: 'automatedSweep',
+    name: 'Automated Sweep',
+    description: 'Dynamically shift sound between left and right channels.',
+    icon: Shuffle,
+    controlType: 'slider',
+    parameters: [
+      { name: 'speed', label: 'Sweep Speed (Hz)', type: 'slider', defaultValue: 0.5, min: 0.05, max: 5, step: 0.01 }
+    ],
+    handlerKey: 'automatedSweep',
+    groupName: 'Spatial Effects',
+  },
+  {
+    id: 'spatialAudioEffect',
+    name: 'Spatial Audio Effect',
+    description: 'Emulate surround sound. Placeholder.',
+    icon: Globe,
+    controlType: 'slider',
+    parameters: [
+      { name: 'depth', label: 'Spatial Depth', type: 'slider', defaultValue: 50, min: 0, max: 100, step: 1 }
+    ],
+    handlerKey: 'spatialAudioEffect',
+    groupName: 'Spatial Effects',
+  },
+  // Frequency Tools
   {
     id: 'subharmonicIntensifier',
     name: 'Subharmonic Intensifier',
@@ -105,6 +132,7 @@ export const effectsList: Effect[] = [
     handlerKey: 'frequencySculptor',
     groupName: 'Frequency Tools',
   },
+  // Pitch & Time
   {
     id: 'keyTransposer',
     name: 'Key Transposer',
@@ -117,6 +145,19 @@ export const effectsList: Effect[] = [
     handlerKey: 'keyTransposer',
     groupName: 'Pitch & Time',
   },
+  {
+    id: 'paceAdjuster',
+    name: 'Pace Adjuster',
+    description: 'Alter the playback tempo without affecting pitch.',
+    icon: Gauge,
+    controlType: 'slider',
+    parameters: [
+      { name: 'tempo', label: 'Tempo Adjust', type: 'slider', defaultValue: 1, min: 0.5, max: 2, step: 0.01 }
+    ],
+    handlerKey: 'paceAdjuster',
+    groupName: 'Pitch & Time',
+  },
+  // Creative Effects
   {
     id: 'echoGenerator',
     name: 'Echo Generator',
@@ -141,18 +182,7 @@ export const effectsList: Effect[] = [
     handlerKey: 'reversePlayback',
     groupName: 'Creative Effects',
   },
-  {
-    id: 'paceAdjuster',
-    name: 'Pace Adjuster',
-    description: 'Alter the playback tempo without affecting pitch.',
-    icon: Gauge,
-    controlType: 'slider',
-    parameters: [
-      { name: 'tempo', label: 'Tempo Adjust', type: 'slider', defaultValue: 1, min: 0.5, max: 2, step: 0.01 }
-    ],
-    handlerKey: 'paceAdjuster',
-    groupName: 'Pitch & Time',
-  },
+  // Utility Tools
   {
     id: 'gainController',
     name: 'Gain Controller',
@@ -164,84 +194,6 @@ export const effectsList: Effect[] = [
     ],
     handlerKey: 'gainController',
     groupName: 'Utility Tools',
-  },
-  {
-    id: 'rhythmDetector',
-    name: 'Rhythm Detector',
-    description: 'Analyze BPM (Beats Per Minute).',
-    icon: HeartPulse,
-    controlType: 'button',
-    actionLabel: 'Analyze BPM',
-    handlerKey: 'rhythmDetector',
-    groupName: 'Analysis Tools',
-    outputsAnalysis: true,
-  },
-  // Presets & Other Tools
-  {
-    id: 'dreamscapeMaker',
-    name: "Slow 'n Reverb",
-    description: 'Create a slowed and reverb effect for ethereal soundscapes.',
-    icon: Moon,
-    controlType: 'button',
-    actionLabel: "Apply Slow 'n Reverb",
-    handlerKey: 'dreamscapeMaker',
-    groupName: 'Creative Presets',
-  },
-  {
-    id: 'frequencyTuner432',
-    name: 'Tune to 432Hz',
-    description: 'Convert a track from standard 440Hz A4 tuning to 432Hz.',
-    icon: Copyleft, // (icon for alternative/harmony)
-    controlType: 'button',
-    actionLabel: 'Tune to 432Hz',
-    handlerKey: 'frequencyTuner',
-    groupName: 'Creative Presets',
-  },
-  {
-    id: 'bassBoosterPresets',
-    name: 'Bass Booster',
-    description: 'Presets to enhance low frequencies.',
-    icon: SignalLow,
-    controlType: 'group', // Group of buttons
-    groupName: 'Bass Boost Presets',
-    // Individual buttons will be generated from this structure
-    parameters: [
-      { name: 'subtleSubwoofer', label: 'Subtle Subwoofer', type: 'button', handlerKey: 'subtleSubwoofer', defaultValue: '' },
-      { name: 'gentleBassBoost', label: 'Gentle Boost', type: 'button', handlerKey: 'gentleBassBoost', defaultValue: '' },
-      { name: 'mediumBassEnhancement', label: 'Medium Enhancement', type: 'button', handlerKey: 'mediumBassEnhancement', defaultValue: '' },
-      { name: 'intenseBassAmplifier', label: 'Intense Amplifier', type: 'button', handlerKey: 'intenseBassAmplifier', defaultValue: '' },
-      { name: 'maximumBassOverdrive', label: 'Maximum Overdrive', type: 'button', handlerKey: 'maximumBassOverdrive', defaultValue: '' },
-    ]
-  },
-  {
-    id: 'reverbPresets',
-    name: 'Reverb Presets',
-    description: 'Simulate various acoustic spaces.',
-    icon: Building,
-    controlType: 'group', // Group of buttons
-    groupName: 'Reverb Presets',
-    parameters: [
-      { name: 'vocalAmbience', label: 'Vocal Ambience', type: 'button', handlerKey: 'vocalAmbience', defaultValue: '' },
-      { name: 'washroomEcho', label: 'Washroom', type: 'button', handlerKey: 'washroomEcho', defaultValue: '' },
-      { name: 'compactRoomReflector', label: 'Small Room', type: 'button', handlerKey: 'compactRoomReflector', defaultValue: '' },
-      { name: 'averageRoomReverberator', label: 'Medium Room', type: 'button', handlerKey: 'averageRoomReverberator', defaultValue: '' },
-      { name: 'grandRoomReverb', label: 'Large Room', type: 'button', handlerKey: 'grandRoomReverb', defaultValue: '' },
-      { name: 'chapelEchoes', label: 'Chapel Hall', type: 'button', handlerKey: 'chapelEchoes', defaultValue: '' },
-      { name: 'cathedralAcoustics', label: 'Cathedral', type: 'button', handlerKey: 'cathedralAcoustics', defaultValue: '' },
-    ]
-  },
-  // Placeholder for features that need more complex UI or are lower priority for initial scaffolding
-  {
-    id: 'automatedSweep',
-    name: 'Automated Sweep',
-    description: 'Dynamically shift sound between left and right channels.',
-    icon: Shuffle,
-    controlType: 'slider',
-    parameters: [
-      { name: 'speed', label: 'Sweep Speed (Hz)', type: 'slider', defaultValue: 0.5, min: 0.1, max: 5, step: 0.1 }
-    ],
-    handlerKey: 'automatedSweep',
-    groupName: 'Spatial Effects',
   },
   {
     id: 'audioSplitter',
@@ -256,23 +208,87 @@ export const effectsList: Effect[] = [
     handlerKey: 'audioSplitter',
     groupName: 'Utility Tools',
   },
+  // Analysis Tools
   {
-    id: 'spatialAudioEffect',
-    name: 'Spatial Audio Effect',
-    description: 'Emulate surround sound. Placeholder.',
-    icon: Globe,
-    controlType: 'slider',
+    id: 'rhythmDetector',
+    name: 'Rhythm Detector',
+    description: 'Analyze BPM (Beats Per Minute).',
+    icon: HeartPulse,
+    controlType: 'button',
+    actionLabel: 'Analyze BPM',
+    handlerKey: 'rhythmDetector',
+    groupName: 'Analysis Tools',
+    outputsAnalysis: true,
+  },
+  // Creative Presets
+  {
+    id: 'dreamscapeMaker',
+    name: "Slow 'n Reverb",
+    description: 'Create a slowed and reverb effect for ethereal soundscapes.',
+    icon: Moon,
+    controlType: 'button',
+    actionLabel: "Apply Slow 'n Reverb",
+    handlerKey: 'dreamscapeMaker',
+    groupName: 'Creative Presets',
+  },
+  {
+    id: 'frequencyTuner432',
+    name: 'Tune to 432Hz',
+    description: 'Convert a track from standard 440Hz A4 tuning to 432Hz.',
+    icon: Copyleft, 
+    controlType: 'button',
+    actionLabel: 'Tune to 432Hz',
+    handlerKey: 'frequencyTuner',
+    groupName: 'Creative Presets',
+  },
+  {
+    id: 'audio8DConverter',
+    name: '8D Audio Converter',
+    description: 'Simulate an 8D audio experience by combining panning and reverb. Best experienced with headphones.',
+    icon: Headphones, // Or Orbit
+    controlType: 'button',
+    actionLabel: 'Apply 8D Effect',
+    handlerKey: 'apply8DEffect',
+    groupName: 'Creative Presets',
+  },
+  // Bass Boost Presets
+  {
+    id: 'bassBoosterPresets',
+    name: 'Bass Booster',
+    description: 'Presets to enhance low frequencies.',
+    icon: SignalLow,
+    controlType: 'group', 
+    groupName: 'Bass Boost Presets',
     parameters: [
-      { name: 'depth', label: 'Spatial Depth', type: 'slider', defaultValue: 50, min: 0, max: 100, step: 1 }
-    ],
-    handlerKey: 'spatialAudioEffect',
-    groupName: 'Spatial Effects',
+      { name: 'subtleSubwoofer', label: 'Subtle Subwoofer', type: 'button', handlerKey: 'subtleSubwoofer', defaultValue: '' },
+      { name: 'gentleBassBoost', label: 'Gentle Boost', type: 'button', handlerKey: 'gentleBassBoost', defaultValue: '' },
+      { name: 'mediumBassEnhancement', label: 'Medium Enhancement', type: 'button', handlerKey: 'mediumBassEnhancement', defaultValue: '' },
+      { name: 'intenseBassAmplifier', label: 'Intense Amplifier', type: 'button', handlerKey: 'intenseBassAmplifier', defaultValue: '' },
+      { name: 'maximumBassOverdrive', label: 'Maximum Overdrive', type: 'button', handlerKey: 'maximumBassOverdrive', defaultValue: '' },
+    ]
+  },
+  // Reverb Presets
+  {
+    id: 'reverbPresets',
+    name: 'Reverb Presets',
+    description: 'Simulate various acoustic spaces.',
+    icon: Building,
+    controlType: 'group', 
+    groupName: 'Reverb Presets',
+    parameters: [
+      { name: 'vocalAmbience', label: 'Vocal Ambience', type: 'button', handlerKey: 'vocalAmbience', defaultValue: '' },
+      { name: 'washroomEcho', label: 'Washroom', type: 'button', handlerKey: 'washroomEcho', defaultValue: '' },
+      { name: 'compactRoomReflector', label: 'Small Room', type: 'button', handlerKey: 'compactRoomReflector', defaultValue: '' },
+      { name: 'averageRoomReverberator', label: 'Medium Room', type: 'button', handlerKey: 'averageRoomReverberator', defaultValue: '' },
+      { name: 'grandRoomReverb', label: 'Large Room', type: 'button', handlerKey: 'grandRoomReverb', defaultValue: '' },
+      { name: 'chapelEchoes', label: 'Chapel Hall', type: 'button', handlerKey: 'chapelEchoes', defaultValue: '' },
+      { name: 'cathedralAcoustics', label: 'Cathedral', type: 'button', handlerKey: 'cathedralAcoustics', defaultValue: '' },
+    ]
   },
 ];
 
 export const effectGroups = Array.from(new Set(effectsList.map(e => e.groupName))).filter(Boolean) as string[];
 
-// Add a fallback icon for any effects that might miss one
 export const fallbackIcon = HelpingHand;
 
 // Features that might be represented differently or are not direct effects

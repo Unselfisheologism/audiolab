@@ -162,9 +162,9 @@ export const audioUtils = {
       const biquadFilter = context.createBiquadFilter();
       biquadFilter.type = 'peaking';
       const filterFreq = Math.max(20, 1000 + (frequency * 40)); 
-      biquadFilter.frequency.value = filterFreq;
-      biquadFilter.Q.value = 1.5;
-      biquadFilter.gain.value = frequency; // Use the passed frequency as gain
+      biquadFilter.frequency.setValueAtTime(filterFreq, context.currentTime);
+      biquadFilter.Q.setValueAtTime(1.5, context.currentTime);
+      biquadFilter.gain.setValueAtTime(frequency, context.currentTime); // Use the passed frequency as gain
       return [biquadFilter];
     }, `Altered resonance: Peaking filter with ${frequency}dB gain around ${ (1000 + (frequency * 40)).toFixed(0) }Hz.`);
   },
@@ -213,14 +213,14 @@ export const audioUtils = {
       const sGain = width; 
 
       const gainLToMid = offlineContext.createGain();
-      gainLToMid.gain.value = 0.5 * mGain; 
+      gainLToMid.gain.setValueAtTime(0.5 * mGain, offlineContext.currentTime); 
       const gainRToMid = offlineContext.createGain();
-      gainRToMid.gain.value = 0.5 * mGain; 
+      gainRToMid.gain.setValueAtTime(0.5 * mGain, offlineContext.currentTime); 
 
       const gainLToSide = offlineContext.createGain();
-      gainLToSide.gain.value = 0.5 * sGain;  
+      gainLToSide.gain.setValueAtTime(0.5 * sGain, offlineContext.currentTime);  
       const gainRToSideInverted = offlineContext.createGain();
-      gainRToSideInverted.gain.value = -0.5 * sGain; 
+      gainRToSideInverted.gain.setValueAtTime(-0.5 * sGain, offlineContext.currentTime); 
       
       sourceNode.connect(splitter);
       splitter.connect(gainLToMid, 0, 0); 
@@ -229,29 +229,27 @@ export const audioUtils = {
       splitter.connect(gainLToSide, 0, 0);       
       splitter.connect(gainRToSideInverted, 1, 0); 
 
-      // Output L' = M + S
-      const sumGainL = offlineContext.createGain(); // To sum M and S components for L'
+      const sumGainL = offlineContext.createGain(); 
       gainLToMid.connect(sumGainL);
       gainRToMid.connect(sumGainL);
       gainLToSide.connect(sumGainL);
-      gainRToSideInverted.connect(sumGainL); // This was (L-R) basically.
+      gainRToSideInverted.connect(sumGainL); 
       sumGainL.connect(merger, 0, 0);
 
 
-      // Output R' = M - S
-      const sumGainR_M = offlineContext.createGain(); // For M part of R'
+      const sumGainR_M = offlineContext.createGain(); 
       gainLToMid.connect(sumGainR_M);
       gainRToMid.connect(sumGainR_M);
       
-      const sumGainR_S_inverted = offlineContext.createGain(); // For -S part of R'
+      const sumGainR_S_inverted = offlineContext.createGain(); 
       const sideInverterForR_L = offlineContext.createGain(); 
-      sideInverterForR_L.gain.value = -1;
+      sideInverterForR_L.gain.setValueAtTime(-1, offlineContext.currentTime);
       gainLToSide.connect(sideInverterForR_L);
       sideInverterForR_L.connect(sumGainR_S_inverted);
 
       const sideInverterForR_R = offlineContext.createGain();
-      sideInverterForR_R.gain.value = -1;
-      gainRToSideInverted.connect(sideInverterForR_R); // This is -(-R*0.5*sGain) = R*0.5*sGain
+      sideInverterForR_R.gain.setValueAtTime(-1, offlineContext.currentTime);
+      gainRToSideInverted.connect(sideInverterForR_R); 
       sideInverterForR_R.connect(sumGainR_S_inverted);
 
       const finalSumR = offlineContext.createGain();
@@ -270,8 +268,8 @@ export const audioUtils = {
     return processAudioWithEffect(audioDataUrl, (offlineContext, sourceNode, decodedAudioBuffer) => {
       const lowshelfFilter = offlineContext.createBiquadFilter();
       lowshelfFilter.type = 'lowshelf';
-      lowshelfFilter.frequency.value = 120; 
-      lowshelfFilter.gain.value = gainDb; 
+      lowshelfFilter.frequency.setValueAtTime(120, offlineContext.currentTime); 
+      lowshelfFilter.gain.setValueAtTime(gainDb, offlineContext.currentTime); 
       return [lowshelfFilter];
     }, `Applied Subharmonic Intensifier: Low-shelf filter at 120Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityParam}%). Effect is most noticeable on audio with existing low-frequency content.`);
   },
@@ -280,19 +278,19 @@ export const audioUtils = {
      return processAudioWithEffect(audioDataUrl, (context, source, buffer) => {
       const lowFilter = context.createBiquadFilter();
       lowFilter.type = 'lowshelf';
-      lowFilter.frequency.value = 250;
-      lowFilter.gain.value = low;
+      lowFilter.frequency.setValueAtTime(250, context.currentTime);
+      lowFilter.gain.setValueAtTime(low, context.currentTime);
 
       const midFilter = context.createBiquadFilter();
       midFilter.type = 'peaking';
-      midFilter.frequency.value = 1000;
-      midFilter.Q.value = 0.707; 
-      midFilter.gain.value = mid;
+      midFilter.frequency.setValueAtTime(1000, context.currentTime);
+      midFilter.Q.setValueAtTime(0.707, context.currentTime); 
+      midFilter.gain.setValueAtTime(mid, context.currentTime);
 
       const highFilter = context.createBiquadFilter();
       highFilter.type = 'highshelf';
-      highFilter.frequency.value = 4000;
-      highFilter.gain.value = high;
+      highFilter.frequency.setValueAtTime(4000, context.currentTime);
+      highFilter.gain.setValueAtTime(high, context.currentTime);
       
       return [lowFilter, midFilter, highFilter];
     }, `Frequency Sculptor: Low ${low}dB @ 250Hz, Mid ${mid}dB @ 1kHz, High ${high}dB @ 4kHz.`);
@@ -364,17 +362,17 @@ export const audioUtils = {
     const sourceNode = offlineContext.createBufferSource();
     sourceNode.buffer = decodedAudioBuffer;
 
-    const delayNode = offlineContext.createDelay(clampedDelay + 1); 
-    delayNode.delayTime.value = clampedDelay;
+    const delayNode = offlineContext.createDelay(Math.max(1, clampedDelay + 1)); 
+    delayNode.delayTime.setValueAtTime(clampedDelay, offlineContext.currentTime);
 
     const feedbackNode = offlineContext.createGain();
-    feedbackNode.gain.value = clampedFeedback;
+    feedbackNode.gain.setValueAtTime(clampedFeedback, offlineContext.currentTime);
 
     const dryNode = offlineContext.createGain();
-    dryNode.gain.value = 1 - clampedMix;
+    dryNode.gain.setValueAtTime(1 - clampedMix, offlineContext.currentTime);
     
     const wetNode = offlineContext.createGain();
-    wetNode.gain.value = clampedMix;
+    wetNode.gain.setValueAtTime(clampedMix, offlineContext.currentTime);
     
     sourceNode.connect(dryNode);
     dryNode.connect(offlineContext.destination);
@@ -465,7 +463,7 @@ export const audioUtils = {
     const gainValue = Math.pow(10, gain / 20); 
     return processAudioWithEffect(audioDataUrl, (context, source, buffer) => {
       const gainNode = context.createGain();
-      gainNode.gain.value = gainValue;
+      gainNode.gain.setValueAtTime(gainValue, context.currentTime);
       return [gainNode];
     }, `Gain adjusted by ${gain}dB (linear gain: ${gainValue.toFixed(2)}).`);
   },
@@ -590,6 +588,25 @@ export const audioUtils = {
     const result = await audioUtils.keyTransposer(audioDataUrl, { semitones });
     return { ...result, analysis: `Tuned to 432Hz (shifted by approx. ${semitones.toFixed(2)} semitones from 440Hz standard).` };
   },
+  apply8DEffect: async (audioDataUrl: string, params: {} = {}) => {
+    // Step 1: Apply Automated Sweep (Auto Panner)
+    // Parameters for Sweep: Frequency: 0.08 Hz
+    const pannerParams = { speed: 0.08 };
+    const sweepResult = await audioUtils.automatedSweep(audioDataUrl, pannerParams);
+  
+    // Step 2: Apply Echo Generator (Reverb) to the output of the sweep
+    // Parameters for Reverb: 
+    // Reverberance: 50% -> mix: 0.5
+    // Room scale: 100% -> delay: 800ms
+    // Feedback around 0.4 for noticeable reverb
+    const reverbParams = { delay: 800, feedback: 0.4, mix: 0.5 };
+    const finalResult = await audioUtils.echoGenerator(sweepResult.processedAudioDataUrl, reverbParams);
+  
+    return {
+      ...finalResult,
+      analysis: `8D Audio Effect Applied: Auto Panner (Speed: ${pannerParams.speed}Hz) followed by Reverb (Delay: ${reverbParams.delay}ms, Feedback: ${(reverbParams.feedback*100).toFixed(0)}%, Mix: ${(reverbParams.mix*100).toFixed(0)}% Wet). Best experienced with headphones.`,
+    };
+  },
 
   subtleSubwoofer: async (audioDataUrl: string, params: EffectSettings) => {
     return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 20 });
@@ -604,9 +621,7 @@ export const audioUtils = {
     return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 75 });
   },
   maximumBassOverdrive: async (audioDataUrl: string, params: EffectSettings) => {
-    // Diagnostic: Using a very high intensity to make the effect extremely obvious if it's working at all.
-    // This corresponds to a +24dB gain, which should be very noticeable or cause clipping.
-    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 200 }); 
+    return audioUtils.subharmonicIntensifier(audioDataUrl, { intensity: 100 }); // Capped at 100 for safety
   },
 
   vocalAmbience: async (audioDataUrl: string, params: EffectSettings) => {
@@ -641,10 +656,10 @@ export const audioUtils = {
         const lfo = context.createOscillator();
         lfo.type = 'sine';
         const clampedSpeed = Math.max(0.05, Math.min(speed, 10)); 
-        lfo.frequency.value = clampedSpeed;
+        lfo.frequency.setValueAtTime(clampedSpeed, context.currentTime);
         
         const lfoGain = context.createGain(); 
-        lfoGain.gain.value = 1; 
+        lfoGain.gain.setValueAtTime(1, context.currentTime); 
         
         lfo.connect(lfoGain);
         lfoGain.connect(panner.pan); 
