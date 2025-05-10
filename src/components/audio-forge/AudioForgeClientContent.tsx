@@ -6,7 +6,7 @@ import { AppHeader } from './AppHeader';
 import { AudioControlsPanel } from './AudioControlsPanel';
 import { MainDisplayPanel } from './MainDisplayPanel';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import type { EffectSettings } from '@/types/audio-forge';
 import { useToast } from '@/hooks/use-toast';
 import { audioUtils, fileToDataUrl } from '@/lib/audio-utils';
@@ -185,41 +185,48 @@ export default function AudioForgeClientContent() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground">
+    <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
       <AppHeader 
         isMobile={isMobile}
         onOpenEffectsPanel={() => setIsEffectsSheetOpen(true)}
       />
-      {isMobile ? (
-        <div className="flex-grow min-h-0">
-          <MainDisplayPanel {...mainDisplayPanelProps} />
-          <Sheet open={isEffectsSheetOpen} onOpenChange={setIsEffectsSheetOpen}>
-            <SheetContent side="left" className="w-[85vw] max-w-md p-0">
+      <div className="flex-grow min-h-0 md:flex">
+        {isMobile ? (
+          <>
+            <div className="flex-grow p-4 overflow-y-auto">
+              <MainDisplayPanel {...mainDisplayPanelProps} />
+            </div>
+            <Sheet open={isEffectsSheetOpen} onOpenChange={setIsEffectsSheetOpen}>
+              <SheetContent side="left" className="w-[85vw] max-w-md p-0 flex flex-col">
+                <SheetTitle className="sr-only">Audio Effects Panel</SheetTitle>
+                <AudioControlsPanel {...audioControlsPanelProps} />
+              </SheetContent>
+            </Sheet>
+          </>
+        ) : (
+          <ResizablePanelGroup 
+            direction="horizontal"
+            className="flex-grow"
+          >
+            <ResizablePanel 
+              defaultSize={30} 
+              minSize={20} 
+              maxSize={45}
+              className="h-full overflow-y-auto"
+            >
               <AudioControlsPanel {...audioControlsPanelProps} />
-            </SheetContent>
-          </Sheet>
-        </div>
-      ) : (
-        <ResizablePanelGroup 
-          direction="horizontal"
-          className="flex-grow min-h-0"
-        >
-          <ResizablePanel 
-            defaultSize={35} 
-            minSize={25} 
-            maxSize={50}
-          >
-            <AudioControlsPanel {...audioControlsPanelProps} />
-          </ResizablePanel>
-          <ResizableHandle withHandle />
-          <ResizablePanel 
-            defaultSize={65} 
-            minSize={50}
-          >
-            <MainDisplayPanel {...mainDisplayPanelProps} />
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      )}
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel 
+              defaultSize={70} 
+              minSize={55}
+              className="h-full overflow-y-auto"
+            >
+              <MainDisplayPanel {...mainDisplayPanelProps} />
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        )}
+      </div>
     </div>
   );
 }
