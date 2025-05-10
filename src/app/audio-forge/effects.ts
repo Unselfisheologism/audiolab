@@ -17,15 +17,12 @@ import {
   KeyRound,
   Repeat,
   Rewind,
-  // GitFork, // No longer used for Channel Router
   Spline,
   Gauge,
   Scissors,
-  // Mic, // No longer used for Voice Extractor
   Volume2,
   HeartPulse,
   FileCog,
-  // Combine, // No longer used for Channel Compressor
   BarChartBig,
   LineChart,
   Globe,
@@ -39,10 +36,41 @@ import {
   TrendingDown,
   HelpingHand,
   CloudCog,
-  Headphones // Added for 8D audio
+  Headphones
 } from 'lucide-react';
 
 export const effectsList: Effect[] = [
+  // Creative Presets
+  {
+    id: 'dreamscapeMaker',
+    name: "Slow 'n Reverb",
+    description: 'Create a slowed and reverb effect for ethereal soundscapes.',
+    icon: Moon,
+    controlType: 'button',
+    actionLabel: "Apply Slow 'n Reverb",
+    handlerKey: 'dreamscapeMaker',
+    groupName: 'Creative Presets',
+  },
+  {
+    id: 'frequencyTuner432',
+    name: 'Tune to 432Hz',
+    description: 'Convert a track from standard 440Hz A4 tuning to 432Hz.',
+    icon: Copyleft, 
+    controlType: 'button',
+    actionLabel: 'Tune to 432Hz',
+    handlerKey: 'frequencyTuner',
+    groupName: 'Creative Presets',
+  },
+  {
+    id: 'audio8DConverter',
+    name: '8D Audio Converter',
+    description: 'Simulate an 8D audio experience by combining panning and reverb. Best experienced with headphones.',
+    icon: Headphones,
+    controlType: 'button',
+    actionLabel: 'Apply 8D Effect',
+    handlerKey: 'apply8DEffect',
+    groupName: 'Creative Presets',
+  },
   // Core Effects
   {
     id: 'resonanceAlteration',
@@ -68,6 +96,29 @@ export const effectsList: Effect[] = [
     handlerKey: 'temporalModification',
     groupName: 'Core Effects',
   },
+  // AI Tools - REMOVED as per user request
+  // {
+  //   id: 'acousticPurification',
+  //   name: 'Acoustic Purification (AI)',
+  //   description: 'Diminish sound artifacts using AI.',
+  //   icon: Sparkles,
+  //   controlType: 'button',
+  //   actionLabel: 'Purify Audio',
+  //   handlerKey: 'acousticPurification', // This will call the Genkit flow
+  //   groupName: 'AI Tools',
+  //   outputsAnalysis: true,
+  // },
+  // {
+  //   id: 'soundScrubber',
+  //   name: 'Sound Scrubber (AI)',
+  //   description: 'Reduce ambient sounds using AI.',
+  //   icon: Eraser,
+  //   controlType: 'button',
+  //   actionLabel: 'Scrub Sound',
+  //   handlerKey: 'soundScrubber', // This will call the Genkit flow
+  //   groupName: 'AI Tools',
+  //   outputsAnalysis: true,
+  // },
   // Spatial Effects
   {
     id: 'stereoWidener',
@@ -137,7 +188,7 @@ export const effectsList: Effect[] = [
     id: 'keyTransposer',
     name: 'Key Transposer',
     description: 'Transpose the key of an audio piece.',
-    icon: Music2,
+    icon: Music2, // Replaced KeyRound
     controlType: 'number_input',
     parameters: [
       { name: 'semitones', label: 'Semitones', type: 'number_input', defaultValue: 0, min: -12, max: 12, step: 1 }
@@ -195,7 +246,7 @@ export const effectsList: Effect[] = [
     handlerKey: 'gainController',
     groupName: 'Utility Tools',
   },
-  {
+   {
     id: 'audioSplitter',
     name: 'Audio Splitter',
     description: 'Extract sections from an audio file by specifying start and end times in minutes.',
@@ -220,37 +271,6 @@ export const effectsList: Effect[] = [
     groupName: 'Analysis Tools',
     outputsAnalysis: true,
   },
-  // Creative Presets
-  {
-    id: 'dreamscapeMaker',
-    name: "Slow 'n Reverb",
-    description: 'Create a slowed and reverb effect for ethereal soundscapes.',
-    icon: Moon,
-    controlType: 'button',
-    actionLabel: "Apply Slow 'n Reverb",
-    handlerKey: 'dreamscapeMaker',
-    groupName: 'Creative Presets',
-  },
-  {
-    id: 'frequencyTuner432',
-    name: 'Tune to 432Hz',
-    description: 'Convert a track from standard 440Hz A4 tuning to 432Hz.',
-    icon: Copyleft, 
-    controlType: 'button',
-    actionLabel: 'Tune to 432Hz',
-    handlerKey: 'frequencyTuner',
-    groupName: 'Creative Presets',
-  },
-  {
-    id: 'audio8DConverter',
-    name: '8D Audio Converter',
-    description: 'Simulate an 8D audio experience by combining panning and reverb. Best experienced with headphones.',
-    icon: Headphones, // Or Orbit
-    controlType: 'button',
-    actionLabel: 'Apply 8D Effect',
-    handlerKey: 'apply8DEffect',
-    groupName: 'Creative Presets',
-  },
   // Bass Boost Presets
   {
     id: 'bassBoosterPresets',
@@ -272,7 +292,7 @@ export const effectsList: Effect[] = [
     id: 'reverbPresets',
     name: 'Reverb Presets',
     description: 'Simulate various acoustic spaces.',
-    icon: Building,
+    icon: Building, // Using Building icon
     controlType: 'group', 
     groupName: 'Reverb Presets',
     parameters: [
@@ -281,8 +301,8 @@ export const effectsList: Effect[] = [
       { name: 'compactRoomReflector', label: 'Small Room', type: 'button', handlerKey: 'compactRoomReflector', defaultValue: '' },
       { name: 'averageRoomReverberator', label: 'Medium Room', type: 'button', handlerKey: 'averageRoomReverberator', defaultValue: '' },
       { name: 'grandRoomReverb', label: 'Large Room', type: 'button', handlerKey: 'grandRoomReverb', defaultValue: '' },
-      { name: 'chapelEchoes', label: 'Chapel Hall', type: 'button', handlerKey: 'chapelEchoes', defaultValue: '' },
-      { name: 'cathedralAcoustics', label: 'Cathedral', type: 'button', handlerKey: 'cathedralAcoustics', defaultValue: '' },
+      { name: 'chapelEchoes', label: 'Chapel Hall', type: 'button', handlerKey: 'chapelEchoes', defaultValue: '' }, // Using Church icon
+      { name: 'cathedralAcoustics', label: 'Cathedral', type: 'button', handlerKey: 'cathedralAcoustics', defaultValue: '' }, // Using Church icon
     ]
   },
 ];
@@ -297,3 +317,7 @@ export const fallbackIcon = HelpingHand;
 // - Format Shifter: Part of ExportPanel
 // - Frequency Visualizer: Component in MainDisplayPanel
 // - Amplitude Plotter: Component in MainDisplayPanel
+// - Channel Router: Removed
+// - Voice Extractor: Removed
+// - Channel Compressor: Removed
+// - AI Tools: Removed
