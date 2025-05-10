@@ -204,7 +204,7 @@ export const effectsList: Effect[] = [
     controlType: 'group', // Group of buttons
     groupName: 'Bass Boost Presets',
     // Individual buttons will be generated from this structure
-    parameters: [ 
+    parameters: [
       { name: 'subtleSubwoofer', label: 'Subtle Subwoofer', type: 'button', handlerKey: 'subtleSubwoofer', defaultValue: '' },
       { name: 'gentleBassBoost', label: 'Gentle Boost', type: 'button', handlerKey: 'gentleBassBoost', defaultValue: '' },
       { name: 'mediumBassEnhancement', label: 'Medium Enhancement', type: 'button', handlerKey: 'mediumBassEnhancement', defaultValue: '' },
@@ -259,8 +259,8 @@ export const effectsList: Effect[] = [
     icon: Scissors,
     controlType: 'group',
     parameters: [
-      { name: 'startTime', label: 'Start Time (s)', type: 'number_input', defaultValue: 0, min: 0, step: 0.01 },
-      { name: 'endTime', label: 'End Time (s)', type: 'number_input', defaultValue: 5, min: 0, step: 0.01 }
+      { name: 'startTime', label: 'Start Time (min)', type: 'number_input', defaultValue: 0, min: 0, step: 0.01 },
+      { name: 'endTime', label: 'End Time (min)', type: 'number_input', defaultValue: 0.1, min: 0, step: 0.01 } // Default 0.1 min = 6 seconds
     ],
     handlerKey: 'audioSplitter',
     groupName: 'Utility Tools',
