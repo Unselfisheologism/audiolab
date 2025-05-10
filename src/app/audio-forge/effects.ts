@@ -1,3 +1,4 @@
+
 import type { Effect } from '@/types/audio-forge';
 import {
   UploadCloud,
@@ -16,15 +17,15 @@ import {
   KeyRound,
   Repeat,
   Rewind,
-  GitFork,
+  // GitFork, // No longer used for Channel Router
   Spline,
   Gauge,
   Scissors,
-  Mic,
+  // Mic, // No longer used for Voice Extractor
   Volume2,
   HeartPulse,
   FileCog,
-  Combine,
+  // Combine, // No longer used for Channel Compressor
   BarChartBig,
   LineChart,
   Globe,
@@ -178,11 +179,11 @@ export const effectsList: Effect[] = [
   // Presets & Other Tools
   {
     id: 'dreamscapeMaker',
-    name: 'Dreamscape Maker',
+    name: "Slow 'n Reverb",
     description: 'Create a slowed and reverb effect for ethereal soundscapes.',
     icon: Moon,
     controlType: 'button',
-    actionLabel: 'Apply Dreamscape',
+    actionLabel: "Apply Slow 'n Reverb",
     handlerKey: 'dreamscapeMaker',
     groupName: 'Creative Presets',
   },
