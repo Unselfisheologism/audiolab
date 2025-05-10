@@ -6,6 +6,7 @@ import { AppHeader } from './AppHeader';
 import { AudioControlsPanel } from './AudioControlsPanel';
 import { MainDisplayPanel } from './MainDisplayPanel';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import type { EffectSettings } from '@/types/audio-forge';
 import { useToast } from '@/hooks/use-toast';
 import { audioUtils, fileToDataUrl } from '@/lib/audio-utils';
@@ -23,6 +24,7 @@ export default function AudioForgeClientContent() {
   const [processedAudioBuffer, setProcessedAudioBuffer] = useState<AudioBuffer | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const isMobile = useIsMobile();
+  const [isEffectsSheetOpen, setIsEffectsSheetOpen] = useState(false);
 
   const [effectSettings, setEffectSettings] = useState<Record<string, EffectSettings>>(() => {
     const initialSettings: Record<string, EffectSettings> = {};
@@ -159,48 +161,65 @@ export default function AudioForgeClientContent() {
     toast({ title: "Export Initiated", description: `Preparing download for ${format}.` });
   }, [processedAudioDataUrl, toast]);
 
+  const audioControlsPanelProps = {
+    onFileSelect: handleFileSelect,
+    selectedFile: originalAudioFile,
+    onApplyEffect: handleApplyEffect,
+    onParameterChange: handleParameterChange,
+    effectSettings: effectSettings,
+    isLoading: isLoading,
+    isAudioLoaded: !!originalAudioDataUrl,
+    analysisResult: analysisResult,
+    analysisSourceEffectId: analysisSourceEffectId,
+  };
+
+  const mainDisplayPanelProps = {
+    originalAudioDataUrl: originalAudioDataUrl,
+    processedAudioDataUrl: processedAudioDataUrl,
+    audioBuffer: processedAudioBuffer,
+    onExport: handleExport,
+    isLoading: isLoading,
+    analysisResult: analysisResult,
+    analysisSourceEffectId: analysisSourceEffectId,
+    originalFileName: originalAudioFile?.name,
+  };
+
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
-      <AppHeader />
-      <ResizablePanelGroup 
-        direction={isMobile ? 'vertical' : 'horizontal'} 
-        className="flex-grow min-h-0"
-      >
-        <ResizablePanel 
-          defaultSize={isMobile ? 40 : 35} 
-          minSize={isMobile ? 30 : 25} 
-          maxSize={isMobile ? 60 : 50}
+      <AppHeader 
+        isMobile={isMobile}
+        onOpenEffectsPanel={() => setIsEffectsSheetOpen(true)}
+      />
+      {isMobile ? (
+        <div className="flex-grow min-h-0">
+          <MainDisplayPanel {...mainDisplayPanelProps} />
+          <Sheet open={isEffectsSheetOpen} onOpenChange={setIsEffectsSheetOpen}>
+            <SheetContent side="left" className="w-[85vw] max-w-md p-0">
+              <AudioControlsPanel {...audioControlsPanelProps} />
+            </SheetContent>
+          </Sheet>
+        </div>
+      ) : (
+        <ResizablePanelGroup 
+          direction="horizontal"
+          className="flex-grow min-h-0"
         >
-          <AudioControlsPanel
-            onFileSelect={handleFileSelect}
-            selectedFile={originalAudioFile}
-            onApplyEffect={handleApplyEffect}
-            onParameterChange={handleParameterChange}
-            effectSettings={effectSettings}
-            isLoading={isLoading}
-            isAudioLoaded={!!originalAudioDataUrl}
-            analysisResult={analysisResult}
-            analysisSourceEffectId={analysisSourceEffectId}
-          />
-        </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel 
-          defaultSize={isMobile ? 60 : 65} 
-          minSize={isMobile ? 40 : 50}
-        >
-          <MainDisplayPanel
-            originalAudioDataUrl={originalAudioDataUrl}
-            processedAudioDataUrl={processedAudioDataUrl}
-            audioBuffer={processedAudioBuffer}
-            onExport={handleExport}
-            isLoading={isLoading}
-            analysisResult={analysisResult}
-            analysisSourceEffectId={analysisSourceEffectId}
-            originalFileName={originalAudioFile?.name}
-          />
-        </ResizablePanel>
-      </ResizablePanelGroup>
+          <ResizablePanel 
+            defaultSize={35} 
+            minSize={25} 
+            maxSize={50}
+          >
+            <AudioControlsPanel {...audioControlsPanelProps} />
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+          <ResizablePanel 
+            defaultSize={65} 
+            minSize={50}
+          >
+            <MainDisplayPanel {...mainDisplayPanelProps} />
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      )}
     </div>
   );
 }
-
