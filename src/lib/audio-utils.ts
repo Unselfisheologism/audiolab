@@ -1,4 +1,5 @@
 
+
 // In a real app, these would interact with Web Audio API or a backend service
 
 export type AudioProcessingFunction = (
@@ -352,20 +353,21 @@ const frequencySculptor: AudioProcessingFunction = async (audioDataUrl, params) 
 
   const lowFilter = offlineContext.createBiquadFilter();
   lowFilter.type = 'lowshelf';
-  lowFilter.frequency.setValueAtTime(250, offlineContext.currentTime);
+  lowFilter.frequency.setValueAtTime(250, offlineContext.currentTime); // Target low frequencies
   lowFilter.gain.setValueAtTime(lowGain, offlineContext.currentTime);
 
   const midFilter = offlineContext.createBiquadFilter();
   midFilter.type = 'peaking';
-  midFilter.frequency.setValueAtTime(1000, offlineContext.currentTime);
+  midFilter.frequency.setValueAtTime(1000, offlineContext.currentTime); // Target mid frequencies
   midFilter.Q.setValueAtTime(1, offlineContext.currentTime); 
   midFilter.gain.setValueAtTime(midGain, offlineContext.currentTime);
 
   const highFilter = offlineContext.createBiquadFilter();
   highFilter.type = 'highshelf';
-  highFilter.frequency.setValueAtTime(4000, offlineContext.currentTime); 
+  highFilter.frequency.setValueAtTime(4000, offlineContext.currentTime); // Target high frequencies
   highFilter.gain.setValueAtTime(highGain, offlineContext.currentTime);
 
+  // Connect the filters in series
   sourceNode.connect(lowFilter);
   lowFilter.connect(midFilter);
   midFilter.connect(highFilter);
@@ -517,6 +519,44 @@ const echoGenerator: AudioProcessingFunction = async (audioDataUrl, params) => {
   return { processedAudioDataUrl, analysis };
 };
 
+const reversePlayback: AudioProcessingFunction = async (audioDataUrl, params) => {
+  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  await resumeAudioContext(audioContext);
+  const response = await fetch(audioDataUrl);
+  const arrayBuffer = await response.arrayBuffer();
+  const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+  const numChannels = decodedAudioBuffer.numberOfChannels;
+  const length = decodedAudioBuffer.length;
+  const sampleRate = decodedAudioBuffer.sampleRate;
+
+  const offlineContext = new OfflineAudioContext(numChannels, length, sampleRate);
+  await resumeAudioContext(offlineContext);
+  
+  const reversedBuffer = offlineContext.createBuffer(numChannels, length, sampleRate);
+
+  for (let channel = 0; channel < numChannels; channel++) {
+    const originalChannelData = decodedAudioBuffer.getChannelData(channel);
+    const reversedChannelData = reversedBuffer.getChannelData(channel);
+    for (let i = 0; i < length; i++) {
+      reversedChannelData[i] = originalChannelData[length - 1 - i];
+    }
+  }
+  
+  const sourceNode = offlineContext.createBufferSource();
+  sourceNode.buffer = reversedBuffer;
+  sourceNode.connect(offlineContext.destination);
+  sourceNode.start(0);
+
+  const renderedBuffer = await offlineContext.startRendering();
+  const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
+
+  const analysis = `Applied Reverse Playback: Audio has been reversed.`;
+  
+  await audioContext.close();
+  return { processedAudioDataUrl, analysis };
+};
+
 
 const simulateProcessing = async (audioDataUrl: string, operationName: string, params: Record<string, any>): Promise<{ processedAudioDataUrl: string; analysis?: string }> => {
   console.log(`Simulating ${operationName} with params:`, params);
@@ -535,7 +575,7 @@ export const audioUtils: Record<string, AudioProcessingFunction> = {
   keyTransposer: keyTransposer,
   paceAdjuster: paceAdjuster,
   echoGenerator: echoGenerator,
-  reversePlayback: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Reverse Playback', params),
+  reversePlayback: reversePlayback,
   channelRouter: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Channel Router', params),
   audioSplitter: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Audio Splitter', params),
   voiceExtractor: (audioDataUrl, params) => simulateProcessing(audioDataUrl, 'Voice Extractor', params),
