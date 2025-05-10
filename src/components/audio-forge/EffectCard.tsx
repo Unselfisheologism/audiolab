@@ -29,9 +29,18 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
   };
 
   const handleInputChange = (paramName: string, event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const value = effect.parameters?.find(p => p.name === paramName)?.type === 'number_input'
-      ? parseFloat(event.target.value)
-      : event.target.value;
+    const paramConfig = effect.parameters?.find(p => p.name === paramName);
+    let value: string | number = event.target.value;
+
+    if (paramConfig?.type === 'number_input') {
+      // Allow empty string for clearing input, otherwise parse
+      if (event.target.value === '') {
+        value = NaN; // Or some other indicator for "empty means reset to default or invalid"
+      } else {
+        const parsedValue = parseFloat(event.target.value);
+        value = isNaN(parsedValue) ? NaN : parsedValue; // Keep NaN if parsing fails
+      }
+    }
     onParameterChange(effect.id, paramName, value);
   };
   
@@ -44,18 +53,19 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
   };
 
   const renderParameterControl = (param: EffectParameter) => {
-    const value = currentSettings[param.name] ?? param.defaultValue;
+    const rawValue = currentSettings[param.name] ?? param.defaultValue;
+    
     switch (param.type) {
       case 'slider':
         return (
           <div key={param.name} className="space-y-2">
             <div className="flex justify-between items-center">
               <Label htmlFor={`${effect.id}-${param.name}`}>{param.label}</Label>
-              <span className="text-sm text-muted-foreground">{value}</span>
+              <span className="text-sm text-muted-foreground">{rawValue}</span>
             </div>
             <Slider
               id={`${effect.id}-${param.name}`}
-              value={[Number(value)]}
+              value={[Number(rawValue)]}
               min={param.min}
               max={param.max}
               step={param.step}
@@ -65,13 +75,16 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
           </div>
         );
       case 'number_input':
+        // If rawValue is NaN (e.g., from parseFloat('') or invalid input), pass "" to Input
+        // Otherwise, pass the rawValue.
+        const displayValue = (typeof rawValue === 'number' && isNaN(rawValue)) ? "" : rawValue;
         return (
           <div key={param.name} className="space-y-2">
             <Label htmlFor={`${effect.id}-${param.name}`}>{param.label}</Label>
             <Input
               id={`${effect.id}-${param.name}`}
               type="number"
-              value={value as string | number}
+              value={displayValue as string | number} 
               min={param.min}
               max={param.max}
               step={param.step}
@@ -86,7 +99,7 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
           <div key={param.name} className="space-y-2">
             <Label htmlFor={`${effect.id}-${param.name}`}>{param.label}</Label>
             <Select
-              value={value as string}
+              value={rawValue as string}
               onValueChange={(val) => handleSelectChange(param.name, val)}
               disabled={isLoading || !isAudioLoaded}
             >
@@ -107,7 +120,7 @@ export function EffectCard({ effect, onApplyEffect, onParameterChange, currentSe
             <Label htmlFor={`${effect.id}-${param.name}`}>{param.label}</Label>
             <Textarea
               id={`${effect.id}-${param.name}`}
-              value={value as string}
+              value={rawValue as string}
               placeholder={param.placeholder}
               rows={param.rows || 3}
               onChange={(e) => handleInputChange(param.name, e)}
