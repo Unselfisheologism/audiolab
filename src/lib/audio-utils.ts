@@ -1,8 +1,3 @@
-
-
-
-
-
 // In a real app, these would interact with Web Audio API or a backend service
 
 export type AudioProcessingFunction = (
@@ -130,7 +125,7 @@ const temporalModification: AudioProcessingFunction = async (audioDataUrl, param
   const arrayBuffer = await response.arrayBuffer();
   const decodedAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
-  const rate = params.rate || 1.0;
+  const rate = Number(params.rate || 1.0);
   if (rate <= 0) {
     await audioContext.close();
     throw new Error("Playback rate must be greater than 0.");
@@ -188,7 +183,7 @@ const automatedSweep: AudioProcessingFunction = async (audioDataUrl, params) => 
 
   const lfo = offlineContext.createOscillator();
   lfo.type = 'sine'; 
-  const sweepSpeed = params.speed || 0.5; 
+  const sweepSpeed = Number(params.speed || 0.5); 
   lfo.frequency.setValueAtTime(sweepSpeed, offlineContext.currentTime);
 
   const lfoGain = offlineContext.createGain();
@@ -227,7 +222,7 @@ const stereoWidener: AudioProcessingFunction = async (audioDataUrl, params) => {
      };
   }
 
-  const widthParam = params.width !== undefined ? params.width : 100; 
+  const widthParam = params.width !== undefined ? Number(params.width) : 100; 
   const widthFactor = widthParam / 100.0; 
 
   const offlineContext = new OfflineAudioContext(
@@ -299,9 +294,8 @@ const subharmonicIntensifier: AudioProcessingFunction = async (audioDataUrl, par
   const lowshelfFilter = offlineContext.createBiquadFilter();
   lowshelfFilter.type = 'lowshelf';
   
-  // Intensity (0-100) maps to gain (0dB to +12dB, for example)
-  const intensityParam = params.intensity !== undefined ? params.intensity : 0;
-  const gainDb = (intensityParam / 100) * 12; // Max 12dB boost
+  const intensityValue = Number(params.intensity || 0); // Ensure intensity is a number, default to 0
+  const gainDb = (intensityValue / 100) * 18; // Max 18dB boost for more noticeable effect
 
   lowshelfFilter.frequency.setValueAtTime(120, offlineContext.currentTime); // Boost frequencies below 120Hz
   lowshelfFilter.gain.setValueAtTime(gainDb, offlineContext.currentTime);
@@ -313,9 +307,15 @@ const subharmonicIntensifier: AudioProcessingFunction = async (audioDataUrl, par
   const renderedBuffer = await offlineContext.startRendering();
   const processedAudioDataUrl = await audioBufferToWavDataUrl(renderedBuffer);
   
-  const analysis = `Applied Subharmonic Intensifier: Low-shelf filter at 120Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityParam}%).`;
+  const analysis = `Applied Subharmonic Intensifier: Low-shelf filter at 120Hz with ${gainDb.toFixed(1)}dB gain (Intensity: ${intensityValue.toFixed(0)}%).`;
   
+  // It's good practice to close the primary AudioContext after use.
+  // If it was intentionally removed before, ensure it's managed correctly elsewhere or add it back if scoped to this function.
+  // For now, leaving it as per the prior state where it was absent in this specific function in the provided files.
+  // If resource leaks become an issue, this is a place to check.
+  // However, for consistency with other similar functions, let's add it.
   await audioContext.close();
+
 
   return { processedAudioDataUrl, analysis };
 };
