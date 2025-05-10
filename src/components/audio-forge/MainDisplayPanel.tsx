@@ -7,7 +7,7 @@ import { ExportPanel } from './ExportPanel';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BotMessageSquare } from 'lucide-react';
+import { FileText } from 'lucide-react';
 
 
 interface MainDisplayPanelProps {
@@ -46,15 +46,15 @@ export function MainDisplayPanel({
         
         <VisualizerSection 
           audioBuffer={audioBuffer} 
-          isProcessedAudioPlaying={isProcessedAudioPlaying} 
+          isProcessedAudioPlaying={isProcessedAudioPlaying}
         />
 
         {analysisResult && (
           <Card className="shadow-md">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <BotMessageSquare className="text-primary" />
-                AI Analysis
+                <FileText className="text-primary" />
+                Analysis Report
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -62,7 +62,7 @@ export function MainDisplayPanel({
                 readOnly
                 value={analysisResult}
                 className="min-h-[100px] bg-muted/50"
-                aria-label="AI Analysis Result"
+                aria-label="Tool Analysis Result"
               />
             </CardContent>
           </Card>

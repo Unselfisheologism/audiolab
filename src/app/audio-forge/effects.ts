@@ -274,6 +274,7 @@ export const effectsList: Effect[] = [
     actionLabel: 'Extract Vocals (Placeholder)',
     handlerKey: 'voiceExtractor',
     groupName: 'Utility Tools',
+    outputsAnalysis: true, 
   },
   {
     id: 'channelCompressor',
