@@ -1,10 +1,11 @@
+
 'use client';
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { AppHeader } from '@/components/audio-forge/AppHeader';
 import { AudioControlsPanel } from './AudioControlsPanel';
 import { MainDisplayPanel } from './MainDisplayPanel';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import type { EffectSettings } from '@/types/audio-forge';
 import { useToast } from '@/hooks/use-toast';
@@ -129,13 +130,13 @@ export default function AudioForgeClientContent() {
     setAnalysisResult(null); 
     setAnalysisSourceEffectId(null);
     const currentAudio = processedAudioDataUrl || originalAudioDataUrl; 
+    
+    const effectToApply = effectsList.find(e => e.id === effectId || e.parameters?.find(p => p.handlerKey === effectId));
+    const actualHandlerKey = effectToApply?.parameters?.find(p => p.handlerKey === effectId)?.handlerKey || effectToApply?.handlerKey || effectId;
+    const parentEffectId = effectToApply?.id || null;
 
     try {
       let result: { processedAudioDataUrl: string; analysis?: string } = { processedAudioDataUrl: currentAudio };
-      const effectToApply = effectsList.find(e => e.id === effectId || e.parameters?.find(p => p.handlerKey === effectId));
-      const actualHandlerKey = effectToApply?.parameters?.find(p => p.handlerKey === effectId)?.handlerKey || effectToApply?.handlerKey || effectId;
-      const parentEffectId = effectToApply?.id || null;
-      
       const combinedParams = { ...(effectSettings[parentEffectId ?? effectId] || {}), ...params };
 
       if (audioUtils[actualHandlerKey]) {
@@ -147,14 +148,13 @@ export default function AudioForgeClientContent() {
       setProcessedAudioDataUrl(result.processedAudioDataUrl);
       if (result.analysis) {
         setAnalysisResult(result.analysis);
-        if (effectToApply?.outputsAnalysis) {
+        if (effectToApply?.outputsAnalysis && parentEffectId) {
           setAnalysisSourceEffectId(parentEffectId);
         }
       }
       toast({ title: "Effect Applied", description: `${effectToApply?.name || actualHandlerKey} processing complete.` });
     } catch (error: any) {
       console.error(`Error applying effect ${effectId}:`, error);
-      const effectToApply = effectsList.find(e => e.id === effectId || e.parameters?.find(p => p.handlerKey === effectId));
       toast({ title: "Processing Error", description: `Could not apply ${effectToApply?.name || effectId}. ${error.message}`, variant: "destructive" });
       setAnalysisResult(null);
       setAnalysisSourceEffectId(null);
@@ -205,6 +205,21 @@ export default function AudioForgeClientContent() {
     </div>
   );
 
+  const MainContentSkeleton = () => (
+    <div className="flex-grow p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-4">
+        <Skeleton className="h-28 w-full" /> 
+        <Skeleton className="h-48 w-full" /> 
+      </div>
+       <div className="space-y-4">
+        <Skeleton className="h-28 w-full" />
+        <Skeleton className="h-48 w-full" /> 
+      </div>
+      <Skeleton className="h-40 w-full md:col-span-2" />
+    </div>
+  );
+
+
   const audioControlsPanelProps = {
     onFileSelect: handleFileSelect,
     selectedFile: originalAudioFile,
@@ -229,6 +244,34 @@ export default function AudioForgeClientContent() {
     originalFileName: originalAudioFile?.name,
   };
 
+  if (!hasMounted) {
+    return (
+      <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
+        <AppHeader 
+          isMobile={isMobile} 
+          onOpenEffectsPanel={() => setIsEffectsSheetOpen(true)}
+        />
+        <div className="flex-grow min-h-0 md:flex">
+          {isMobile ? (
+             <div className="flex-grow p-4 overflow-y-auto">
+                <MainContentSkeleton />
+             </div>
+          ) : (
+            <ResizablePanelGroup direction="horizontal" className="flex-grow">
+              <ResizablePanel defaultSize={30} minSize={20} maxSize={45} className="h-full overflow-y-auto">
+                 <ControlsPanelSkeleton />
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+              <ResizablePanel defaultSize={70} minSize={55} className="h-full overflow-y-auto">
+                 <MainContentSkeleton />
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
       <AppHeader 
@@ -249,7 +292,7 @@ export default function AudioForgeClientContent() {
                     Panel containing all audio effects and file upload controls.
                   </SheetDescription>
                 </SheetHeader>
-                {hasMounted ? <AudioControlsPanel {...audioControlsPanelProps} /> : <ControlsPanelSkeleton />}
+                <AudioControlsPanel {...audioControlsPanelProps} />
               </SheetContent>
             </Sheet>
           </>
@@ -264,7 +307,7 @@ export default function AudioForgeClientContent() {
               maxSize={45}
               className="h-full overflow-y-auto"
             >
-              {hasMounted ? <AudioControlsPanel {...audioControlsPanelProps} /> : <ControlsPanelSkeleton />}
+              <AudioControlsPanel {...audioControlsPanelProps} />
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel 
