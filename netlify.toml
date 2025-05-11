@@ -1,4 +1,5 @@
 
+
 [build]
   command = "npm run build" # or "next build"
   publish = "out" 
