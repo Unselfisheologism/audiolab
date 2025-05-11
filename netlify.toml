@@ -1,5 +1,10 @@
+
 [build]
-  publish = "." # Set publish directory to the root as index.html is at the root
+  command = "npm run build" # or "next build"
+  publish = "out" 
+
+[build.environment]
+  NODE_VERSION = "20"
 
 [[redirects]]
   from = "/*"
