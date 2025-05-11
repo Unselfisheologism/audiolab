@@ -1,10 +1,6 @@
-import { redirect } from 'next/navigation';
+import AudioForgeClientContent from '@/components/audio-forge/AudioForgeClientContent';
 
 export default function Home() {
-  redirect('/audio-forge');
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <p>Loading Audio Lab...</p>
-    </div>
-  );
+  // Directly render the main application content
+  return <AudioForgeClientContent />;
 }
