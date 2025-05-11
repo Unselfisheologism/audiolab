@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
@@ -6,12 +5,13 @@ import { AppHeader } from '@/components/audio-forge/AppHeader';
 import { AudioControlsPanel } from './AudioControlsPanel';
 import { MainDisplayPanel } from './MainDisplayPanel';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import type { EffectSettings } from '@/types/audio-forge';
 import { useToast } from '@/hooks/use-toast';
 import { audioUtils, fileToDataUrl } from '@/lib/audio-utils';
 import { effectsList } from '@/app/audio-forge/effects';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AudioForgeClientContent() {
   const [originalAudioFile, setOriginalAudioFile] = useState<File | null>(null);
@@ -26,6 +26,11 @@ export default function AudioForgeClientContent() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const isMobile = useIsMobile();
   const [isEffectsSheetOpen, setIsEffectsSheetOpen] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const [effectSettings, setEffectSettings] = useState<Record<string, EffectSettings>>(() => {
     const initialSettings: Record<string, EffectSettings> = {};
@@ -190,6 +195,15 @@ export default function AudioForgeClientContent() {
     }
   }, [processedAudioDataUrl, originalAudioFile, toast]);
 
+  const ControlsPanelSkeleton = () => (
+    <div className="p-4 space-y-4">
+      <Skeleton className="h-32 w-full" />
+      <Skeleton className="h-12 w-full" />
+      <Skeleton className="h-24 w-full" />
+      <Skeleton className="h-24 w-full" />
+      <Skeleton className="h-24 w-full" />
+    </div>
+  );
 
   const audioControlsPanelProps = {
     onFileSelect: handleFileSelect,
@@ -231,8 +245,11 @@ export default function AudioForgeClientContent() {
               <SheetContent side="left" className="w-[85vw] max-w-md p-0 flex flex-col">
                 <SheetHeader className="p-4 border-b">
                   <SheetTitle>Audio Effects</SheetTitle>
+                  <SheetDescription className="sr-only">
+                    Panel containing all audio effects and file upload controls.
+                  </SheetDescription>
                 </SheetHeader>
-                <AudioControlsPanel {...audioControlsPanelProps} />
+                {hasMounted ? <AudioControlsPanel {...audioControlsPanelProps} /> : <ControlsPanelSkeleton />}
               </SheetContent>
             </Sheet>
           </>
@@ -247,7 +264,7 @@ export default function AudioForgeClientContent() {
               maxSize={45}
               className="h-full overflow-y-auto"
             >
-              <AudioControlsPanel {...audioControlsPanelProps} />
+              {hasMounted ? <AudioControlsPanel {...audioControlsPanelProps} /> : <ControlsPanelSkeleton />}
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel 
@@ -263,3 +280,4 @@ export default function AudioForgeClientContent() {
     </div>
   );
 }
+
