@@ -17,6 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body className={`font-sans bg-background text-foreground`}> {/* Added bg-background and text-foreground for base styling */}
+        <a href="https://affordhunt.com" target="_blank" rel="noopener noreferrer">
+          <img src="https://svgshare.com/i/xLe.svg" title="Top Pick By AffordHunt" />
+        </a>
         {children}
         <Toaster />
       </body>
