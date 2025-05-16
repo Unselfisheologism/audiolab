@@ -5,8 +5,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'Audio Lab', // Changed from Audio Forge
-  description: 'Forge your sound with powerful audio processing tools.',
+  title: 'Advanced Audio Tools & Presets for Slowed and Reverb, Pitch, Bass Boost, 8D Effects, Lofi | Audiolab Create, Convert, and Enhance Audio Files Online with Free Reverb Presets, Vocal Removal, Tempo Detection, and More!', // Changed from Audio Forge
+  description: 'Unlock professional-grade audio editing with our free online tools. Apply reverb presets, bass booster effects, pitch shifting, 8D audio, and vocal removal. Optimize tracks with EQ, noise reduction, stereo enhancement, and room-size adjustments. Perfect for music producers, podcasters, and content creators!',
 };
 
 export default function RootLayout({
