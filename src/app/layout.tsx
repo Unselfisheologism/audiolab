@@ -20,6 +20,7 @@ export default function RootLayout({
         <a href="https://affordhunt.com" target="_blank" rel="noopener noreferrer">
           <img src="https://svgshare.com/i/xLe.svg" title="Top Pick By AffordHunt" />
         </a>
+        <a href="https://fazier.com" target="_blank"><img src="https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=featured&theme=neutral" alt="Fazier badge" /></a>
         {children}
         <Toaster />
       </body>
