@@ -11,31 +11,50 @@ export function AppFooter() {
           <div>
             <h5 className="font-semibold text-foreground mb-2">About Audio Lab</h5>
             <p className="text-sm">
-              Audio Lab is a cutting-edge, browser-based audio processing suite designed for musicians,
-              sound designers, and audio enthusiasts. Our platform offers a wide array of tools
-              to sculpt, transform, and perfect your sound, all within an intuitive and accessible interface.
-              Whether you're looking to apply subtle enhancements or create entirely new sonic landscapes,
-              Audio Lab provides the power and flexibility you need.
+              Empowering Creativity Through Accessible Audio Tools
+              At Audiolab, we provide a comprehensive collection of easy-to-use web tools to transform your audio projects.
+              Whether you’re tweaking vocal tracks, adding cinematic reverb effects (hall, church, cathedral, or small room presets),
+              or crafting bass-heavy songs, our online audio toolkit delivers precision and flexibility.
+
+              Key Features:
+
+              Reverb Presets : Simulate spaces from intimate bathrooms to grand concert halls.
+              Bass Booster Presets : Enhance low frequencies with adjustable intensity (moderate, heavy, extreme).
+              Pitch & Tempo : Shift pitch by semitones or adjust beats per minute without quality loss.
+              Vocal Removal : Isolate or remove vocals from songs for instrumental mixes.
+              8D Audio & Stereo Enhancement : Create immersive 3D soundscapes or deepen stereo width.
+              Noise Reduction : Clean background noise from recordings with adjustable frequency filters.
             </p>
           </div>
           <div>
             <h5 className="font-semibold text-foreground mb-2">Our Philosophy</h5>
             <p className="text-sm">
-              We believe that powerful audio tools should be available to everyone, regardless of their
-              technical expertise or budget. Audio Lab is built on the principles of accessibility,
-              innovation, and user-centric design. We continuously strive to incorporate the latest
-              advancements in audio technology while keeping the user experience straightforward and enjoyable.
-              Our commitment is to empower creators by removing barriers to high-quality audio production.
+              Innovation meets Accessibility
+              We believe audio production tools should be intuitive, powerful, and free for all creators. 
+              Audiolab combines user-centric design with advanced algorithms to deliver seamless processing for MP3, WAV, FLAC, and OGG files. 
+              Whether you’re a pro engineer or a hobbyist, our web-based tools empower you to:
+              Replicate live concert ambiance with room-size reverb presets.
+              Tune vocals for clarity or apply extreme intensity effects for experimental sounds.
+              Visualize audio with spectrogram and waveform images for precise editing.
+              Why Choose Us?
+              Download in any audio file format.
+              Edit directly in your browser. 
+              Fast processing : Convert, boost, or reverse audio files instantly. 
+              Customizable presets : Save and reuse your favorite settings for reverb, bass, or light intensity effects.
             </p>
           </div>
           <div>
             <h5 className="font-semibold text-foreground mb-2">Important Considerations</h5>
             <p className="text-sm">
-              Audio processing is performed client-side, meaning all computations happen directly in your browser.
-              This ensures privacy and speed for most operations. However, performance can vary based on your
-              computer's capabilities and the complexity of the audio file and applied effects. For very large files or
-              intensive processing chains, please be patient. Always ensure you have the rights to any audio material
-              you upload and process using Audio Lab.
+              Optimize Your Audio Workflow
+              To ensure high-quality results, keep these tips in mind:
+
+              File Format Compatibility : Support for MP3, WAV, FLAC, and OGG ensures flexibility .
+              Reverb Intensity : Adjust decay time and EQ filters to avoid muddiness in bass-heavy tracks .
+              Pitch Shifting : Use semitone adjustments for subtle tuning or extreme effects without distortion .
+              Noise Reduction : Target specific frequencies (e.g., 60Hz hum) to preserve vocal clarity .
+              Stereo Enhancement : Balance left/right panning or apply auto-panner effects for dynamic mixes .
+              Pro Tip : Preview effects like slowed reverb , 8D audio , or bass booster presets before exporting to perfect your sound.
             </p>
           </div>
         </div>
@@ -48,22 +67,25 @@ export function AppFooter() {
         {/* Copyright and Disclaimers */}
         <div className="text-xs">
           <p>
-            Audio Lab utilizes various open-source libraries and technologies. All processing is done locally in your browser,
-            ensuring your audio files are not uploaded to any server for the effects application.
-            This application is for demonstration and educational purposes.
-            While we strive for accuracy and stability, use these tools responsibly and always back up your original work.
-            The effects are based on standard digital signal processing techniques and Web Audio API functionalities.
-            The quality of the output may vary depending on the source material and the parameters chosen.
-            Experimentation is encouraged to achieve desired results. Please note that "8D Audio" is a perceptual effect
-            best experienced with headphones and its effectiveness can be subjective.
-            The "Tune to 432Hz" feature alters the pitch based on a mathematical ratio; its perceived benefits are a subject of ongoing discussion.
+            Audio Lab leverages open-source libraries and technologies like the Web Audio API to deliver an online audio toolkit with easy-to-use web tools.
+            All processing occurs locally in your browser, ensuring your audio files remain private—no uploads to servers for reverb preset adjustments, bass booster preset enhancements, or 8D audio effects. 
+            This application serves demonstration and educational purposes, emphasizing responsible use of tools like pitch-shifted tracks, semitones-rounded tuning, and vocal tracks editing.
+            Always back up original audio files before applying effects such as reverb effect simulations (e.g., cathedral, church hall, or small room presets), noise reduction for background recordings, or stereo sound adding.
+            Output quality depends on source material and parameters, such as intensity settings (moderate, heavy, extreme) or room size adjustments.
+            Experiment with audio alternate left panning, reverse audio, or tempo beats detection to achieve desired results. For visualization, create waveform image or spectrogram image outputs.
+            Note that 8D Audio relies on perceptual cues like moving circles head positioning and works best with headphones, while the "Tune to 432Hz" feature alters track pitch based on alternative pitch theories, with perceived clearer benefits debated among users.
           </p>
           <p className="mt-4">
-            &copy; {new Date().getFullYear()} Audio Lab. All rights reserved. (Placeholder copyright for demo purposes).
-            This is a fictional entity for this application. No real-world services are implied or offered.
-            Further development might include more advanced features, AI-powered enhancements, and collaborative tools.
-            Feedback and suggestions are always welcome as we aim to improve and expand Audio Lab's capabilities.
-            Remember to save your work frequently by exporting the processed audio.
+            &copy; {new Date().getFullYear()} Audio Lab. All rights reserved.
+            Further development may incorporate AI-powered enhancements like reverb presets,
+            bass booster presets, and 8D audio effects to elevate stereo sound.
+            Collaborative tools could enable preset sharing, track pitch adjustments,
+            or room-size reverb simulations (e.g., cathedral, church hall, or small room settings).
+            Feedback and suggestions are crucial as we aim to expand Audio Lab’s capabilities—whether
+            refining pitch-shifted tracks , optimizing noise reduction for background recordings,
+            or enhancing vocal tracks with extreme intensity presets. Always save your work by exporting
+            processed audio files in multiple formats (MP3, WAV, FLAC) , ensuring seamless
+            integration into live concert mixes  or personal projects.
           </p>
         </div>
       </div>
