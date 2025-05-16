@@ -18,6 +18,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body className={`font-sans bg-background text-foreground`}> {/* Added bg-background and text-foreground for base styling */}
         <a href="https://fazier.com" target="_blank"><img src="https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=featured&theme=neutral" alt="Fazier badge" /></a>
+        <a href="https://www.uneed.best/tool/audiolab">
+          <img src="https://www.uneed.best/EMBED3.png" alt="Uneed Embed Badge" />
+        </a>
         {children}
         <Toaster />
       </body>
