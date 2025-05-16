@@ -22,6 +22,7 @@ export default function RootLayout({
           <img src="https://www.uneed.best/EMBED3.png" alt="Uneed Embed Badge" />
         </a>
         <a href='https://www.sideprojectors.com/project/58769/audiolab' alt='Check out Audiolab  at @SideProjectors'><img src='https://www.sideprojectors.com/img/badges/badge_show_black.png' alt='Check out Audiolab at @SideProjectors'></a>
+        <a href="https://dang.ai/" target="_blank" ><img src="https://cdn.prod.website-files.com/63d8afd87da01fb58ea3fbcb/6487e2868c6c8f93b4828827_dang-badge.png" alt="Dang.ai" style="width: 150px; height: 54px;" width="150" height="54"/></a>  
         {children}
         <Toaster />
       </body>
