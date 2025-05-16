@@ -21,6 +21,7 @@ export default function RootLayout({
         <a href="https://www.uneed.best/tool/audiolab">
           <img src="https://www.uneed.best/EMBED3.png" alt="Uneed Embed Badge" />
         </a>
+        <a href='https://www.sideprojectors.com/project/58769/audiolab' alt='Check out Audiolab  at @SideProjectors'><img src='https://www.sideprojectors.com/img/badges/badge_show_black.png' alt='Check out Audiolab at @SideProjectors'></a>
         {children}
         <Toaster />
       </body>
