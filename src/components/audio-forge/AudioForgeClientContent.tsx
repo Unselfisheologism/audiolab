@@ -5,7 +5,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { AppHeader } from '@/components/audio-forge/AppHeader';
 import { AudioControlsPanel } from './AudioControlsPanel';
 import { MainDisplayPanel } from './MainDisplayPanel';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import type { EffectSettings } from '@/types/audio-forge';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +13,7 @@ import { audioUtils, fileToDataUrl } from '@/lib/audio-utils';
 import { effectsList } from '@/app/audio-forge/effects';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AppFooter } from './AppFooter';
 
 export default function AudioForgeClientContent() {
   const [originalAudioFile, setOriginalAudioFile] = useState<File | null>(null);
@@ -155,7 +156,7 @@ export default function AudioForgeClientContent() {
       toast({ title: "Effect Applied", description: `${effectToApply?.name || actualHandlerKey} processing complete.` });
     } catch (error: any) {
       console.error(`Error applying effect ${effectId}:`, error);
-      toast({ title: "Processing Error", description: `Could not apply ${effectToApply?.name || effectId}. ${error.message}`, variant: "destructive" });
+      toast({ title: "Processing Error", description: `Could not apply ${effectToApply?.name || effectId}. ${error.message || 'Unknown error'}`, variant: "destructive" });
       setAnalysisResult(null);
       setAnalysisSourceEffectId(null);
     } finally {
@@ -246,12 +247,12 @@ export default function AudioForgeClientContent() {
 
   if (!hasMounted) {
     return (
-      <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
+      <div className="flex flex-col min-h-screen bg-background text-foreground">
         <AppHeader 
           isMobile={isMobile} 
           onOpenEffectsPanel={() => setIsEffectsSheetOpen(true)}
         />
-        <div className="flex-grow min-h-0 md:flex">
+        <main className="flex-grow min-h-0 md:flex">
           {isMobile ? (
              <div className="flex-grow p-4 overflow-y-auto">
                 <MainContentSkeleton />
@@ -267,23 +268,23 @@ export default function AudioForgeClientContent() {
               </ResizablePanel>
             </ResizablePanelGroup>
           )}
-        </div>
+        </main>
+        <AppFooter />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
       <AppHeader 
         isMobile={isMobile}
         onOpenEffectsPanel={() => setIsEffectsSheetOpen(true)}
       />
-      <div className="flex-grow min-h-0 md:flex">
+      <main className="flex-grow min-h-0 p-4 overflow-y-auto md:flex md:p-0 md:overflow-visible">
         {isMobile ? (
           <>
-            <div className="flex-grow p-4 overflow-y-auto">
-              <MainDisplayPanel {...mainDisplayPanelProps} />
-            </div>
+            {/* On mobile, MainDisplayPanel is directly inside the scrollable main */}
+            <MainDisplayPanel {...mainDisplayPanelProps} />
             <Sheet open={isEffectsSheetOpen} onOpenChange={setIsEffectsSheetOpen}>
               <SheetContent side="left" className="w-[85vw] max-w-md p-0 flex flex-col">
                 <SheetHeader className="p-4 border-b">
@@ -299,13 +300,13 @@ export default function AudioForgeClientContent() {
         ) : (
           <ResizablePanelGroup 
             direction="horizontal"
-            className="flex-grow"
+            className="flex-grow" 
           >
             <ResizablePanel 
               defaultSize={30} 
               minSize={20} 
               maxSize={45}
-              className="h-full overflow-y-auto"
+              className="h-full overflow-y-auto" 
             >
               <AudioControlsPanel {...audioControlsPanelProps} />
             </ResizablePanel>
@@ -313,14 +314,17 @@ export default function AudioForgeClientContent() {
             <ResizablePanel 
               defaultSize={70} 
               minSize={55}
-              className="h-full overflow-y-auto"
+              className="h-full overflow-y-auto" 
             >
               <MainDisplayPanel {...mainDisplayPanelProps} />
             </ResizablePanel>
           </ResizablePanelGroup>
         )}
-      </div>
+      </main>
+      <AppFooter />
     </div>
   );
 }
+
+
 
