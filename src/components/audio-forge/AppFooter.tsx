@@ -1,9 +1,13 @@
 
+import { LegalLinks } from './LegalLinks';
+import { Separator } from '@/components/ui/separator';
+
 export function AppFooter() {
   return (
     <footer className="bg-muted text-muted-foreground p-6 md:p-8 mt-auto w-full border-t">
-      <div className="container mx-auto text-center md:text-left">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="container mx-auto text-center">
+        {/* About and Philosophy Sections - keeping these as they were */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <div>
             <h5 className="font-semibold text-foreground mb-2">About Audio Lab</h5>
             <p className="text-sm">
@@ -35,7 +39,14 @@ export function AppFooter() {
             </p>
           </div>
         </div>
-        <div className="mt-8 pt-8 border-t border-border/50 text-xs">
+
+        {/* Legal Links Section */}
+        <LegalLinks />
+
+        <Separator className="my-6 bg-border/50" />
+
+        {/* Copyright and Disclaimers */}
+        <div className="text-xs">
           <p>
             Audio Lab utilizes various open-source libraries and technologies. All processing is done locally in your browser,
             ensuring your audio files are not uploaded to any server for the effects application.
@@ -47,7 +58,7 @@ export function AppFooter() {
             best experienced with headphones and its effectiveness can be subjective.
             The "Tune to 432Hz" feature alters the pitch based on a mathematical ratio; its perceived benefits are a subject of ongoing discussion.
           </p>
-          <p className="mt-2">
+          <p className="mt-4">
             &copy; {new Date().getFullYear()} Audio Lab. All rights reserved. (Placeholder copyright for demo purposes).
             This is a fictional entity for this application. No real-world services are implied or offered.
             Further development might include more advanced features, AI-powered enhancements, and collaborative tools.
