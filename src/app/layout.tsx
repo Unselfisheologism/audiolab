@@ -30,6 +30,19 @@ export default function RootLayout({
             p.parentNode.insertBefore(sc, p);
           })();`}
         </Script>
+        <a
+          href="https://www.producthunt.com/posts/audiolab-2?embed=true&utm_source=badge-featured&utm_medium=badge"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+         <img
+           src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=966661&theme=light&t=1747473927338"
+           alt="Audiolab: Audio Editing Without the Headache | Product Hunt"
+           style={{ width: 250, height: 54 }}
+           width={250}
+           height={54}
+         />
+       </a>
         <a href="https://fazier.com" target="_blank" rel="noopener noreferrer">
           <img src="https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=featured&theme=neutral" alt="Fazier badge" />
         </a>
