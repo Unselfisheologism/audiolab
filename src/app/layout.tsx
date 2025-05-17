@@ -18,6 +18,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body className="font-sans bg-background text-foreground">
+        <a 
+          href="https://fazier.com/launches/audiolab" 
+          target="_blank" 
+          rel="noopener noreferrer"
+        >
+          <img 
+            src="https://fazier.com/api/v1/public/badges/embed_image.svg?launch_id=4421&badge_type=daily&theme=light" 
+            width={270} 
+            alt="Fazier badge" 
+          />
+        </a>
         <div className="sf-root" data-id="3877164" data-badge="oss-users-love-us-white" style={{ width: 125 }}>
           <a href="https://sourceforge.net/projects/audiolab/" target="_blank" rel="noopener noreferrer">Audiolab</a>
         </div>
