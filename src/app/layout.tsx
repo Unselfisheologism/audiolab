@@ -17,6 +17,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body className={`font-sans bg-background text-foreground`}> {/* Added bg-background and text-foreground for base styling */}
+      <div class="sf-root" data-id="3877164" data-badge="oss-users-love-us-white" style="width:125px">
+          <a href="https://sourceforge.net/projects/audiolab/" target="_blank">Audiolab</a>
+      </div>
+<script>(function () {var sc=document.createElement('script');sc.async=true;sc.src='https://b.sf-syn.com/badge_js?sf_id=3877164';var p=document.getElementsByTagName('script')[0];p.parentNode.insertBefore(sc, p);})();
+</script>
+<!-- End  Tag -->
         <a href="https://fazier.com" target="_blank"><img src="https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=featured&theme=neutral" alt="Fazier badge" /></a>
         <a href="https://www.uneed.best/tool/audiolab">
           <img src="https://www.uneed.best/EMBED3.png" alt="Uneed Embed Badge" />
