@@ -54,9 +54,6 @@ export default function RootLayout({
            height={54}
          />
        </a>
-        <a href="https://fazier.com" target="_blank" rel="noopener noreferrer">
-          <img src="https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=featured&theme=neutral" alt="Fazier badge" />
-        </a>
         <a href="https://www.uneed.best/tool/audiolab">
           <img src="https://www.uneed.best/EMBED3.png" alt="Uneed Embed Badge" />
         </a>
