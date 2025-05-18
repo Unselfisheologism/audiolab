@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 html {
-  scroll-padding-top: 80px; /* Adjust to match your header/nav height */
+  scroll-padding-top: 64px; /* Adjust to match your header/nav height */
 }
 
 @layer base {
