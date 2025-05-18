@@ -288,14 +288,14 @@ export default function AudioForgeClientContent() {
             {/* On mobile, MainDisplayPanel is directly inside the scrollable main */}
             <MainDisplayPanel {...mainDisplayPanelProps} />
             <Sheet open={isEffectsSheetOpen} onOpenChange={setIsEffectsSheetOpen}>
-              <SheetContent side="left" className="w-[85vw] max-w-md p-0 flex flex-col">
+              <SheetContent side="left" className="w-[85vw] max-w-md p-0 flex flex-col h-full">
                 <SheetHeader className="p-4 border-b">
                   <SheetTitle>Audio Effects</SheetTitle>
                   <SheetDescription className="sr-only">
                     Panel containing all audio effects and file upload controls.
                   </SheetDescription>
                 </SheetHeader>
-                <div className="p-4 space-y-4">
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
                   <FileUploadArea
                     onFileSelect={handleFileSelect}
                     selectedFile={originalAudioFile}
