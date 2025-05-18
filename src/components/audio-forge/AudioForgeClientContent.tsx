@@ -15,6 +15,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AppFooter } from './AppFooter';
 import { EffectsPanel } from './EffectsPanel';
+import { FileUploadArea } from './FileUploadArea';
 
 export default function AudioForgeClientContent() {
   const [originalAudioFile, setOriginalAudioFile] = useState<File | null>(null);
@@ -294,15 +295,22 @@ export default function AudioForgeClientContent() {
                     Panel containing all audio effects and file upload controls.
                   </SheetDescription>
                 </SheetHeader>
-                <EffectsPanel
-                  onApplyEffect={handleApplyEffect}
-                  onParameterChange={handleParameterChange}
-                  effectSettings={effectSettings}
-                  isLoading={isLoading}
-                  isAudioLoaded={!!originalAudioDataUrl}
-                  analysisResult={analysisResult}
-                  analysisSourceEffectId={analysisSourceEffectId}
-                />
+                <div className="p-4 space-y-4">
+                  <FileUploadArea
+                    onFileSelect={handleFileSelect}
+                    selectedFile={originalAudioFile}
+                    isLoading={isLoading}
+                  />
+                  <EffectsPanel
+                    onApplyEffect={handleApplyEffect}
+                    onParameterChange={handleParameterChange}
+                    effectSettings={effectSettings}
+                    isLoading={isLoading}
+                    isAudioLoaded={!!originalAudioDataUrl}
+                    analysisResult={analysisResult}
+                    analysisSourceEffectId={analysisSourceEffectId}
+                  />
+                </div>
               </SheetContent>
             </Sheet>
           </>
@@ -317,15 +325,22 @@ export default function AudioForgeClientContent() {
               maxSize={45}
               className="h-full overflow-y-auto" 
             >
-              <EffectsPanel
-                onApplyEffect={handleApplyEffect}
-                onParameterChange={handleParameterChange}
-                effectSettings={effectSettings}
-                isLoading={isLoading}
-                isAudioLoaded={!!originalAudioDataUrl}
-                analysisResult={analysisResult}
-                analysisSourceEffectId={analysisSourceEffectId}
-              />
+              <div className="p-4 space-y-4">
+                <FileUploadArea
+                  onFileSelect={handleFileSelect}
+                  selectedFile={originalAudioFile}
+                  isLoading={isLoading}
+                />
+                <EffectsPanel
+                  onApplyEffect={handleApplyEffect}
+                  onParameterChange={handleParameterChange}
+                  effectSettings={effectSettings}
+                  isLoading={isLoading}
+                  isAudioLoaded={!!originalAudioDataUrl}
+                  analysisResult={analysisResult}
+                  analysisSourceEffectId={analysisSourceEffectId}
+                />
+              </div>
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel 
