@@ -294,7 +294,15 @@ export default function AudioForgeClientContent() {
                     Panel containing all audio effects and file upload controls.
                   </SheetDescription>
                 </SheetHeader>
-                <AudioControlsPanel {...audioControlsPanelProps} />
+                <EffectsPanel
+                  onApplyEffect={handleApplyEffect}
+                  onParameterChange={handleParameterChange}
+                  effectSettings={effectSettings}
+                  isLoading={isLoading}
+                  isAudioLoaded={!!originalAudioDataUrl}
+                  analysisResult={analysisResult}
+                  analysisSourceEffectId={analysisSourceEffectId}
+                />
               </SheetContent>
             </Sheet>
           </>
