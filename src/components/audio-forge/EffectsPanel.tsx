@@ -6,7 +6,7 @@ export function EffectsPanel(props) {
   return (
     <div>
       {/* Anchor Navigation */}
-      <nav className="mb-6">
+      <nav className="mb-6 sticky top-0 z-10 bg-background">
         <ul className="flex flex-wrap gap-2">
           {effectsList.map(effect => (
             <li key={effect.id}>
