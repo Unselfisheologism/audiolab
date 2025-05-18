@@ -309,7 +309,15 @@ export default function AudioForgeClientContent() {
               maxSize={45}
               className="h-full overflow-y-auto" 
             >
-              <AudioControlsPanel {...audioControlsPanelProps} />
+              <EffectsPanel
+                onApplyEffect={handleApplyEffect}
+                onParameterChange={handleParameterChange}
+                effectSettings={effectSettings}
+                isLoading={isLoading}
+                isAudioLoaded={!!originalAudioDataUrl}
+                analysisResult={analysisResult}
+                analysisSourceEffectId={analysisSourceEffectId}
+              />
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel 
