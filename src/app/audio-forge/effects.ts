@@ -30,7 +30,7 @@ export const effectsList: Effect[] = [
   {
     id: 'dreamscapeMaker',
     name: "Lo-fi",
-    description: 'Create a slowed and reverb effect for ethereal soundscapes.',
+    description: 'Create lo-fi music with a slowed and reverb effect for chill, atmospheric soundscapes. Perfect for lo-fi beats, study music, and relaxing background audio.',
     icon: CassetteTape, // Changed from Moon to CassetteTape
     controlType: 'button',
     actionLabel: "Apply Lo-fi Effect",
@@ -40,7 +40,7 @@ export const effectsList: Effect[] = [
   {
     id: 'audio8DConverter',
     name: '8D Audio Converter',
-    description: 'Simulate an 8D audio experience by combining panning and reverb. Best experienced with headphones.',
+    description: 'Transform any song or audio file into immersive 8D audio. Combine panning and reverb to simulate a surround sound experience in your headphones.',
     icon: Headphones,
     controlType: 'button',
     actionLabel: 'Apply 8D Effect',
@@ -50,7 +50,7 @@ export const effectsList: Effect[] = [
   {
     id: 'frequencyTuner432',
     name: 'Tune to 432Hz',
-    description: 'Convert a track from standard 440Hz A4 tuning to 432Hz.',
+    description: 'Convert music from standard 440Hz tuning to 432Hz for a warmer, more natural sound. Ideal for musicians and audiophiles seeking 432Hz audio.',
     icon: Copyleft, 
     controlType: 'button',
     actionLabel: 'Tune to 432Hz',
@@ -61,7 +61,7 @@ export const effectsList: Effect[] = [
   {
     id: 'resonanceAlteration',
     name: 'Resonance Alteration',
-    description: 'Modify the perceived frequency of sound.',
+    description: 'Shift the frequency of your audio with a pitch shifter. Change how high or low your audio sounds for creative or corrective purposes.',
     icon: Waves,
     controlType: 'slider',
     parameters: [
@@ -73,7 +73,7 @@ export const effectsList: Effect[] = [
   {
     id: 'temporalModification',
     name: 'Temporal Modification',
-    description: 'Change the rate at which the audio is played.',
+    description: 'Change the playback speed of audio without affecting pitch. Speed up or slow down music, podcasts, and more.',
     icon: Clock,
     controlType: 'slider',
     parameters: [
@@ -86,7 +86,7 @@ export const effectsList: Effect[] = [
   {
     id: 'stereoWidener',
     name: 'Stereo Widener',
-    description: 'Enhance the spaciousness of stereo sounds.',
+    description: 'Widen the stereo image of your audio for a fuller, more spacious sound. Enhance stereo separation for music or podcasts.',
     icon: Expand,
     controlType: 'slider',
     parameters: [
@@ -98,7 +98,7 @@ export const effectsList: Effect[] = [
   {
     id: 'automatedSweep',
     name: 'Automated Sweep',
-    description: 'Dynamically shift sound between left and right channels.',
+    description: 'Pan audio from left to right automatically. Create dynamic, moving effects for binaural and immersive listening.',
     icon: Shuffle,
     controlType: 'slider',
     parameters: [
@@ -111,7 +111,7 @@ export const effectsList: Effect[] = [
   {
     id: 'subharmonicIntensifier',
     name: 'Subharmonic Intensifier',
-    description: 'Strengthen the lower frequencies in an audio track.',
+    description: 'Boost the bass and sub-bass frequencies in your audio. Use this bass booster to add depth and power to any track.',
     icon: TrendingDown,
     controlType: 'slider',
     parameters: [
@@ -123,7 +123,7 @@ export const effectsList: Effect[] = [
   {
     id: 'frequencySculptor',
     name: 'Frequency Sculptor',
-    description: 'Fine-tune audio frequencies with a 3-band EQ.',
+    description: 'Shape your sound with a 3-band equalizer (EQ). Adjust bass, mid, and treble frequencies for precise audio control.',
     icon: SlidersHorizontal,
     controlType: 'group', // Implies multiple sliders
     parameters: [
@@ -138,7 +138,7 @@ export const effectsList: Effect[] = [
   {
     id: 'keyTransposer',
     name: 'Key Transposer',
-    description: 'Transpose the key of an audio piece.',
+    description: 'Transpose the key of your audio up or down in semitones. Perfect for musicians and vocalists wanting to shift pitch.',
     icon: Music2, 
     controlType: 'number_input',
     parameters: [
@@ -150,7 +150,7 @@ export const effectsList: Effect[] = [
   {
     id: 'paceAdjuster',
     name: 'Pace Adjuster',
-    description: 'Alter the playback tempo without affecting pitch.',
+    description: 'Adjust tempo without changing pitch. Speed up or slow down your audio to match any project or practice needs.',
     icon: Gauge,
     controlType: 'slider',
     parameters: [
@@ -163,7 +163,7 @@ export const effectsList: Effect[] = [
   {
     id: 'echoGenerator',
     name: 'Echo Generator',
-    description: 'Simulate sound reflections with customizable delay and feedback.',
+    description: 'Add customizable echo and delay effects to your audio. Create depth and atmosphere with professional-quality echo controls.',
     icon: Repeat,
     controlType: 'group',
     parameters: [
@@ -177,7 +177,7 @@ export const effectsList: Effect[] = [
   {
     id: 'reversePlayback',
     name: 'Reverse Playback',
-    description: 'Play audio backward.',
+    description: 'Play any audio file in reverse. Create experimental sounds or uncover hidden audio details.',
     icon: Rewind,
     controlType: 'button',
     actionLabel: 'Reverse Audio',
@@ -188,7 +188,7 @@ export const effectsList: Effect[] = [
   {
     id: 'gainController',
     name: 'Gain Controller',
-    description: 'Regulate sound intensity (volume).',
+    description: 'Increase or decrease the volume of your audio with a precise gain control slider.',
     icon: Volume2,
     controlType: 'slider',
     parameters: [
@@ -200,7 +200,7 @@ export const effectsList: Effect[] = [
    {
     id: 'audioSplitter',
     name: 'Audio Splitter',
-    description: 'Extract sections from an audio file by specifying start and end times in minutes.',
+    description: 'Cut and extract sections from your audio by selecting start and end times. Ideal for trimming music, podcasts, and samples.',
     icon: Scissors,
     controlType: 'group',
     parameters: [
@@ -214,7 +214,7 @@ export const effectsList: Effect[] = [
   {
     id: 'rhythmDetector',
     name: 'Rhythm Detector',
-    description: 'Analyze BPM (Beats Per Minute).',
+    description: 'Detect and analyze the BPM (beats per minute) of any audio file. Perfect for DJs, remixes, and tempo-matching.',
     icon: HeartPulse,
     controlType: 'button',
     actionLabel: 'Analyze BPM',
@@ -226,7 +226,7 @@ export const effectsList: Effect[] = [
   {
     id: 'bassBoosterPresets',
     name: 'Bass Booster',
-    description: 'Presets to enhance low frequencies.',
+    description: 'Choose from a range of bass booster presets to enhance low frequencies: subtle, gentle, medium, intense, or maximum bass.',
     icon: SignalLow,
     controlType: 'group', 
     groupName: 'Bass Boost Presets',
@@ -242,7 +242,7 @@ export const effectsList: Effect[] = [
   {
     id: 'reverbPresets',
     name: 'Reverb Presets',
-    description: 'Simulate various acoustic spaces.',
+    description: 'Simulate real acoustic spaces with reverb presets: vocal ambience, washroom, small room, medium room, large room, chapel hall, or cathedral.',
     icon: Building, 
     controlType: 'group', 
     groupName: 'Reverb Presets',
