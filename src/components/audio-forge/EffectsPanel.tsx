@@ -21,7 +21,13 @@ export function EffectsPanel(props) {
           <section id={effect.id} key={effect.id}>
             <EffectCard
               effect={effect}
-              {...props} // Pass down handlers, settings, etc.
+              currentSettings={props.effectSettings?.[effect.id] || {}} // Defensive fallback
+              onApplyEffect={props.onApplyEffect}
+              onParameterChange={props.onParameterChange}
+              isLoading={props.isLoading}
+              isAudioLoaded={props.isAudioLoaded}
+              analysisResult={props.analysisResult}
+              analysisSourceEffectId={props.analysisSourceEffectId}
             />
           </section>
         ))}
