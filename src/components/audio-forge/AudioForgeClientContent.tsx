@@ -14,6 +14,7 @@ import { effectsList } from '@/app/audio-forge/effects';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AppFooter } from './AppFooter';
+import { EffectsPanel } from './EffectsPanel';
 
 export default function AudioForgeClientContent() {
   const [originalAudioFile, setOriginalAudioFile] = useState<File | null>(null);
