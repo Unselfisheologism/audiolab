@@ -1,6 +1,7 @@
 
 import { LegalLinks } from './LegalLinks';
 import { Separator } from '@/components/ui/separator';
+import { FaYoutube, FaXTwitter, FaLinkedin, FaMedium, FaDiscord } from "react-icons/fa6"; // <-- Add this line
 
 export function AppFooter() {
   return (
@@ -58,6 +59,26 @@ export function AppFooter() {
             </p>
           </div>
         </div>
+
+        {/* === SOCIAL ICONS START === */}
+        <div className="flex justify-center gap-4 mb-6">
+          <a href="https://www.youtube.com/YOUR_CHANNEL" target="_blank" rel="noopener noreferrer" title="YouTube">
+            <FaYoutube size={28} aria-label="YouTube" />
+          </a>
+          <a href="https://x.com/YOUR_X_PROFILE" target="_blank" rel="noopener noreferrer" title="X">
+            <FaXTwitter size={28} aria-label="X" />
+          </a>
+          <a href="https://www.linkedin.com/in/YOUR_LINKEDIN" target="_blank" rel="noopener noreferrer" title="LinkedIn">
+            <FaLinkedin size={28} aria-label="LinkedIn" />
+          </a>
+          <a href="https://medium.com/@YOUR_MEDIUM" target="_blank" rel="noopener noreferrer" title="Medium">
+            <FaMedium size={28} aria-label="Medium" />
+          </a>
+          <a href="https://discord.gg/YOUR_INVITE" target="_blank" rel="noopener noreferrer" title="Discord">
+            <FaDiscord size={28} aria-label="Discord" />
+          </a>
+        </div>
+        {/* === SOCIAL ICONS END === */}
 
         {/* Legal Links Section */}
         <LegalLinks />
