@@ -6,8 +6,8 @@ import { Toaster } from "@/components/ui/toaster";
 import Script from 'next/script';
 
 export const metadata: Metadata = {
-  title: 'Advanced Audio Tools & Presets for Slowed and Reverb, Pitch, Bass Boost, 8D Effects, Lofi | Audiolab Create, Convert, and Enhance Audio Files Online with Free Reverb Presets, Vocal Removal, Tempo Detection, and More!',
-  description: 'Unlock professional-grade audio editing with our free online tools. Apply reverb presets, bass booster effects, pitch shifting, 8D audio, and vocal removal. Optimize tracks with EQ, noise reduction, stereo enhancement, and room-size adjustments. Perfect for music producers, podcasters, and content creators!',
+  title: 'Audiolab: Online Audio Editor, Bass Booster, 8D Audio, Reverb & More',
+  description: 'Edit audio online for free: 8D Audio Converter, Bass Booster, Reverb, Equalizer, 432Hz tuning, Lo-fi & more. No signup. Export instantly.',
 };
 
 export default function RootLayout({
