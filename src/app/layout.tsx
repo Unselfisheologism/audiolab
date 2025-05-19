@@ -210,6 +210,19 @@ export default function RootLayout({
         <a href='https://dang.ai/' target='_blank' rel="noopener noreferrer" >
           <img src='https://cdn.prod.website-files.com/63d8afd87da01fb58ea3fbcb/6487e2868c6c8f93b4828827_dang-badge.png' alt='Dang.ai' style={{ width: 150, height: 54 }} width='150' height='54' />
         </a>
+        <a
+          href="https://www.producthunt.com/products/audiolab-2/reviews?utm_source=badge-product_review&utm_medium=badge&utm_source=badge-audiolab-2"
+          target="_blank"
+          rel="noopener noreferrer"
+         >
+          <img
+            src="https://api.producthunt.com/widgets/embed-image/v1/product_review.svg?product_id=1066251&theme=light"
+            alt="Audiolab: Audio Editing Without the Headache | Product Hunt"
+            style={{ width: 250, height: 54 }}
+            width={250}
+            height={54}
+          />
+        </a>
         {children}
         <Toaster />
       </body>
