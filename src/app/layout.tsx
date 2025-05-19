@@ -170,6 +170,7 @@ export default function RootLayout({
         }}
       />
       <body className="font-sans bg-background text-foreground">
+      <div style={{ minWidth: 270, minHeight: 54, display: "inline-block" }}>   
         <a 
           href="https://fazier.com/launches/audiolab" 
           target="_blank" 
@@ -182,8 +183,16 @@ export default function RootLayout({
             unoptimized
           />
         </a>
-        <div className="sf-root" data-id="3877164" data-badge="oss-users-love-us-white" style={{ width: 125 }}>
-          <a href="https://sourceforge.net/projects/audiolab/" target="_blank" rel="noopener noreferrer">Audiolab on Sourceforge</a>
+       </div>  
+        <div 
+          className="sf-root"
+          data-id="3877164" 
+          data-badge="oss-users-love-us-white" 
+          style={{ width: 125, minHeight: 40 }}
+        >
+          <a href="https://sourceforge.net/projects/audiolab/" target="_blank" rel="noopener noreferrer">
+            Audiolab on Sourceforge
+          </a>
         </div>
         <Script id="sf-badge" strategy="afterInteractive">
           {`(function () {
@@ -194,6 +203,7 @@ export default function RootLayout({
             p.parentNode.insertBefore(sc, p);
           })();`}
         </Script>
+      <div style={{ minWidth: 250, minHeight: 54, display: "inline-block" }}>
         <a
           href="https://www.producthunt.com/posts/audiolab-2?embed=true&utm_source=badge-featured&utm_medium=badge"
           target="_blank"
@@ -208,6 +218,8 @@ export default function RootLayout({
            unoptimized
          />
        </a>
+      </div> 
+      <div style={{ minWidth: 120, minHeight: 40, display: "inline-block" }}>
         <a href="https://www.uneed.best/tool/audiolab">
           <Image
             src="https://www.uneed.best/EMBED3.png"
@@ -217,6 +229,8 @@ export default function RootLayout({
             unoptimized
           />
         </a>
+       </div>  
+      <div style={{ minWidth: 130, minHeight: 40, display: "inline-block" }}>
         <a href='https://www.sideprojectors.com/project/58769/audiolab' target="_blank" rel="noopener noreferrer">
           <Image
             src='https://www.sideprojectors.com/img/badges/badge_show_black.png'
@@ -226,6 +240,8 @@ export default function RootLayout({
             unoptimized
           />
         </a>
+       </div>  
+      <div style={{ minWidth: 150, minHeight: 54, display: "inline-block" }}>  
         <a href='https://dang.ai/' target='_blank' rel="noopener noreferrer">
           <Image
             src='https://cdn.prod.website-files.com/63d8afd87da01fb58ea3fbcb/6487e2868c6c8f93b4828827_dang-badge.png'
@@ -235,6 +251,8 @@ export default function RootLayout({
             unoptimized
           />
         </a>
+       </div> 
+      <div style={{ minWidth: 250, minHeight: 54, display: "inline-block" }}> 
         <a
           href="https://www.producthunt.com/products/audiolab-2/reviews?utm_source=badge-product_review&utm_medium=badge&utm_source=badge-audiolab-2"
           target="_blank"
@@ -248,6 +266,7 @@ export default function RootLayout({
             unoptimized
           />
         </a>
+       </div>  
         {children}
         <Toaster />
       </body>
