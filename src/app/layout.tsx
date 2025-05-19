@@ -177,7 +177,7 @@ export default function RootLayout({
           />
         </a>
         <div className="sf-root" data-id="3877164" data-badge="oss-users-love-us-white" style={{ width: 125 }}>
-          <a href="https://sourceforge.net/projects/audiolab/" target="_blank" rel="noopener noreferrer">Audiolab</a>
+          <a href="https://sourceforge.net/projects/audiolab/" target="_blank" rel="noopener noreferrer">Audiolab on Sourceforge</a>
         </div>
         <Script id="sf-badge" strategy="afterInteractive">
           {`(function () {
