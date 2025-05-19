@@ -184,20 +184,20 @@ export default function RootLayout({
           />
         </a>
        </div>  
-        <div 
+        <div
           className="sf-root badge-wrapper-125x40"
-          data-id="3877164" 
-          data-badge="oss-users-love-us-white" 
+          data-id="3877688"
+          data-badge="oss-users-love-us-black"
         >
           <a href="https://sourceforge.net/projects/audiolab/" target="_blank" rel="noopener noreferrer">
-            Audiolab on Sourceforge
+            Audiolab
           </a>
         </div>
         <Script id="sf-badge" strategy="afterInteractive">
           {`(function () {
             var sc = document.createElement('script');
             sc.async = true;
-            sc.src = 'https://b.sf-syn.com/badge_js?sf_id=3877164';
+            sc.src = 'https://b.sf-syn.com/badge_js?sf_id=3877688';
             var p = document.getElementsByTagName('script')[0];
             p.parentNode.insertBefore(sc, p);
           })();`}
