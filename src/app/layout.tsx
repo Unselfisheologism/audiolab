@@ -4,6 +4,7 @@ import { GeistMono } from 'geist/font/mono';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import Script from 'next/script';
+import Head from 'next/head';
 
 export const metadata: Metadata = {
   title: 'Audiolab: Online Audio Editor, Bass Booster, 8D Audio, Reverb',
@@ -17,6 +18,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <head> 
+        <link rel="canonical" href="https://audiolab.in.net/" />
+      </head>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
