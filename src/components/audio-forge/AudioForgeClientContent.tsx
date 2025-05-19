@@ -285,9 +285,7 @@ export default function AudioForgeClientContent() {
       />
       <main className="flex-grow min-h-0 p-4 overflow-y-auto md:flex md:p-0 md:overflow-visible">
         {/* SEO: Main H1 for the app (visually hidden on mobile, visible on desktop for SEO) */}
-        <h1 className="text-2xl font-extrabold mb-2 md:block sr-only md:not-sr-only">
-          Audiolab: Online Audio Editor, Bass Booster, 8D Audio, Reverb & More
-        </h1>
+        <h1 className="sr-only">Audiolab: Online Audio Editor, Bass Booster, 8D Audio, Reverb</h1>
         {isMobile ? (
           <>
             <MainDisplayPanel {...mainDisplayPanelProps} />
