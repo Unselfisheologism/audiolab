@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import Script from 'next/script';
 
 export const metadata: Metadata = {
-  title: 'Audiolab: Online Audio Editor, Bass Booster, 8D Audio, Reverb & More',
+  title: 'Audiolab: Online Audio Editor, Bass Booster, 8D Audio, Reverb',
   description: 'Edit audio online for free: 8D Audio Converter, Bass Booster, Reverb, Equalizer, 432Hz tuning, Lo-fi & more. No signup. Export instantly.',
 };
 
