@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
@@ -255,6 +254,8 @@ export default function AudioForgeClientContent() {
           onOpenEffectsPanel={() => setIsEffectsSheetOpen(true)}
         />
         <main className="flex-grow min-h-0 md:flex">
+          {/* SEO: Main H1 for the app (hidden visually but accessible for SEO/screen readers in skeleton state) */}
+          <h1 className="sr-only">Audiolab: Online Audio Editor, Bass Booster, 8D Audio, Reverb & More</h1>
           {isMobile ? (
              <div className="flex-grow p-4 overflow-y-auto">
                 <MainContentSkeleton />
@@ -283,14 +284,19 @@ export default function AudioForgeClientContent() {
         onOpenEffectsPanel={() => setIsEffectsSheetOpen(true)}
       />
       <main className="flex-grow min-h-0 p-4 overflow-y-auto md:flex md:p-0 md:overflow-visible">
+        {/* SEO: Main H1 for the app (visually hidden on mobile, visible on desktop for SEO) */}
+        <h1 className="text-2xl font-extrabold mb-2 md:block sr-only md:not-sr-only">
+          Audiolab: Online Audio Editor, Bass Booster, 8D Audio, Reverb & More
+        </h1>
         {isMobile ? (
           <>
-            {/* On mobile, MainDisplayPanel is directly inside the scrollable main */}
             <MainDisplayPanel {...mainDisplayPanelProps} />
             <Sheet open={isEffectsSheetOpen} onOpenChange={setIsEffectsSheetOpen}>
               <SheetContent side="left" className="w-[85vw] max-w-md p-0 flex flex-col h-full">
                 <SheetHeader className="p-4 border-b">
-                  <SheetTitle>Audio Effects</SheetTitle>
+                  <SheetTitle>
+                    <h2 className="text-xl font-bold">Audio Effects</h2>
+                  </SheetTitle>
                   <SheetDescription className="sr-only">
                     Panel containing all audio effects and file upload controls.
                   </SheetDescription>
@@ -326,6 +332,8 @@ export default function AudioForgeClientContent() {
               className="h-full overflow-y-auto" 
             >
               <div className="p-4 space-y-4">
+                {/* H2 for Effects panel, only visible on desktop */}
+                <h2 className="text-lg font-bold mb-4 hidden md:block">Audio Effects</h2>
                 <FileUploadArea
                   onFileSelect={handleFileSelect}
                   selectedFile={originalAudioFile}
@@ -357,6 +365,3 @@ export default function AudioForgeClientContent() {
     </div>
   );
 }
-
-
-
