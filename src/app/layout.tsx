@@ -5,6 +5,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import Script from 'next/script';
 import Head from 'next/head';
+import Image from 'next/image';
 
 export const metadata: Metadata = {
   title: 'Audiolab: Online Audio Editor, Bass Booster, 8D Audio, Reverb',
@@ -178,6 +179,7 @@ export default function RootLayout({
             src="https://fazier.com/api/v1/public/badges/embed_image.svg?launch_id=4421&badge_type=daily&theme=light" 
             width={270} 
             alt="Fazier badge" 
+            unoptimized
           />
         </a>
         <div className="sf-root" data-id="3877164" data-badge="oss-users-love-us-white" style={{ width: 125 }}>
@@ -203,28 +205,47 @@ export default function RootLayout({
            style={{ width: 250, height: 54 }}
            width={250}
            height={54}
+           unoptimized
          />
        </a>
         <a href="https://www.uneed.best/tool/audiolab">
-          <img src="https://www.uneed.best/EMBED3.png" alt="Uneed Embed Badge" />
+          <Image
+            src="https://www.uneed.best/EMBED3.png"
+            alt="Uneed Embed Badge"
+            width={120}    // Use the actual badge width in pixels
+            height={40}    // Use the actual badge height in pixels
+            unoptimized
+          />
         </a>
-        <a href='https://www.sideprojectors.com/project/58769/audiolab' target="_blank" rel="noopener noreferrer" >
-          <img src='https://www.sideprojectors.com/img/badges/badge_show_black.png' alt='Check out Audiolab at @SideProjectors' />
+        <a href='https://www.sideprojectors.com/project/58769/audiolab' target="_blank" rel="noopener noreferrer">
+          <Image
+            src='https://www.sideprojectors.com/img/badges/badge_show_black.png'
+            alt='Check out Audiolab at @SideProjectors'
+            width={130}
+            height={40}
+            unoptimized
+          />
         </a>
-        <a href='https://dang.ai/' target='_blank' rel="noopener noreferrer" >
-          <img src='https://cdn.prod.website-files.com/63d8afd87da01fb58ea3fbcb/6487e2868c6c8f93b4828827_dang-badge.png' alt='Dang.ai' style={{ width: 150, height: 54 }} width='150' height='54' />
+        <a href='https://dang.ai/' target='_blank' rel="noopener noreferrer">
+          <Image
+            src='https://cdn.prod.website-files.com/63d8afd87da01fb58ea3fbcb/6487e2868c6c8f93b4828827_dang-badge.png'
+            alt='Dang.ai'
+            width={150}
+            height={54}
+            unoptimized
+          />
         </a>
         <a
           href="https://www.producthunt.com/products/audiolab-2/reviews?utm_source=badge-product_review&utm_medium=badge&utm_source=badge-audiolab-2"
           target="_blank"
           rel="noopener noreferrer"
-         >
-          <img
+        >
+          <Image
             src="https://api.producthunt.com/widgets/embed-image/v1/product_review.svg?product_id=1066251&theme=light"
             alt="Audiolab: Audio Editing Without the Headache | Product Hunt"
-            style={{ width: 250, height: 54 }}
             width={250}
             height={54}
+            unoptimized
           />
         </a>
         {children}
