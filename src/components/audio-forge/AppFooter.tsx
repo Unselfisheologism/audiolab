@@ -63,19 +63,19 @@ export function AppFooter() {
         {/* === SOCIAL ICONS START === */}
         <div className="flex justify-center gap-4 mb-6">
           <a href="https://www.youtube.com/@WhAtNOTif-r4h" target="_blank" rel="noopener noreferrer" title="YouTube">
-            <FaYoutube size={28} aria-label="YouTube" />
+            <FaYoutube className="text-gray-600 hover:text-red-600 transition" size={28} aria-label="YouTube" />
           </a>
           <a href="https://x.com/Jeff9James" target="_blank" rel="noopener noreferrer" title="X">
-            <FaXTwitter size={28} aria-label="X" />
+            <FaXTwitter className="text-gray-600 hover:text-black transition" size={28} aria-label="X" />
           </a>
           <a href="https://www.linkedin.com/in/jeffrin-jeffrin-6b4041345/" target="_blank" rel="noopener noreferrer" title="LinkedIn">
-            <FaLinkedin size={28} aria-label="LinkedIn" />
+            <FaLinkedin className="text-gray-600 hover:text-blue-700 transition" size={28} aria-label="LinkedIn" />
           </a>
           <a href="https://medium.com/@jeffrinjames99" target="_blank" rel="noopener noreferrer" title="Medium">
-            <FaMedium size={28} aria-label="Medium" />
+            <FaMedium className="text-gray-600 hover:text-green-700 transition" size={28} aria-label="Medium" />
           </a>
           <a href="https://discordapp.com/users/1293939031620456492" target="_blank" rel="noopener noreferrer" title="Discord">
-            <FaDiscord size={28} aria-label="Discord" />
+            <FaDiscord className="text-gray-600 hover:text-indigo-600 transition" size={28} aria-label="Discord" />
           </a>
         </div>
         {/* === SOCIAL ICONS END === */}
