@@ -122,3 +122,35 @@ html {
   white-space: nowrap;
   border-width: 0;
 }
+
+/* === Badge Wrapper Classes === */
+.badge-wrapper-270x54 {
+  min-width: 270px;
+  min-height: 54px;
+  display: inline-block;
+}
+.badge-wrapper-125x40 {
+  width: 125px;
+  min-height: 40px;
+  display: inline-block;
+}
+.badge-wrapper-250x54 {
+  min-width: 250px;
+  min-height: 54px;
+  display: inline-block;
+}
+.badge-wrapper-120x40 {
+  min-width: 120px;
+  min-height: 40px;
+  display: inline-block;
+}
+.badge-wrapper-130x40 {
+  min-width: 130px;
+  min-height: 40px;
+  display: inline-block;
+}
+.badge-wrapper-150x54 {
+  min-width: 150px;
+  min-height: 54px;
+  display: inline-block;
+}
