@@ -17,6 +17,153 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Audio Lab",
+            "url": "https://audiolab.in.net",
+            "description": "Free online audio editor with tools like 8D Audio Converter, Lo-fi, 432Hz Tuning, Resonance Alteration, Tempo Change, Stereo Widener, Bass Booster, Equalizer, Reverb, and more.",
+            "applicationCategory": "AudioEditor",
+            "browserRequirements": "Requires JavaScript and a modern browser",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "hasPart": [
+              {
+                "@type": "SoftwareApplication",
+                "name": "Lo-fi",
+                "url": "https://audiolab.in.net/#dreamscapeMaker",
+                "description": "Create lo-fi music with a slowed and reverb effect for chill, atmospheric soundscapes.",
+                "operatingSystem": "All"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "8D Audio Converter",
+                "url": "https://audiolab.in.net/#audio8DConverter",
+                "description": "Transform any song or audio file into immersive 8D audio.",
+                "operatingSystem": "All"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "Tune to 432Hz",
+                "url": "https://audiolab.in.net/#frequencyTuner432",
+                "description": "Convert music from 440Hz to 432Hz for a warmer, more natural sound.",
+                "operatingSystem": "All"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "Resonance Alteration",
+                "url": "https://audiolab.in.net/#resonanceAlteration",
+                "description": "Shift the frequency of your audio with a pitch shifter.",
+                "operatingSystem": "All"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "Temporal Modification",
+                "url": "https://audiolab.in.net/#temporalModification",
+                "description": "Change the playback speed of audio without affecting pitch.",
+                "operatingSystem": "All"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "Stereo Widener",
+                "url": "https://audiolab.in.net/#stereoWidener",
+                "description": "Widen the stereo image of your audio for a fuller, more spacious sound.",
+                "operatingSystem": "All"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "Automated Sweep",
+                "url": "https://audiolab.in.net/#automatedSweep",
+                "description": "Pan audio from left to right automatically.",
+                "operatingSystem": "All"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "Subharmonic Intensifier",
+                "url": "https://audiolab.in.net/#subharmonicIntensifier",
+                "description": "Boost the bass and sub-bass frequencies in your audio.",
+                "operatingSystem": "All"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "Frequency Sculptor",
+                "url": "https://audiolab.in.net/#frequencySculptor",
+                "description": "Shape your sound with a 3-band equalizer (EQ).",
+                "operatingSystem": "All"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "Key Transposer",
+                "url": "https://audiolab.in.net/#keyTransposer",
+                "description": "Transpose the key of your audio up or down in semitones.",
+                "operatingSystem": "All"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "Pace Adjuster",
+                "url": "https://audiolab.in.net/#paceAdjuster",
+                "description": "Adjust tempo without changing pitch.",
+                "operatingSystem": "All"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "Echo Generator",
+                "url": "https://audiolab.in.net/#echoGenerator",
+                "description": "Add customizable echo and delay effects to your audio.",
+                "operatingSystem": "All"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "Reverse Playback",
+                "url": "https://audiolab.in.net/#reversePlayback",
+                "description": "Play any audio file in reverse.",
+                "operatingSystem": "All"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "Gain Controller",
+                "url": "https://audiolab.in.net/#gainController",
+                "description": "Increase or decrease the volume of your audio with a precise gain control slider.",
+                "operatingSystem": "All"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "Audio Splitter",
+                "url": "https://audiolab.in.net/#audioSplitter",
+                "description": "Cut and extract sections from your audio by selecting start and end times.",
+                "operatingSystem": "All"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "Rhythm Detector",
+                "url": "https://audiolab.in.net/#rhythmDetector",
+                "description": "Detect and analyze the BPM (beats per minute) of any audio file.",
+                "operatingSystem": "All"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "Bass Booster Presets",
+                "url": "https://audiolab.in.net/#bassBoosterPresets",
+                "description": "Choose from a range of bass booster presets to enhance low frequencies: subtle, gentle, medium, intense, or maximum bass.",
+                "operatingSystem": "All"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "Reverb Presets",
+                "url": "https://audiolab.in.net/#reverbPresets",
+                "description": "Simulate real acoustic spaces with reverb presets: vocal ambience, washroom, small room, medium room, large room, chapel hall, or cathedral.",
+                "operatingSystem": "All"
+               }
+             ]
+          })
+        }}
+      />
       <body className="font-sans bg-background text-foreground">
         <a 
           href="https://fazier.com/launches/audiolab" 
