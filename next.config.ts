@@ -1,6 +1,6 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  /* config options here */
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
   output: 'export',
   typescript: {
     ignoreBuildErrors: true,
@@ -17,10 +17,19 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
-    unoptimized: true, // Required for static export if using next/image
+    unoptimized: true,
   },
-};
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
+        ],
+      },
+    ]
+  },
+}
 
-export default nextConfig;
-
-export default nextConfig;
+export default nextConfig
