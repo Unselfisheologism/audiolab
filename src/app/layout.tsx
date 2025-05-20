@@ -306,7 +306,19 @@ export default function RootLayout({
             unoptimized
           />
         </a>
-       </div>  
+       </div> 
+        
+        {/* --- Add this block below badges, before {children} --- */}
+       <div className="site-header-info" style={{textAlign: 'center', margin: '24px 0 10px 0'}}>
+         <h1 className="text-3xl font-bold text-primary" style={{marginBottom: 10}}>
+           Audio Lab: Free Online Audio Editor & Converter
+         </h1>
+         <p className="text-lg text-muted-foreground" style={{maxWidth: 600, margin: '0 auto'}}>
+           Edit audio online for free. Audio Lab lets you convert, enhance, and fine-tune audio files with tools like 8D Audio Converter, Bass Booster, Noise Reduction, Equalizer, 432Hz Tuning, Lo-fi, and more. No signup required—export your music instantly!
+         </p>
+       </div>
+       {/* --- End of block --- */} 
+        
         {children}
         <Toaster />
       </body>
