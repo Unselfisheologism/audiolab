@@ -1,24 +1,9 @@
 [build]
-  command = "next build && npm run postbuild && cp public/sitemap*.xml out/"
+  command = "next build"
   publish = "out" 
 
 [build.environment]
   NODE_VERSION = "20"
-
-[[redirects]]
-  from = "/robots.txt"
-  to = "/robots.txt"
-  status = 200
-
-[[redirects]]
-  from = "/sitemap.xml"
-  to = "/sitemap.xml"
-  status = 200
-
-[[redirects]]
-  from = "/sitemap-:splat.xml"
-  to = "/sitemap-:splat.xml"
-  status = 200
 
 [[redirects]]
   from = "/*"
