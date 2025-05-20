@@ -1,5 +1,5 @@
 [build]
-  command = "next build && next export && npx next-sitemap && cp public/robots.txt out/robots.txt && cp public/sitemap*.xml out/"
+  command = "next build && npx next-sitemap && cp public/robots.txt out/robots.txt && cp public/sitemap*.xml out/"
   publish = "out" 
 
 [build.environment]
