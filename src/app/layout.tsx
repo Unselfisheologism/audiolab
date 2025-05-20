@@ -318,6 +318,45 @@ export default function RootLayout({
          </p>
        </div>
        {/* --- End of block --- */} 
+
+       <div className="w-full flex flex-wrap justify-center items-stretch my-6 px-2 gap-4">
+         {/* Left Toast Card */}
+         <div className="flex-1 min-w-[220px] max-w-xs bg-white/90 shadow-lg rounded-lg p-4 border border-gray-200 flex flex-col justify-center items-center mx-auto">
+           <h2 className="font-bold text-base mb-2 text-black">Optimize Your Audio Projects</h2>
+           <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+             <li>Audio files & original recordings</li>
+             <li>Audio projects with minimal quality loss</li>
+             <li>Noise reduction</li>
+             <li>Key features for audio editing software</li>
+             <li>Music composing software</li>
+             <li>Audio analyzer & rhythm detector</li>
+             <li>Audio gain controller & audio key transposer</li>
+             <li>Bass booster & audio presets</li>
+           </ul>
+         </div>
+         {/* Center Title+Description */}
+         <div className="flex flex-col flex-[2_1_320px] items-center justify-center mx-auto max-w-2xl text-center bg-transparent p-2">
+           <h1 className="text-3xl font-bold text-primary mb-2">Audio Lab: Free Online Audio Editor & Converter</h1>
+           <p className="text-lg text-muted-foreground mb-2">
+             Edit audio online for free. Audio Lab lets you convert, enhance, and fine-tune audio files with tools like 8D Audio Converter, Bass Booster, Noise Reduction, Equalizer, 432Hz Tuning, Lo-fi, and more. No signup required—export your music instantly!
+           </p>
+         </div>
+         {/* Right Toast Card */}
+         <div className="flex-1 min-w-[220px] max-w-xs bg-white/90 shadow-lg rounded-lg p-4 border border-gray-200 flex flex-col justify-center items-center mx-auto">
+           <h2 className="font-bold text-base mb-2 text-black">Audio Editing & Conversion Tools</h2>
+           <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+             <li>Free audio editor & audio editing online</li>
+             <li>Audacity alternative, audioalter alternative, audiolab alternative</li>
+             <li>8D audio, white noise, Lo-fi, slowed and reverb tool</li>
+             <li>Audio converter & audio player</li>
+             <li>MP3 converter, OGG converter, FLAC converter, WAV converter</li>
+             <li>MP3 to OGG, MP3 to FLAC, MP3 to WAV</li>
+             <li>OGG to MP3, OGG to FLAC, OGG to WAV</li>
+             <li>FLAC to MP3, FLAC to OGG, FLAC to WAV</li>
+             <li>WAV to MP3, WAV to OGG, WAV to FLAC</li>
+           </ul>
+         </div>
+       </div> 
         
         {children}
         <Toaster />
