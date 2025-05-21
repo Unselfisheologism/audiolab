@@ -41,7 +41,7 @@ export default function AutoScrollingCarousel() {
             Whether you’re tweaking vocal tracks, adding cinematic reverb effects, or crafting bass-heavy songs, our online audio toolkit delivers precision and flexibility.
           </p>
           <br />
-          <span className="font-semibold">Key Features:</span>
+          <span className="font-semibold text-black">Key Features:</span>
           <ul className="list-disc list-inside text-sm text-gray-700 mt-2 space-y-1 pl-4">
             <li>
               <Link href="#reverbPresets" className="text-blue-600 underline">Reverb Presets</Link>: Simulate spaces from intimate bathrooms to grand concert halls.
