@@ -7,6 +7,7 @@ export default function AutoScrollingCarousel() {
   useEffect(() => {
     const carousel = carouselRef.current;
     if (!carousel) return;
+    if (carousel.scrollWidth <= carousel.clientWidth) return;
     let direction = 1;
     let frame: number;
 
@@ -31,7 +32,7 @@ export default function AutoScrollingCarousel() {
       aria-label="About, Philosophy, and Considerations carousel"
       tabIndex={0}
     >
-      <div className="flex min-w-[1200px] gap-6 px-2 py-2">
+      <div className="flex min-w-[950px] md:min-w-[1300px] gap-6 px-2 py-2">
         <article className="flex-shrink-0 bg-white/90 shadow-lg rounded-lg p-6 border border-gray-200 max-w-md min-w-[300px]">
           <h2 className="text-xl font-bold mb-2 text-primary">About Audio Lab</h2>
           <p className="text-sm text-gray-700">
