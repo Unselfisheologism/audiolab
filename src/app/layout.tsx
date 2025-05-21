@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import Script from 'next/script';
 import Head from 'next/head';
 import Image from 'next/image';
+// import { AppHeader } from '@/components/audio-forge/AppHeader'; // Uncomment if you want the header
 
 export const metadata = {
   title: 'Edit Audio Online',
@@ -211,20 +212,24 @@ export default function RootLayout({
         }}
       />
       <body className="font-sans bg-background text-foreground">
-      <div className="badge-wrapper-270x54">   
-        <a 
-          href="https://fazier.com/launches/audiolab" 
-          target="_blank" 
-          rel="noopener noreferrer"
-        >
-          <img 
-            src="https://fazier.com/api/v1/public/badges/embed_image.svg?launch_id=4421&badge_type=daily&theme=light" 
-            width={270} 
-            alt="Fazier badge" 
-            unoptimized
-          />
-        </a>
-       </div>  
+        {/* Uncomment this line if using AppHeader */}
+        {/* <AppHeader /> */}
+
+        {/* BADGES */}
+        <div className="badge-wrapper-270x54">   
+          <a 
+            href="https://fazier.com/launches/audiolab" 
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            <img 
+              src="https://fazier.com/api/v1/public/badges/embed_image.svg?launch_id=4421&badge_type=daily&theme=light" 
+              width={270} 
+              alt="Fazier badge" 
+              unoptimized
+            />
+          </a>
+        </div>  
         <div
           className="sf-root badge-wrapper-125x40"
           data-id="3877688"
@@ -243,110 +248,121 @@ export default function RootLayout({
             p.parentNode.insertBefore(sc, p);
           })();`}
         </Script>
-      <div className="badge-wrapper-250x54">
-        <a
-          href="https://www.producthunt.com/posts/audiolab-2?embed=true&utm_source=badge-featured&utm_medium=badge"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-         <img
-           src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=966661&theme=light&t=1747473927338"
-           alt="Audiolab: Audio Editing Without the Headache | Product Hunt"
-           style={{ width: 250, height: 54 }}
-           width={250}
-           height={54}
-           unoptimized
-         />
-       </a>
-      </div> 
-      <div className="badge-wrapper-120x40">
-        <a href="https://www.uneed.best/tool/audiolab">
-          <Image
-            src="https://www.uneed.best/EMBED3.png"
-            alt="Uneed Embed Badge"
-            width={120}    // Use the actual badge width in pixels
-            height={40}    // Use the actual badge height in pixels
-            unoptimized
-          />
-        </a>
-       </div>  
-      <div className="badge-wrapper-130x40">
-        <a href='https://www.sideprojectors.com/project/58769/audiolab' target="_blank" rel="noopener noreferrer">
-          <Image
-            src='https://www.sideprojectors.com/img/badges/badge_show_black.png'
-            alt='Check out Audiolab at @SideProjectors'
-            width={130}
-            height={40}
-            unoptimized
-          />
-        </a>
-       </div>  
-      <div className="badge-wrapper-150x54">  
-        <a href='https://dang.ai/' target='_blank' rel="noopener noreferrer">
-          <Image
-            src='https://cdn.prod.website-files.com/63d8afd87da01fb58ea3fbcb/6487e2868c6c8f93b4828827_dang-badge.png'
-            alt='Dang.ai'
-            width={150}
-            height={54}
-            unoptimized
-          />
-        </a>
-       </div> 
-      <div className="badge-wrapper-250x54"> 
-        <a
-          href="https://www.producthunt.com/products/audiolab-2/reviews?utm_source=badge-product_review&utm_medium=badge&utm_source=badge-audiolab-2"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            src="https://api.producthunt.com/widgets/embed-image/v1/product_review.svg?product_id=1066251&theme=light"
-            alt="Audiolab: Audio Editing Without the Headache | Product Hunt"
-            width={250}
-            height={54}
-            unoptimized
-          />
-        </a>
-       </div> 
+        <div className="badge-wrapper-250x54">
+          <a
+            href="https://www.producthunt.com/posts/audiolab-2?embed=true&utm_source=badge-featured&utm_medium=badge"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=966661&theme=light&t=1747473927338"
+              alt="Audiolab: Audio Editing Without the Headache | Product Hunt"
+              style={{ width: 250, height: 54 }}
+              width={250}
+              height={54}
+              unoptimized
+            />
+          </a>
+        </div> 
+        <div className="badge-wrapper-120x40">
+          <a href="https://www.uneed.best/tool/audiolab">
+            <Image
+              src="https://www.uneed.best/EMBED3.png"
+              alt="Uneed Embed Badge"
+              width={120}
+              height={40}
+              unoptimized
+            />
+          </a>
+        </div>  
+        <div className="badge-wrapper-130x40">
+          <a href='https://www.sideprojectors.com/project/58769/audiolab' target="_blank" rel="noopener noreferrer">
+            <Image
+              src='https://www.sideprojectors.com/img/badges/badge_show_black.png'
+              alt='Check out Audiolab at @SideProjectors'
+              width={130}
+              height={40}
+              unoptimized
+            />
+          </a>
+        </div>  
+        <div className="badge-wrapper-150x54">  
+          <a href='https://dang.ai/' target='_blank' rel="noopener noreferrer">
+            <Image
+              src='https://cdn.prod.website-files.com/63d8afd87da01fb58ea3fbcb/6487e2868c6c8f93b4828827_dang-badge.png'
+              alt='Dang.ai'
+              width={150}
+              height={54}
+              unoptimized
+            />
+          </a>
+        </div> 
+        <div className="badge-wrapper-250x54"> 
+          <a
+            href="https://www.producthunt.com/products/audiolab-2/reviews?utm_source=badge-product_review&utm_medium=badge&utm_source=badge-audiolab-2"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Image
+              src="https://api.producthunt.com/widgets/embed-image/v1/product_review.svg?product_id=1066251&theme=light"
+              alt="Audiolab: Audio Editing Without the Headache | Product Hunt"
+              width={250}
+              height={54}
+              unoptimized
+            />
+          </a>
+        </div>  
 
-       <div className="w-full flex flex-wrap justify-center items-stretch my-6 px-2 gap-4">
-         {/* Left Toast Card */}
-         <div className="flex-1 min-w-[220px] max-w-xs bg-white/90 shadow-lg rounded-lg p-4 border border-gray-200 flex flex-col justify-center items-center mx-auto">
-           <h2 className="font-bold text-base mb-2 text-black">Optimize Your Audio Projects</h2>
-           <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-             <li>Audio files & original recordings</li>
-             <li>Audio projects with minimal quality loss</li>
-             <li>Noise reduction</li>
-             <li>Key features for audio editing software</li>
-             <li>Music composing software</li>
-             <li>Audio analyzer & rhythm detector</li>
-             <li>Audio gain controller & audio key transposer</li>
-             <li>Bass booster & audio presets</li>
-           </ul>
-         </div>
-         {/* Center Title+Description */}
-         <div className="flex flex-col flex-[2_1_320px] items-center justify-center mx-auto max-w-2xl text-center bg-transparent p-2">
-           <h1 className="text-3xl font-bold text-primary mb-2">Audio Lab: Free Online Audio Editor & Converter</h1>
-           <p className="text-lg text-muted-foreground mb-2">
-             Edit audio online for free. Audio Lab lets you convert, enhance, and fine-tune audio files with tools like 8D Audio Converter, Bass Booster, Noise Reduction, Equalizer, 432Hz Tuning, Lo-fi, and more. No signup required—export your music instantly!
-           </p>
-         </div>
-         {/* Right Toast Card */}
-         <div className="flex-1 min-w-[220px] max-w-xs bg-white/90 shadow-lg rounded-lg p-4 border border-gray-200 flex flex-col justify-center items-center mx-auto">
-           <h2 className="font-bold text-base mb-2 text-black">Audio Editing & Conversion Tools</h2>
-           <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-             <li>Free audio editor & audio editing online</li>
-             <li>Audacity alternative, audioalter alternative, audiolab alternative</li>
-             <li>8D audio, white noise, Lo-fi, slowed and reverb tool</li>
-             <li>Audio converter & audio player</li>
-             <li>MP3 converter, OGG converter, FLAC converter, WAV converter</li>
-             <li>MP3 to OGG, MP3 to FLAC, MP3 to WAV</li>
-             <li>OGG to MP3, OGG to FLAC, OGG to WAV</li>
-             <li>FLAC to MP3, FLAC to OGG, FLAC to WAV</li>
-             <li>WAV to MP3, WAV to OGG, WAV to FLAC</li>
-           </ul>
-         </div>
-       </div> 
-        
+        {/* HERO + FEATURE CARDS */}
+        <div className="w-full flex flex-wrap justify-center items-stretch my-6 px-2 gap-4">
+          {/* Left Toast Card */}
+          <section className="flex-1 min-w-[220px] max-w-xs bg-white/90 shadow-lg rounded-lg p-4 border border-gray-200 flex flex-col justify-center items-center mx-auto">
+            <h2 className="font-bold text-base mb-2 text-black">Optimize Your Audio Projects</h2>
+            <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+              <li>Audio files & original recordings</li>
+              <li>Audio projects with minimal quality loss</li>
+              <li>Noise reduction</li>
+              <li>Key features for audio editing software</li>
+              <li>Music composing software</li>
+              <li>Audio analyzer & rhythm detector</li>
+              <li>Audio gain controller & audio key transposer</li>
+              <li>Bass booster & audio presets</li>
+            </ul>
+          </section>
+          {/* Center Title+Description */}
+          <section className="flex flex-col flex-[2_1_320px] items-center justify-center mx-auto max-w-2xl text-center bg-transparent p-2">
+            <h1 className="text-3xl font-bold text-primary mb-2">Audio Lab: Free Online Audio Editor & Converter</h1>
+            <p className="text-lg text-muted-foreground mb-2">
+              Edit audio online for free. Audio Lab lets you convert, enhance, and fine-tune audio files with tools like 8D Audio Converter, Bass Booster, Noise Reduction, Equalizer, 432Hz Tuning, Lo-fi, and more. No signup required—export your music instantly!
+            </p>
+          </section>
+          {/* Right Toast Card */}
+          <section className="flex-1 min-w-[220px] max-w-xs bg-white/90 shadow-lg rounded-lg p-4 border border-gray-200 flex flex-col justify-center items-center mx-auto">
+            <h2 className="font-bold text-base mb-2 text-black">Audio Editing & Conversion Tools</h2>
+            <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+              <li>Free audio editor & audio editing online</li>
+              <li>Audacity alternative, audioalter alternative, audiolab alternative</li>
+              <li>8D audio, white noise, Lo-fi, slowed and reverb tool</li>
+              <li>Audio converter & audio player</li>
+              <li>MP3 converter, OGG converter, FLAC converter, WAV converter</li>
+              <li>MP3 to OGG, MP3 to FLAC, MP3 to WAV</li>
+              <li>OGG to MP3, OGG to FLAC, OGG to WAV</li>
+              <li>FLAC to MP3, FLAC to OGG, FLAC to WAV</li>
+              <li>WAV to MP3, WAV to OGG, WAV to FLAC</li>
+            </ul>
+          </section>
+        </div>
+
+        {/* EXAMPLE: ABOUT SECTION (use h2/h3 as needed) */}
+        <section className="about-section my-8 max-w-2xl mx-auto">
+          <h2>About Audio Lab</h2>
+          <p>...</p>
+          <h3>Our Philosophy</h3>
+          <p>...</p>
+          <h3>Important Considerations</h3>
+          <p>...</p>
+        </section>
+
         {children}
         <Toaster />
       </body>
