@@ -323,12 +323,14 @@ export default function RootLayout({
             <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
               <li>Audio files & original recordings</li>
               <li>Audio projects with minimal quality loss</li>
-              <li>Noise reduction</li>
+              <li>
+                <Link href="#stereoWidener" className="text-blue-600 underline">Stereo Effects</Link>
+              </li>
               <li>Key features for audio editing software</li>
               <li>Music composing software</li>
-              <li>Audio analyzer & rhythm detector</li>
-              <li>Audio gain controller & audio key transposer</li>
-              <li>Bass booster & audio presets</li>
+              <li>Audio analyzer & <Link href="#rhythm detector" className="text-blue-600 underline">Rhythm Detector</Link></li>
+              <li><Link href="#gainController" className="text-blue-600 underline">Audio gain controller</Link> & <Link href="#keyTransposer" className="text-blue-600 underline">Audio Key transposer</Link></li>
+              <li><Link href="#bassBoosterPresets" className="text-blue-600 underline">Bass Booster</Link> & <Link href="#reverbPresets" className="text-blue-600 underline">Audio Reverb Presets</Link></li>
             </ul>
           </section>
           {/* Center Title+Description */}
@@ -344,7 +346,7 @@ export default function RootLayout({
             <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
               <li>Free audio editor & audio editing online</li>
               <li>Audacity alternative, audioalter alternative, audiolab alternative</li>
-              <li>8D audio, white noise, Lo-fi, slowed and reverb tool</li>
+              <li><Link href="#audio8DConverter" className="text-blue-600 underline">8D Audio</Link>, <Link href="#dreamscapeMaker" className="text-blue-600 underline">Lo-fi, Slowed and Reverb Tool</Link></li>
               <li>Audio converter & audio player</li>
               <li>MP3 converter, OGG converter, FLAC converter, WAV converter</li>
               <li>MP3 to OGG, MP3 to FLAC, MP3 to WAV</li>
