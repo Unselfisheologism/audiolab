@@ -38,11 +38,30 @@ export default function AutoScrollingCarousel() {
           <p className="text-sm text-gray-700">
             <strong>Empowering Creativity Through Accessible Audio Tools.</strong> At Audiolab, we provide a comprehensive collection of easy-to-use web tools to transform your audio projects.<br />
             Whether you’re tweaking vocal tracks, adding cinematic reverb effects, or crafting bass-heavy songs, our online audio toolkit delivers precision and flexibility.
-            <br /><br />
-            <span className="font-semibold">Key Features:</span><br />
-            Reverb Presets, Bass Booster Presets, Pitch &amp; Tempo, Vocal Removal, 8D Audio &amp; Stereo Enhancement, Noise Reduction, and more.
           </p>
-        </article>
+          <br />
+          <span className="font-semibold">Key Features:</span>
+          <ul className="list-disc list-inside text-sm text-gray-700 mt-2 space-y-1 pl-4">
+            <li>
+              <Link href="#reverbPresets" className="text-blue-600 underline">Reverb Presets</Link>: Simulate spaces from intimate bathrooms to grand concert halls.
+            </li>
+            <li>
+              <Link href="#bassBoosterPresets" className="text-blue-600 underline">Bass Booster Presets</Link>: Enhance low frequencies with adjustable intensity.
+            </li>
+            <li>
+              <Link href="#frequencyTuner432" className="text-blue-600 underline">Tune to 432Hz</Link>: Convert music from standard 440Hz tuning to 432Hz for a warmer, more natural sound.
+            </li>
+            <li>
+              <Link href="#automatedSweep" className="text-blue-600 underline">Automated Sweep</Link>: Pan Audio From Left to Right Autmatically.
+            </li>
+            <li>
+              <Link href="#audio8dConverter" className="text-blue-600 underline">8D Audio</Link>: Create immersive 3D soundscapes.
+            </li>
+            <li>
+              <Link href="#subharmonicIntensifier" className="text-blue-600 underline">Sub-harmonic Intensifier</Link>: Boost bass & sub-bass frequencies in your audio.
+           </li>
+         </ul>
+       </article>
         <article className="flex-shrink-0 bg-white/90 shadow-lg rounded-lg p-6 border border-gray-200 max-w-md min-w-[300px]">
           <h2 className="text-xl font-bold mb-2 text-primary">Our Philosophy</h2>
           <p className="text-sm text-gray-700">
@@ -51,7 +70,8 @@ export default function AutoScrollingCarousel() {
             Audiolab combines user-centric design with advanced algorithms for seamless processing.<br />
             <br />
             <span className="font-semibold">Why Choose Us?</span><br />
-            Download in any audio file format. Edit directly in your browser. Fast processing. Customizable presets for reverb, bass, and effects.
+            Download in any audio file format. Edit directly in your browser. Fast processing. 
+             <Link href="#bassBoosterPresets" className="text-blue-600 underline">Customizable presets for reverb, bass, and effects.</Link>
           </p>
         </article>
         <article className="flex-shrink-0 bg-white/90 shadow-lg rounded-lg p-6 border border-gray-200 max-w-md min-w-[300px]">
