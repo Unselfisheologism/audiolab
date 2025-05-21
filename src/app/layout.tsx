@@ -316,47 +316,13 @@ export default function RootLayout({
           </a>
         </div>  
 
-        {/* HERO + FEATURE CARDS */}
-        <div className="w-full flex flex-wrap justify-center items-stretch my-6 px-2 gap-4">
-          {/* Left Toast Card */}
-          <section className="flex-1 min-w-[220px] max-w-xs bg-white/90 shadow-lg rounded-lg p-4 border border-gray-200 flex flex-col justify-center items-center mx-auto">
-            <h2 className="font-bold text-base mb-2 text-black">Optimize Your Audio Projects</h2>
-            <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-              <li>Audio files & original recordings</li>
-              <li>Audio projects with minimal quality loss</li>
-              <li>
-                <Link href="#stereoWidener" className="text-blue-600 underline">Stereo Effects</Link>
-              </li>
-              <li>Key features for audio editing software</li>
-              <li>Music composing software</li>
-              <li>Audio analyzer & <Link href="#rhythm detector" className="text-blue-600 underline">Rhythm Detector</Link></li>
-              <li><Link href="#gainController" className="text-blue-600 underline">Audio gain controller</Link> & <Link href="#keyTransposer" className="text-blue-600 underline">Audio Key transposer</Link></li>
-              <li><Link href="#bassBoosterPresets" className="text-blue-600 underline">Bass Booster</Link> & <Link href="#reverbPresets" className="text-blue-600 underline">Audio Reverb Presets</Link></li>
-            </ul>
-          </section>
-          {/* Center Title+Description */}
+          {/* Title+Description */}
           <section className="flex flex-col flex-[2_1_320px] items-center justify-center mx-auto max-w-2xl text-center bg-transparent p-2">
             <h1 className="text-3xl font-bold text-primary mb-2">Audio Lab: Free Online Audio Editor & Converter</h1>
             <p className="text-lg text-muted-foreground mb-2">
               Edit audio online for free. Audio Lab lets you convert, enhance, and fine-tune audio files with tools like 8D Audio Converter, Bass Booster, Noise Reduction, Equalizer, 432Hz Tuning, Lo-fi, and more. No signup required—export your music instantly!
             </p>
           </section>
-          {/* Right Toast Card */}
-          <section className="flex-1 min-w-[220px] max-w-xs bg-white/90 shadow-lg rounded-lg p-4 border border-gray-200 flex flex-col justify-center items-center mx-auto">
-            <h2 className="font-bold text-base mb-2 text-black">Audio Editing & Conversion Tools</h2>
-            <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-              <li>Free audio editor & audio editing online</li>
-              <li>Audacity alternative, audioalter alternative, audiolab alternative</li>
-              <li><Link href="#audio8DConverter" className="text-blue-600 underline">8D Audio</Link>, <Link href="#dreamscapeMaker" className="text-blue-600 underline">Lo-fi, Slowed and Reverb Tool</Link></li>
-              <li>Audio converter & audio player</li>
-              <li>MP3 converter, OGG converter, FLAC converter, WAV converter</li>
-              <li>MP3 to OGG, MP3 to FLAC, MP3 to WAV</li>
-              <li>OGG to MP3, OGG to FLAC, OGG to WAV</li>
-              <li>FLAC to MP3, FLAC to OGG, FLAC to WAV</li>
-              <li>WAV to MP3, WAV to OGG, WAV to FLAC</li>
-            </ul>
-          </section>
-        </div>
   
        {/* === CAROUSEL === */}
         <AutoScrollingCarousel />
