@@ -1,5 +1,6 @@
 // src/components/AutoScrollingCarousel.tsx
 "use client";
+import Link from 'next/link';
 import { useEffect, useRef } from "react";
 
 export default function AutoScrollingCarousel() {
