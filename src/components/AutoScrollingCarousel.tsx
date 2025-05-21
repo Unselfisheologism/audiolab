@@ -33,6 +33,25 @@ export default function AutoScrollingCarousel() {
       aria-label="About, Philosophy, and Considerations carousel"
       tabIndex={0}
     >
+
+      <div className="flex min-w-[950px] md:min-w-[1300px] gap-6 px-2 py-2">
+        {/* LEFT TOAST CARD (now in carousel) */}
+        <article className="flex-shrink-0 bg-white/90 shadow-lg rounded-lg p-4 border border-gray-200 max-w-md min-w-[300px]">
+          <h2 className="font-bold text-base mb-2 text-black">Optimize Your Audio Projects</h2>
+          <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+            <li>Audio files & original recordings</li>
+            <li>Audio projects with minimal quality loss</li>
+            <li>
+              <Link href="#stereoWidener" className="text-blue-600 underline">Stereo Effects</Link>
+            </li>
+            <li>Key features for audio editing software</li>
+            <li>Music composing software</li>
+            <li>Audio analyzer & <Link href="#rhythm detector" className="text-blue-600 underline">Rhythm Detector</Link></li>
+            <li><Link href="#gainController" className="text-blue-600 underline">Audio gain controller</Link> & <Link href="#keyTransposer" className="text-blue-600 underline">Audio Key transposer</Link></li>
+            <li><Link href="#bassBoosterPresets" className="text-blue-600 underline">Bass Booster</Link> & <Link href="#reverbPresets" className="text-blue-600 underline">Audio Reverb Presets</Link></li>
+          </ul>
+        </article>
+      
       <div className="flex min-w-[950px] md:min-w-[1300px] gap-6 px-2 py-2">
         <article className="flex-shrink-0 bg-white/90 shadow-lg rounded-lg p-6 border border-gray-200 max-w-md min-w-[300px]">
           <h2 className="text-xl font-bold mb-2 text-primary">About Audio Lab</h2>
@@ -88,6 +107,22 @@ export default function AutoScrollingCarousel() {
             <b>Stereo Enhancement:</b> Use panning and auto-panner for dynamic mixes.<br />
             <b>Pro Tip:</b> Preview effects before export for a perfect result!
           </p>
+        </article>
+        
+        {/* RIGHT TOAST CARD (now in carousel) */}
+        <article className="flex-shrink-0 bg-white/90 shadow-lg rounded-lg p-4 border border-gray-200 max-w-md min-w-[300px]">
+          <h2 className="font-bold text-base mb-2 text-black">Audio Editing & Conversion Tools</h2>
+          <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+            <li>Free audio editor & audio editing online</li>
+            <li>Audacity alternative, audioalter alternative, audiolab alternative</li>
+            <li><Link href="#audio8DConverter" className="text-blue-600 underline">8D Audio</Link>, <Link href="#dreamscapeMaker" className="text-blue-600 underline">Lo-fi, Slowed and Reverb Tool</Link></li>
+            <li>Audio converter & audio player</li>
+            <li>MP3 converter, OGG converter, FLAC converter, WAV converter</li>
+            <li>MP3 to OGG, MP3 to FLAC, MP3 to WAV</li>
+            <li>OGG to MP3, OGG to FLAC, OGG to WAV</li>
+            <li>FLAC to MP3, FLAC to OGG, FLAC to WAV</li>
+            <li>WAV to MP3, WAV to OGG, WAV to FLAC</li>
+          </ul>
         </article>
       </div>
     </section>
