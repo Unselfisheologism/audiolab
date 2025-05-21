@@ -1,4 +1,3 @@
-// src/components/AutoScrollingCarousel.tsx
 "use client";
 import Link from 'next/link';
 import { useEffect, useRef } from "react";
@@ -33,9 +32,8 @@ export default function AutoScrollingCarousel() {
       aria-label="About, Philosophy, and Considerations carousel"
       tabIndex={0}
     >
-
       <div className="flex min-w-[950px] md:min-w-[1300px] gap-6 px-2 py-2">
-        {/* LEFT TOAST CARD (now in carousel) */}
+        {/* LEFT TOAST CARD */}
         <article className="flex-shrink-0 bg-white/90 shadow-lg rounded-lg p-4 border border-gray-200 max-w-md min-w-[300px]">
           <h2 className="font-bold text-base mb-2 text-black">Optimize Your Audio Projects</h2>
           <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
@@ -51,8 +49,8 @@ export default function AutoScrollingCarousel() {
             <li><Link href="#bassBoosterPresets" className="text-blue-600 underline">Bass Booster</Link> & <Link href="#reverbPresets" className="text-blue-600 underline">Audio Reverb Presets</Link></li>
           </ul>
         </article>
-      
-      <div className="flex min-w-[950px] md:min-w-[1300px] gap-6 px-2 py-2">
+
+        {/* ABOUT CARD */}
         <article className="flex-shrink-0 bg-white/90 shadow-lg rounded-lg p-6 border border-gray-200 max-w-md min-w-[300px]">
           <h2 className="text-xl font-bold mb-2 text-primary">About Audio Lab</h2>
           <p className="text-sm text-gray-700">
@@ -79,9 +77,11 @@ export default function AutoScrollingCarousel() {
             </li>
             <li>
               <Link href="#subharmonicIntensifier" className="text-blue-600 underline">Sub-harmonic Intensifier</Link>: Boost bass & sub-bass frequencies in your audio.
-           </li>
-         </ul>
-       </article>
+            </li>
+          </ul>
+        </article>
+
+        {/* PHILOSOPHY CARD */}
         <article className="flex-shrink-0 bg-white/90 shadow-lg rounded-lg p-6 border border-gray-200 max-w-md min-w-[300px]">
           <h2 className="text-xl font-bold mb-2 text-primary">Our Philosophy</h2>
           <p className="text-sm text-gray-700">
@@ -91,9 +91,11 @@ export default function AutoScrollingCarousel() {
             <br />
             <span className="font-semibold">Why Choose Us?</span><br />
             Download in any audio file format. Edit directly in your browser. Fast processing. 
-             <Link href="#bassBoosterPresets" className="text-blue-600 underline">Customizable presets for reverb, bass, and effects.</Link>
+            <Link href="#bassBoosterPresets" className="text-blue-600 underline">Customizable presets for reverb, bass, and effects.</Link>
           </p>
         </article>
+
+        {/* CONSIDERATIONS CARD */}
         <article className="flex-shrink-0 bg-white/90 shadow-lg rounded-lg p-6 border border-gray-200 max-w-md min-w-[300px]">
           <h2 className="text-xl font-bold mb-2 text-primary">Important Considerations</h2>
           <p className="text-sm text-gray-700">
@@ -108,8 +110,8 @@ export default function AutoScrollingCarousel() {
             <b>Pro Tip:</b> Preview effects before export for a perfect result!
           </p>
         </article>
-        
-        {/* RIGHT TOAST CARD (now in carousel) */}
+
+        {/* RIGHT TOAST CARD */}
         <article className="flex-shrink-0 bg-white/90 shadow-lg rounded-lg p-4 border border-gray-200 max-w-md min-w-[300px]">
           <h2 className="font-bold text-base mb-2 text-black">Audio Editing & Conversion Tools</h2>
           <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
@@ -124,6 +126,7 @@ export default function AutoScrollingCarousel() {
             <li>WAV to MP3, WAV to OGG, WAV to FLAC</li>
           </ul>
         </article>
+
       </div>
     </section>
   );
