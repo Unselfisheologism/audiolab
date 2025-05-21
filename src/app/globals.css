@@ -154,3 +154,12 @@ html {
   min-height: 54px;
   display: inline-block;
 }
+
+/* === Hide scrollbar for auto-scrolling carousel === */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
