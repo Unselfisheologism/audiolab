@@ -1,5 +1,5 @@
 [build]
-  command = "next build"
+  command = "next build && npm run postbuild"
   publish = "out" 
 
 [build.environment]
