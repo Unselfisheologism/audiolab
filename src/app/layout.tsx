@@ -195,8 +195,8 @@ export const metadata = {
   "best equalizer",  
   "make audio louder",  
   "make sound",  
-  "youtube music equalizer"  
-]
+  "youtube music equalizer",
+  ]
   alternates: {
     canonical: 'https://audiolab.in.net/',
   },
