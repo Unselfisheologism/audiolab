@@ -282,3 +282,17 @@ export const fallbackIcon = HelpingHand;
 // - Amplitude Plotter: Component in MainDisplayPanel
 // - AI Tools: Removed
 
+
+export const loadEffectModule = async (effectType: string) => {
+  switch(effectType) {
+    case 'reverb':
+      return import('./effects/reverb');
+    case '8d-audio':
+      return import('./effects/8dAudio');
+    case 'spectral':
+      return import('./effects/spectral');
+    default:
+      return import('./effects/base');
+  }
+};
+

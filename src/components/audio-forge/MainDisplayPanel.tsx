@@ -9,6 +9,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText } from 'lucide-react';
 import { effectsList } from '@/app/audio-forge/effects';
+import { VisualizerPlaceholder } from './VisualizerPlaceholder';
+import React from "react";
+const LazySpectrogramVisualizer = React.lazy(() =>
+  import('./SpectrogramVisualizer').then(module => ({
+    default: module.SpectrogramVisualizer
+  }))
+);
 
 
 interface MainDisplayPanelProps {
@@ -100,5 +107,24 @@ export function MainDisplayPanel({
         />
       </div>
     </ScrollArea>
+  );
+}
+
+// Usage example:
+function MainDisplayPanel({ activeTab, audioBuffer }) {
+  return (
+    <div className="w-full h-full">
+      {activeTab === 'frequency' && (
+        <React.Suspense fallback={<VisualizerPlaceholder />}>
+          <LazyFrequencyVisualizer audioBuffer={audioBuffer} />
+        </React.Suspense>
+      )}
+      {activeTab === 'spectrogram' && (
+        <React.Suspense fallback={<VisualizerPlaceholder />}>
+          <LazySpectrogramVisualizer audioBuffer={audioBuffer} />
+        </React.Suspense>
+      )}
+      {/* Repeat for other visualizers as needed */}
+    </div>
   );
 }
