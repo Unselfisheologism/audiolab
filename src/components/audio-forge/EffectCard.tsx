@@ -70,7 +70,6 @@ export function EffectCard({
     }
   };
 
-
   const handleSelectChange = (paramName: string, value: string) => {
     onParameterChange(effect.id, paramName, value);
   };
@@ -79,13 +78,43 @@ export function EffectCard({
     onParameterChange(effect.id, paramName, checked);
   };
 
+  // Accessibility: Keyboard support for sliders
+  const handleSliderKeyDown = (
+    param: EffectParameter,
+    rawValue: number,
+    event: React.KeyboardEvent<HTMLDivElement>
+  ) => {
+    if (param.type !== 'slider' || isLoading || !isAudioLoaded) return;
+    let newValue = rawValue;
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
+      newValue = Math.max(param.min, rawValue - (param.step || 1));
+      onParameterChange(effect.id, param.name, newValue);
+      event.preventDefault();
+    } else if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
+      newValue = Math.min(param.max, rawValue + (param.step || 1));
+      onParameterChange(effect.id, param.name, newValue);
+      event.preventDefault();
+    }
+  };
+
   const renderParameterControl = (param: EffectParameter) => {
     const rawValue = currentSettings[param.name] ?? param.defaultValue;
     
     switch (param.type) {
       case 'slider':
         return (
-          <div key={param.name} className="space-y-2">
+          <div
+            key={param.name}
+            className="space-y-2"
+            tabIndex={0}
+            role="slider"
+            aria-valuenow={Number(rawValue)}
+            aria-valuemin={param.min}
+            aria-valuemax={param.max}
+            aria-label={param.label}
+            aria-disabled={isLoading || !isAudioLoaded}
+            onKeyDown={(e) => handleSliderKeyDown(param, Number(rawValue), e)}
+          >
             <div className="flex justify-between items-center">
               <Label htmlFor={`${effect.id}-${param.name}`}>{param.label}</Label>
               <span className="text-sm text-muted-foreground">{Number(rawValue).toFixed(param.step && param.step < 1 ? 2 : 0)}</span>
@@ -98,6 +127,8 @@ export function EffectCard({
               step={param.step}
               onValueChange={(val) => handleSliderChange(param.name, val)}
               disabled={isLoading || !isAudioLoaded}
+              aria-controls={`${effect.id}-${param.name}-value`}
+              aria-label={param.label}
             />
           </div>
         );
@@ -116,6 +147,10 @@ export function EffectCard({
               onBlur={(e) => handleInputBlur(param.name, e)}
               disabled={isLoading || !isAudioLoaded}
               className="w-full"
+              aria-label={param.label}
+              aria-valuenow={typeof rawValue === 'number' ? rawValue : undefined}
+              aria-valuemin={param.min}
+              aria-valuemax={param.max}
             />
           </div>
         );
@@ -127,8 +162,10 @@ export function EffectCard({
               value={String(rawValue)}
               onValueChange={(val) => handleSelectChange(param.name, val)}
               disabled={isLoading || !isAudioLoaded}
+              aria-label={param.label}
+              aria-controls={`${effect.id}-${param.name}-select`}
             >
-              <SelectTrigger id={`${effect.id}-${param.name}`}>
+              <SelectTrigger id={`${effect.id}-${param.name}`} tabIndex={0} aria-label={param.label}>
                 <SelectValue placeholder={`Select ${param.label}`} />
               </SelectTrigger>
               <SelectContent>
@@ -150,6 +187,7 @@ export function EffectCard({
               rows={param.rows || 3}
               onChange={(e) => handleInputChange(param.name, e)}
               disabled={isLoading || !isAudioLoaded}
+              aria-label={param.label}
             />
           </div>
         );
@@ -162,6 +200,9 @@ export function EffectCard({
               onClick={() => onApplyEffect(param.handlerKey || effect.id, { preset: param.name, ...currentSettings })}
               disabled={isLoading || !isAudioLoaded}
               className="w-full"
+              tabIndex={0}
+              aria-label={param.label}
+              role="button"
             >
               {param.label}
             </Button>
@@ -217,6 +258,10 @@ export function EffectCard({
             checked={currentSettings[effect.parameters[0].name] ?? effect.parameters[0].defaultValue}
             onCheckedChange={(checked) => handleToggleChange(effect.parameters![0].name, checked)}
             disabled={isLoading || !isAudioLoaded}
+            tabIndex={0}
+            aria-checked={currentSettings[effect.parameters[0].name] ?? effect.parameters[0].defaultValue}
+            aria-label={effect.parameters[0].label}
+            role="switch"
           />
         </CardFooter>
       )}
