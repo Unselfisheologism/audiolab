@@ -8,6 +8,10 @@ export function AppFooter() {
       <div className="container mx-auto text-center">
         {/* Social Icons */}
         <div className="flex justify-center gap-4 mb-6">
+          <a href="https://https://unselfishneologism/substack.com" target="_blank" rel="noopener noreferrer" title="Substack">
+            <FaRegEnvelope className="text-gray-600 hover:text-orange-600 transition" size={28} aria-label="Substack" />
+            <span className="text-sm font-medium mt-1">Tutorials</span>
+          </a>
           <a href="https://www.youtube.com/@WhAtNOTif-r4h" target="_blank" rel="noopener noreferrer" title="YouTube">
             <FaYoutube className="text-gray-600 hover:text-red-600 transition" size={28} aria-label="YouTube" />
           </a>
