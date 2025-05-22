@@ -1,6 +1,6 @@
 import { LegalLinks } from './LegalLinks';
 import { Separator } from '@/components/ui/separator';
-import { FaYoutube, FaXTwitter, FaLinkedin, FaMedium, FaDiscord } from "react-icons/fa6";
+import { FaYoutube, FaXTwitter, FaLinkedin, FaMedium, FaDiscord, FaRegEnvelope } from "react-icons/fa6";
 
 export function AppFooter() {
   return (
