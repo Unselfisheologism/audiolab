@@ -1,18 +1,7 @@
 'use client';
 
-import React from 'react';
-
-const LazyFrequencyVisualizer = React.lazy(() =>
-  import('./FunctionalFrequencyVisualizer').then(module => ({
-    default: module.FunctionalFrequencyVisualizer
-  }))
-);
-
-const LazyAmplitudePlotter = React.lazy(() =>
-  import('./FunctionalAmplitudePlotter').then(module => ({
-    default: module.FunctionalAmplitudePlotter
-  }))
-);
+import { FunctionalFrequencyVisualizer } from './FunctionalFrequencyVisualizer';
+import { FunctionalAmplitudePlotter } from './FunctionalAmplitudePlotter'; 
 
 interface VisualizerSectionProps {
   originalAudioBuffer: AudioBuffer | null;
@@ -44,17 +33,13 @@ export function VisualizerSection({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <React.Suspense fallback={<div>Loading Frequency Visualizer...</div>}>
-        <LazyFrequencyVisualizer 
-          audioBuffer={bufferForFreqViz} 
-          isPlaying={isPlayingForFreqViz} 
-        />
-      </React.Suspense>
-      <React.Suspense fallback={<div>Loading Amplitude Plotter...</div>}>
-        <LazyAmplitudePlotter 
-          audioBuffer={bufferForAmplitudePlotter} 
-        />
-      </React.Suspense>
+      <FunctionalFrequencyVisualizer 
+        audioBuffer={bufferForFreqViz} 
+        isPlaying={isPlayingForFreqViz} 
+      />
+      <FunctionalAmplitudePlotter 
+        audioBuffer={bufferForAmplitudePlotter} 
+      />
     </div>
   );
 }
