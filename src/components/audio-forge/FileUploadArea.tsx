@@ -14,7 +14,27 @@ interface FileUploadAreaProps {
 export function FileUploadArea({ onFileSelect, selectedFile, isLoading }: FileUploadAreaProps) {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    const allowedAudioTypes = [
+      "audio/mpeg", // MP3
+      "audio/wav", // WAV
+      "audio/webm", // WebM
+      "audio/ogg", // OGG
+      "audio/flac", // FLAC
+      "audio/aac", // AAC
+      "audio/mp4", // M4A
+    ];
     if (file) {
+      if (!allowedAudioTypes.includes(file.type)) {
+        // @ts-ignore
+        if (typeof toast === "function") {
+          toast({
+            title: "Invalid File Type",
+            description: "Only audio files (MP3, WAV, WebM, OGG, FLAC, AAC, M4A) can be uploaded.",
+            variant: "destructive",
+          });
+        }
+        return;
+      }
       onFileSelect(file);
     }
   };

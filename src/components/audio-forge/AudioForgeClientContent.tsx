@@ -67,6 +67,18 @@ export default function AudioForgeClientContent() {
          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
       }
       const audioBufferInstance = await audioContextRef.current.decodeAudioData(arrayBuffer);
+      // --- File Content Validation (Post-Decode Check) ---
+      if (audioBufferInstance.length === 0) {
+        if (typeof toast === "function") {
+          toast({
+            title: "Invalid Audio File",
+            description: "The uploaded file appears to be empty or corrupted.",
+            variant: "destructive",
+          });
+        }
+        setBuffer(null);
+        return;
+      }
       setBuffer(audioBufferInstance);
     } catch (error) {
       console.error("Error decoding audio data for visualizer:", error);
