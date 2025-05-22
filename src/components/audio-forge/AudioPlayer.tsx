@@ -113,7 +113,7 @@ export function AudioPlayer({ title, audioSrc, fileName = "processed_audio.wav",
       <CardContent className="space-y-3">
         {audioSrc ? (
           <>
-            <audio ref={audioRef} src={audioSrc} className="w-full hidden" preload="metadata" />
+            <audio ref={audioRef} src={audioSrc || undefined} className="w-full hidden" preload="metadata" />
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <button onClick={togglePlayPause} className="text-primary hover:text-accent transition-colors" aria-label={isPlaying ? "Pause" : "Play"}>
                 {isPlaying ? <PauseCircle size={32} /> : <PlayCircle size={32} />}

@@ -20,6 +20,7 @@ export function ExportPanel({ processedAudioDataUrl, onExport, isLoading }: Expo
 
   const handleExportClick = () => {
     if (processedAudioDataUrl) {
+      // For large files, consider exporting in a Web Worker
       onExport(format, quality, loopCount);
     }
   };

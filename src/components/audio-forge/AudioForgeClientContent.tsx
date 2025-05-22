@@ -88,9 +88,10 @@ export default function AudioForgeClientContent() {
     if (file) {
       setIsLoading(true);
       try {
-        const dataUrl = await fileToDataUrl(file);
-        setOriginalAudioDataUrl(dataUrl);
-        setProcessedAudioDataUrl(dataUrl); 
+        // Use Blob URL for large files
+        const blobUrl = URL.createObjectURL(file);
+        setOriginalAudioDataUrl(blobUrl);
+        setProcessedAudioDataUrl(blobUrl);
         setAnalysisResult(null);
         setAnalysisSourceEffectId(null);
         toast({ title: "Audio Loaded", description: `${file.name} is ready for forging.` });
@@ -103,6 +104,9 @@ export default function AudioForgeClientContent() {
         setIsLoading(false);
       }
     } else {
+      // Release Blob URLs to free memory
+      if (originalAudioDataUrl) URL.revokeObjectURL(originalAudioDataUrl);
+      if (processedAudioDataUrl) URL.revokeObjectURL(processedAudioDataUrl);
       setOriginalAudioDataUrl(null);
       setProcessedAudioDataUrl(null);
       setAnalysisResult(null);
@@ -110,7 +114,7 @@ export default function AudioForgeClientContent() {
       setOriginalAudioBuffer(null);
       setProcessedAudioBuffer(null); 
     }
-  }, [toast]);
+  }, [toast, originalAudioDataUrl, processedAudioDataUrl]);
 
   const handleParameterChange = useCallback((effectId: string, paramName: string, value: any) => {
     setEffectSettings(prev => ({

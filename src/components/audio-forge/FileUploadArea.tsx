@@ -5,6 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
+const MAX_FILE_SIZE_MB = 50;
+
 interface FileUploadAreaProps {
   onFileSelect: (file: File | null) => void;
   selectedFile: File | null;
@@ -15,6 +17,11 @@ export function FileUploadArea({ onFileSelect, selectedFile, isLoading }: FileUp
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        alert(`File is too large (${(file.size / (1024 * 1024)).toFixed(2)} MB). Max allowed is ${MAX_FILE_SIZE_MB} MB.`);
+        event.target.value = '';
+        return;
+      }
       onFileSelect(file);
     }
   };
@@ -27,9 +34,8 @@ export function FileUploadArea({ onFileSelect, selectedFile, isLoading }: FileUp
           Upload Audio
         </CardTitle>
         <CardDescription>
-          Select an audio file (e.g., MP3, WAV, WebM, OGG, FLAC, AAC, M4A) to start forging. 
-          Accepts most common audio formats. While files of any size can be selected, 
-          processing very large files may be slow or unstable due to client-side limitations.
+          Select an audio file (e.g., MP3, WAV, WebM, OGG, FLAC, AAC, M4A) to start forging.<br />
+          <span className="text-warning-foreground">Files over {MAX_FILE_SIZE_MB}MB are not supported for performance reasons.</span>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -47,6 +53,7 @@ export function FileUploadArea({ onFileSelect, selectedFile, isLoading }: FileUp
         {selectedFile && (
           <p className="text-sm text-muted-foreground">
             Selected: <span className="font-medium text-foreground">{selectedFile.name}</span>
+            <span className="ml-2 text-xs">({(selectedFile.size / (1024 * 1024)).toFixed(2)} MB)</span>
           </p>
         )}
         {selectedFile && (
