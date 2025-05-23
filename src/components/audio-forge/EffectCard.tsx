@@ -80,6 +80,8 @@ export function EffectCard({
   };
 
   const renderParameterControl = (param: EffectParameter) => {
+    const elementId = `${effect.id}-${param.name}`;
+    console.log(`Generating ID: ${elementId} for effect: ${effect.name}, parameter: ${param.label}`);
     const rawValue = currentSettings[param.name] ?? param.defaultValue;
     
     switch (param.type) {
@@ -87,11 +89,11 @@ export function EffectCard({
         return (
           <div key={param.name} className="space-y-2">
             <div className="flex justify-between items-center">
-              <Label htmlFor={`${effect.id}-${param.name}`}>{param.label}</Label>
+              <Label htmlFor={elementId}>{param.label}</Label>
               <span className="text-sm text-muted-foreground">{Number(rawValue).toFixed(param.step && param.step < 1 ? 2 : 0)}</span>
             </div>
             <Slider
-              id={`${effect.id}-${param.name}`}
+              id={elementId}
               value={[Number(rawValue)]}
               min={param.min}
               max={param.max}
@@ -105,9 +107,9 @@ export function EffectCard({
       case 'number_input':
         return (
           <div key={param.name} className="space-y-2">
-            <Label htmlFor={`${effect.id}-${param.name}`}>{param.label}</Label>
+            <Label htmlFor={elementId}>{param.label}</Label>
             <Input
-              id={`${effect.id}-${param.name}`}
+              id={elementId}
               type="number"
               value={rawValue === "" || (typeof rawValue === 'number' && isNaN(rawValue)) ? "" : String(rawValue)}
               min={param.min}

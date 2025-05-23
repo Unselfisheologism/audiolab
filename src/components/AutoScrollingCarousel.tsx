@@ -44,7 +44,7 @@ export default function AutoScrollingCarousel() {
             </li>
             <li>Key features for audio editing software</li>
             <li>Music composing software</li>
-            <li>Audio analyzer & <Link href="#rhythm detector" className="text-blue-900 underline">Rhythm Detector</Link></li>
+            <li>Audio analyzer & <Link href="#rhythmDetector" className="text-blue-900 underline">Rhythm Detector</Link></li>
             <li><Link href="#gainController" className="text-blue-900 underline">Audio gain controller</Link> & <Link href="#keyTransposer" className="text-blue-900 underline">Audio Key transposer</Link></li>
             <li><Link href="#bassBoosterPresets" className="text-blue-900 underline">Bass Booster</Link> & <Link href="#reverbPresets" className="text-blue-900 underline">Audio Reverb Presets</Link></li>
           </ul>
