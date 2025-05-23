@@ -420,6 +420,7 @@ export default function RootLayout({
               width={120}
               height={40}
               unoptimized
+              loading="eager"
             />
           </a>
         </div>  
@@ -431,6 +432,7 @@ export default function RootLayout({
               width={130}
               height={40}
               unoptimized
+              loading="eager"
             />
           </a>
         </div>  
@@ -442,6 +444,7 @@ export default function RootLayout({
               width={150}
               height={54}
               unoptimized
+              loading="eager"
             />
           </a>
         </div> 
@@ -457,6 +460,7 @@ export default function RootLayout({
               width={250}
               height={54}
               unoptimized
+              loading="eager"
             />
           </a>
         </div>  
