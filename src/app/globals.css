@@ -19,7 +19,7 @@ html {
     --secondary: 0 0% 96.1%; /* Slightly off-white */
     --secondary-foreground: 180 100% 25.1%; /* Deep Teal for text on secondary */
     --muted: 0 0% 90%; /* Lighter gray for muted text/elements */
-    --muted-foreground: 0 0% 45.1%;
+    --muted-foreground: 0 0% 25%; /* Darker gray for muted text/elements to meet 7:1 contrast */
     --accent: 183 100% 72%; /* #7DF9FF Electric Blue */
     --accent-foreground: 180 100% 15%; /* Dark Teal for text on accent */
     --destructive: 0 84.2% 60.2%;
@@ -162,4 +162,11 @@ html {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Fallback for backdrop-filter for browsers that don't support it (e.g., older iOS Safari) */
+@supports not (backdrop-filter: blur(0)) {
+  .backdrop-blur {
+    background-color: rgba(255, 255, 255, 0.98); /* Adjust color and opacity as needed for contrast */
+  }
 }
