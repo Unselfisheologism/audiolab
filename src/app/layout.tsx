@@ -363,8 +363,16 @@ export default function RootLayout({
         {/* Uncomment this line if using AppHeader */}
         {/* <AppHeader /> */}
 
-        {/* BADGES */}
-        <div className="badge-wrapper-270x54">   
+          {/* Title+Description */}
+          <section className="flex flex-col flex-[2_1_320px] items-center justify-center mx-auto max-w-2xl text-center bg-transparent p-2">
+            <h1 className="text-3xl font-bold text-primary mb-2">Audio Lab: Free Online Audio Editor & Converter</h1>
+            <p className="text-lg text-muted-foreground mb-2">
+              Edit audio online for free. Audio Lab lets you convert, enhance, and fine-tune audio files with tools like 8D Audio Converter, Bass Booster, Noise Reduction, Equalizer, 432Hz Tuning, Lo-fi, and more. No signup required—export your music instantly!
+            </p>
+          </section>
+
+          {/* BADGES */}
+        <div className="badge-wrapper-270x54 mb-4">   
           <a 
             href="https://fazier.com/launches/audiolab" 
             target="_blank" 
@@ -378,24 +386,7 @@ export default function RootLayout({
             />
           </a>
         </div>  
-        <div
-          className="sf-root badge-wrapper-125x40"
-          data-id="3877688"
-          data-badge="oss-users-love-us-black"
-        >
-          <a href="https://sourceforge.net/projects/audiolab/" target="_blank" rel="noopener noreferrer">
-            Audiolab
-          </a>
-        </div>
-        <Script id="sf-badge" strategy="afterInteractive">
-          {`(function () {
-            var sc = document.createElement('script');
-            sc.async = true;
-            sc.src = 'https://b.sf-syn.com/badge_js?sf_id=3877688';
-            var p = document.getElementsByTagName('script')[0];
-            p.parentNode.insertBefore(sc, p);
-          })();`}
-        </Script>
+        
         <div className="badge-wrapper-250x54">
           <a
             href="https://www.producthunt.com/posts/audiolab-2?embed=true&utm_source=badge-featured&utm_medium=badge"
@@ -412,38 +403,6 @@ export default function RootLayout({
             />
           </a>
         </div> 
-        <div className="badge-wrapper-120x40">
-          <a href="https://www.uneed.best/tool/audiolab">
-            <Image
-              src="https://www.uneed.best/EMBED3.png"
-              alt="Uneed Embed Badge"
-              width={120}
-              height={40}
-              unoptimized
-              loading="eager"
-            />
-          </a>
-        </div>  
-        <div className="badge-wrapper-150x54">  
-          <a href='https://dang.ai/' target='_blank' rel="noopener noreferrer">
-            <Image
-              src='https://cdn.prod.website-files.com/63d8afd87da01fb58ea3fbcb/6487e2868c6c8f93b4828827_dang-badge.png'
-              alt='Dang.ai'
-              width={150}
-              height={54}
-              unoptimized
-              loading="eager"
-            />
-          </a>
-        </div> 
-
-          {/* Title+Description */}
-          <section className="flex flex-col flex-[2_1_320px] items-center justify-center mx-auto max-w-2xl text-center bg-transparent p-2">
-            <h1 className="text-3xl font-bold text-primary mb-2">Audio Lab: Free Online Audio Editor & Converter</h1>
-            <p className="text-lg text-muted-foreground mb-2">
-              Edit audio online for free. Audio Lab lets you convert, enhance, and fine-tune audio files with tools like 8D Audio Converter, Bass Booster, Noise Reduction, Equalizer, 432Hz Tuning, Lo-fi, and more. No signup required—export your music instantly!
-            </p>
-          </section>
   
        {/* === CAROUSEL === */}
         <AutoScrollingCarousel />
