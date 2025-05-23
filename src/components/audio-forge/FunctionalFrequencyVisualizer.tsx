@@ -24,121 +24,64 @@ export function FunctionalFrequencyVisualizer({ audioBuffer, isPlaying }: Functi
   const [frequencyData, setFrequencyData] = useState<{ band: string; level: number }[]>(
     Array(NUM_BARS).fill(null).map((_, i) => ({ band: `${i + 1}`, level: 0 }))
   );
-
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserNodeRef = useRef<AnalyserNode | null>(null);
-  const sourceNodeRef = useRef<AudioBufferSourceNode | null>(null);
+  const workerRef = useRef<Worker | null>(null);
   const animationFrameIdRef = useRef<number | null>(null);
-  const dataArrayRef = useRef<Uint8Array | null>(null);
 
   useEffect(() => {
-    // Initialize AudioContext locally for this component
-    if (typeof window !== 'undefined' && !audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-    }
-    
-    const localAudioContext = audioContextRef.current;
-
     // Cleanup function for the effect
     const cleanup = () => {
       if (animationFrameIdRef.current) {
         cancelAnimationFrame(animationFrameIdRef.current);
         animationFrameIdRef.current = null;
       }
-      if (sourceNodeRef.current) {
-        try {
-            sourceNodeRef.current.stop();
-        } catch(e) { /* ignore if already stopped */ }
-        sourceNodeRef.current.disconnect();
-        sourceNodeRef.current = null;
-      }
-      analyserNodeRef.current?.disconnect();
-      // Don't null out analyserNodeRef here, it might be reused if context persists
-      // Reset frequency data when audioBuffer is null or playback stops or on unmount
       setFrequencyData(Array(NUM_BARS).fill(null).map((_, i) => ({ band: `${i + 1}`, level: 0 })));
     };
-    
-    if (!audioBuffer || !isPlaying || !localAudioContext || localAudioContext.state === 'closed') {
+
+    if (!audioBuffer || !isPlaying) {
       cleanup();
-      if (localAudioContext && localAudioContext.state === 'closed' && audioBuffer && isPlaying) {
-        // Re-initialize if context was closed (e.g. by browser)
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      }
-      return;
-    }
-    
-    // Setup AnalyserNode
-    if (!analyserNodeRef.current || analyserNodeRef.current.context.state === 'closed') {
-        if(localAudioContext.state === 'closed') { // Double check context before creating analyser
-            console.warn("Visualizer audio context is closed, cannot create analyser.");
-            return;
-        }
-        analyserNodeRef.current = localAudioContext.createAnalyser();
-        analyserNodeRef.current.fftSize = FFT_SIZE;
-    }
-    const analyser = analyserNodeRef.current;
-    
-    // Setup Data Array
-    if (!dataArrayRef.current || dataArrayRef.current.length !== analyser.frequencyBinCount) {
-        dataArrayRef.current = new Uint8Array(analyser.frequencyBinCount);
-    }
-    const dataArray = dataArrayRef.current;
-
-    // Create and connect AudioBufferSourceNode
-    sourceNodeRef.current = localAudioContext.createBufferSource();
-    sourceNodeRef.current.buffer = audioBuffer;
-    sourceNodeRef.current.connect(analyser);
-    // Not connecting analyser to destination to avoid re-playing audio here. AudioPlayer handles playback.
-    
-    try {
-      sourceNodeRef.current.start(0);
-    } catch(e) {
-      console.warn("Could not start audio source for visualizer:", e);
-      cleanup(); // Clean up if start fails
       return;
     }
 
-    const draw = () => {
-      if (analyser && dataArray && sourceNodeRef.current && sourceNodeRef.current.buffer ) { 
-        analyser.getByteFrequencyData(dataArray); 
+    // Create worker if not exists
+    if (!workerRef.current) {
+      workerRef.current = new Worker(new URL('../../workers/audioWorker.ts', import.meta.url));
+    }
+    const worker = workerRef.current;
 
-        const newFrequencyLevels = [];
-        const binCount = analyser.frequencyBinCount;
-        const step = Math.max(1, Math.floor(binCount / NUM_BARS)); 
+    // Prepare transferable data
+    const channelData = audioBuffer.getChannelData(0);
+    const channelCopy = new Float32Array(channelData.length);
+    channelCopy.set(channelData);
 
-        for (let i = 0; i < NUM_BARS; i++) {
-          let sum = 0;
-          const startBin = i * step;
-          const endBin = Math.min(startBin + step, binCount); 
-          
-          if (startBin >= binCount) break; 
+    let stopped = false;
 
-          for (let j = startBin; j < endBin; j++) {
-            sum += dataArray[j];
-          }
-          const countInStep = endBin - startBin;
-          const average = countInStep > 0 ? sum / countInStep : 0;
-          newFrequencyLevels.push({ band: `${i + 1}`, level: average });
-        }
-        setFrequencyData(newFrequencyLevels);
+    worker.onmessage = (e: MessageEvent) => {
+      if (e.data.type === "frequency" && !stopped) {
+        setFrequencyData(e.data.data);
       }
-      animationFrameIdRef.current = requestAnimationFrame(draw);
     };
 
-    draw();
+    // Animation loop to simulate real-time updates while playing
+    const updateFrequency = () => {
+      worker.postMessage({
+        type: "frequency",
+        audioBufferData: [channelCopy],
+        sampleRate: audioBuffer.sampleRate,
+        numBars: NUM_BARS,
+        fftSize: FFT_SIZE,
+      });
+      animationFrameIdRef.current = requestAnimationFrame(updateFrequency);
+    };
 
-    return cleanup;
+    updateFrequency();
 
-  }, [audioBuffer, isPlaying]); 
-
-  useEffect(() => {
-    const contextToClose = audioContextRef.current;
     return () => {
-      contextToClose?.close().catch(e => console.error("Error closing visualizer audio context on unmount", e));
-      audioContextRef.current = null; 
+      stopped = true;
+      cleanup();
+      // Optionally terminate worker if you want to clean up
+      // worker.terminate();
     };
-  }, []);
-
+  }, [audioBuffer, isPlaying]);
 
   return (
     <Card className="shadow-md">

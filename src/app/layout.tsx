@@ -448,22 +448,6 @@ export default function RootLayout({
             />
           </a>
         </div> 
-        <div className="badge-wrapper-250x54"> 
-          <a
-            href="https://www.producthunt.com/products/audiolab-2/reviews?utm_source=badge-product_review&utm_medium=badge&utm_source=badge-audiolab-2"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              src="https://api.producthunt.com/widgets/embed-image/v1/product_review.svg?product_id=1066251&theme=light"
-              alt="Audiolab: Audio Editing Without the Headache | Product Hunt"
-              width={250}
-              height={54}
-              unoptimized
-              loading="eager"
-            />
-          </a>
-        </div>  
 
           {/* Title+Description */}
           <section className="flex flex-col flex-[2_1_320px] items-center justify-center mx-auto max-w-2xl text-center bg-transparent p-2">
