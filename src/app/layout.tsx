@@ -372,38 +372,39 @@ export default function RootLayout({
           </section>
 
           {/* BADGES */}
-        <div className="badge-wrapper-270x54 mb-4">   
-          <a 
-            href="https://fazier.com/launches/audiolab" 
-            target="_blank" 
-            rel="noopener noreferrer"
-          >
-            <img 
-              src="https://fazier.com/api/v1/public/badges/embed_image.svg?launch_id=4421&badge_type=daily&theme=light" 
-              width={270} 
-              alt="Fazier badge" 
-              unoptimized
-            />
-          </a>
-        </div>  
-        
-        <div className="badge-wrapper-250x54">
-          <a
-            href="https://www.producthunt.com/posts/audiolab-2?embed=true&utm_source=badge-featured&utm_medium=badge"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img
-              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=966661&theme=light&t=1747473927338"
-              alt="Audiolab: Audio Editing Without the Headache | Product Hunt"
-              style={{ width: 250, height: 54 }}
-              width={250}
-              height={54}
-              unoptimized
-            />
-          </a>
-        </div> 
-  
+        <div className="flex flex-row items-center gap-x-4">
+          <div className="badge-wrapper-270x54">   
+            <a 
+              href="https://fazier.com/launches/audiolab" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <img 
+                src="https://fazier.com/api/v1/public/badges/embed_image.svg?launch_id=4421&badge_type=daily&theme=light" 
+                width={270} 
+                alt="Fazier badge" 
+                unoptimized
+              />
+            </a>
+          </div>  
+          
+          <div className="badge-wrapper-250x54">
+            <a
+              href="https://www.producthunt.com/posts/audiolab-2?embed=true&utm_source=badge-featured&utm_medium=badge"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=966661&theme=light&t=1747473927338"
+                alt="Audiolab: Audio Editing Without the Headache | Product Hunt"
+                style={{ width: 250, height: 54 }}
+                width={250}
+                height={54}
+                unoptimized
+              />
+            </a>
+          </div> 
+        </div>
        {/* === CAROUSEL === */}
         <AutoScrollingCarousel />
 
