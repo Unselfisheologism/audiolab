@@ -378,6 +378,7 @@ export default function RootLayout({
               href="https://fazier.com/launches/audiolab" 
               target="_blank" 
               rel="noopener noreferrer"
+              title="Fazier badge (opens in a new window)"
             >
               <img 
                 src="https://fazier.com/api/v1/public/badges/embed_image.svg?launch_id=4421&badge_type=daily&theme=light" 
@@ -393,6 +394,7 @@ export default function RootLayout({
               href="https://www.producthunt.com/posts/audiolab-2?embed=true&utm_source=badge-featured&utm_medium=badge"
               target="_blank"
               rel="noopener noreferrer"
+              title="Audiolab: Audio Editing Without the Headache | Product Hunt (opens in a new window)"
             >
               <img
                 src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=966661&theme=light&t=1747473927338"

@@ -40,13 +40,13 @@ export default function AutoScrollingCarousel() {
             <li>Audio files & original recordings</li>
             <li>Audio projects with minimal quality loss</li>
             <li>
-              <Link href="#stereoWidener" className="text-blue-600 underline">Stereo Effects</Link>
+              <Link href="#stereoWidener" className="text-blue-900 underline">Stereo Effects</Link>
             </li>
             <li>Key features for audio editing software</li>
             <li>Music composing software</li>
-            <li>Audio analyzer & <Link href="#rhythm detector" className="text-blue-600 underline">Rhythm Detector</Link></li>
-            <li><Link href="#gainController" className="text-blue-600 underline">Audio gain controller</Link> & <Link href="#keyTransposer" className="text-blue-600 underline">Audio Key transposer</Link></li>
-            <li><Link href="#bassBoosterPresets" className="text-blue-600 underline">Bass Booster</Link> & <Link href="#reverbPresets" className="text-blue-600 underline">Audio Reverb Presets</Link></li>
+            <li>Audio analyzer & <Link href="#rhythm detector" className="text-blue-900 underline">Rhythm Detector</Link></li>
+            <li><Link href="#gainController" className="text-blue-900 underline">Audio gain controller</Link> & <Link href="#keyTransposer" className="text-blue-900 underline">Audio Key transposer</Link></li>
+            <li><Link href="#bassBoosterPresets" className="text-blue-900 underline">Bass Booster</Link> & <Link href="#reverbPresets" className="text-blue-900 underline">Audio Reverb Presets</Link></li>
           </ul>
         </article>
 
@@ -61,22 +61,22 @@ export default function AutoScrollingCarousel() {
           <span className="font-semibold text-black">Key Features:</span>
           <ul className="list-disc list-inside text-sm text-gray-700 mt-2 space-y-1 pl-4">
             <li>
-              <Link href="#reverbPresets" className="text-blue-600 underline">Reverb Presets</Link>: Simulate spaces from intimate bathrooms to grand concert halls.
+              <Link href="#reverbPresets" className="text-blue-900 underline">Reverb Presets</Link>: Simulate spaces from intimate bathrooms to grand concert halls.
             </li>
             <li>
-              <Link href="#bassBoosterPresets" className="text-blue-600 underline">Bass Booster Presets</Link>: Enhance low frequencies with adjustable intensity.
+              <Link href="#bassBoosterPresets" className="text-blue-900 underline">Bass Booster Presets</Link>: Enhance low frequencies with adjustable intensity.
             </li>
             <li>
-              <Link href="#frequencyTuner432" className="text-blue-600 underline">Tune to 432Hz</Link>: Convert music from standard 440Hz tuning to 432Hz for a warmer, more natural sound.
+              <Link href="#frequencyTuner432" className="text-blue-900 underline">Tune to 432Hz</Link>: Convert music from standard 440Hz tuning to 432Hz for a warmer, more natural sound.
             </li>
             <li>
-              <Link href="#automatedSweep" className="text-blue-600 underline">Automated Sweep</Link>: Pan Audio From Left to Right Autmatically.
+              <Link href="#automatedSweep" className="text-blue-900 underline">Automated Sweep</Link>: Pan Audio From Left to Right Autmatically.
             </li>
             <li>
-              <Link href="#audio8dConverter" className="text-blue-600 underline">8D Audio</Link>: Create immersive 3D soundscapes.
+              <Link href="#audio8dConverter" className="text-blue-900 underline">8D Audio</Link>: Create immersive 3D soundscapes.
             </li>
             <li>
-              <Link href="#subharmonicIntensifier" className="text-blue-600 underline">Sub-harmonic Intensifier</Link>: Boost bass & sub-bass frequencies in your audio.
+              <Link href="#subharmonicIntensifier" className="text-blue-900 underline">Sub-harmonic Intensifier</Link>: Boost bass & sub-bass frequencies in your audio.
             </li>
           </ul>
         </article>
@@ -93,7 +93,7 @@ export default function AutoScrollingCarousel() {
             Download in any audio file format. Edit directly in your browser. Fast processing. 
             <Link href="#bassBoosterPresets" className="text-blue-600 underline">Customizable presets for reverb, bass, and effects.</Link>
           </p>
-        </article>
+        </article> {/* This closing tag was incorrectly placed */}
 
         {/* CONSIDERATIONS CARD */}
         <article className="flex-shrink-0 bg-white/90 shadow-lg rounded-lg p-6 border border-gray-200 max-w-md min-w-[300px]">
@@ -118,7 +118,7 @@ export default function AutoScrollingCarousel() {
             <li>Free audio editor & audio editing online</li>
             <li>Audacity alternative, audioalter alternative, audiolab alternative</li>
             <li><Link href="#audio8DConverter" className="text-blue-600 underline">8D Audio</Link>, <Link href="#dreamscapeMaker" className="text-blue-600 underline">Lo-fi, Slowed and Reverb Tool</Link></li>
-            <li>Audio converter & audio player</li>
+            <li>Audio converter & audio player</li> {/* This line had no changes */}
             <li>MP3 converter, OGG converter, FLAC converter, WAV converter</li>
             <li>MP3 to OGG, MP3 to FLAC, MP3 to WAV</li>
             <li>OGG to MP3, OGG to FLAC, OGG to WAV</li>

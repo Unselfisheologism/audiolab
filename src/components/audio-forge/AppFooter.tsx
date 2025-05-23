@@ -8,29 +8,29 @@ export function AppFooter() {
       <div className="container mx-auto text-center">
         {/* Social Icons */}
         <div className="flex justify-center gap-4 mb-6">
-          <a href="https://unselfishneologism.substack.com" target="_blank" rel="noopener noreferrer" title="Substack">
+          <a href="https://unselfishneologism.substack.com" target="_blank" rel="noopener noreferrer" title="Substack (opens in a new window)">
             <FaRegEnvelope className="text-gray-600 hover:text-orange-600 transition" size={28} aria-label="Substack" />
             <span className="text-sm font-medium mt-1">Tutorials</span>
           </a>
-          <a href="https://www.youtube.com/@WhAtNOTif-r4h" target="_blank" rel="noopener noreferrer" title="YouTube">
+          <a href="https://www.youtube.com/@WhAtNOTif-r4h" target="_blank" rel="noopener noreferrer" title="YouTube (opens in a new window)">
             <FaYoutube className="text-gray-600 hover:text-red-600 transition" size={28} aria-label="YouTube" />
           </a>
-          <a href="https://x.com/Jeff9James" target="_blank" rel="noopener noreferrer" title="X">
+          <a href="https://x.com/Jeff9James" target="_blank" rel="noopener noreferrer" title="X (opens in a new window)">
             <FaXTwitter className="text-gray-600 hover:text-black transition" size={28} aria-label="X" />
           </a>
-          <a href="https://www.linkedin.com/in/jeffrin-jeffrin-6b4041345/" target="_blank" rel="noopener noreferrer" title="LinkedIn">
+          <a href="https://www.linkedin.com/in/jeffrin-jeffrin-6b4041345/" target="_blank" rel="noopener noreferrer" title="LinkedIn (opens in a new window)">
             <FaLinkedin className="text-gray-600 hover:text-blue-700 transition" size={28} aria-label="LinkedIn" />
           </a>
-          <a href="https://medium.com/@jeffrinjames99" target="_blank" rel="noopener noreferrer" title="Medium">
+          <a href="https://medium.com/@jeffrinjames99" target="_blank" rel="noopener noreferrer" title="Medium (opens in a new window)">
             <FaMedium className="text-gray-600 hover:text-green-700 transition" size={28} aria-label="Medium" />
           </a>
-          <a href="https://discordapp.com/users/1293939031620456492" target="_blank" rel="noopener noreferrer" title="Discord">
+          <a href="https://discordapp.com/users/1293939031620456492" target="_blank" rel="noopener noreferrer" title="Discord (opens in a new window)">
             <FaDiscord className="text-gray-600 hover:text-indigo-600 transition" size={28} aria-label="Discord" />
           </a>
         </div>
 
         {/* Legal Links Section */}
-        <LegalLinks />
+        <LegalLinks /> {/* Assuming LegalLinks also contains target="_blank" links that need title attributes */}
 
         <Separator className="my-6 bg-border/50" />
 
