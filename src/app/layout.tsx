@@ -424,18 +424,6 @@ export default function RootLayout({
             />
           </a>
         </div>  
-        <div className="badge-wrapper-130x40">
-          <a href='https://res.cloudinary.com/ddz3nsnq1/image/upload/v1747986022/side_cloud_y0rtcq.png' target="_blank" rel="noopener noreferrer">
-            <Image
-              src='https://www.sideprojectors.com/img/badges/badge_show_black.png'
-              alt='Check out Audiolab at @SideProjectors'
-              width={130}
-              height={40}
-              unoptimized
-              loading="eager"
-            />
-          </a>
-        </div>  
         <div className="badge-wrapper-150x54">  
           <a href='https://dang.ai/' target='_blank' rel="noopener noreferrer">
             <Image
