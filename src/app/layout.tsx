@@ -366,7 +366,7 @@ export default function RootLayout({
           {/* Title+Description */}
           <section className="flex flex-col flex-[2_1_320px] items-center justify-center mx-auto max-w-2xl text-center bg-transparent p-2">
             <h1 className="text-3xl font-bold text-primary mb-2">Audio Lab: Free Online Audio Editor & Converter</h1>
-            <p className="text-lg text-muted-foreground mb-2">
+            <p className="text-lg text-gray-900 mb-2">
               Edit audio online for free. Audio Lab lets you convert, enhance, and fine-tune audio files with tools like 8D Audio Converter, Bass Booster, Noise Reduction, Equalizer, 432Hz Tuning, Lo-fi, and more. No signup required—export your music instantly!
             </p>
           </section>
