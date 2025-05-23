@@ -14,7 +14,7 @@ export function LegalLinks() {
     <div className="py-4">
       <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2">
         {legalLinks.map((link) => (
-          <Link key={link.href} href={link.href} passHref>
+          <Link key={link.href} href={link.href}>
             <span className="text-sm text-muted-foreground hover:text-primary hover:underline cursor-pointer">
               {link.label}
             </span>

@@ -4,7 +4,7 @@ import { FaYoutube, FaXTwitter, FaLinkedin, FaMedium, FaDiscord, FaRegEnvelope }
 
 export function AppFooter() {
   return (
-    <footer className="bg-muted text-muted-foreground p-6 md:p-8 mt-auto w-full border-t">
+    <footer className="bg-muted text-foreground p-6 md:p-8 mt-auto w-full border-t">
       <div className="container mx-auto text-center">
         {/* Social Icons */}
         <div className="flex justify-center gap-4 mb-6">

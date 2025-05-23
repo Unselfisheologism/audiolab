@@ -98,6 +98,7 @@ export function EffectCard({
               step={param.step}
               onValueChange={(val) => handleSliderChange(param.name, val)}
               disabled={isLoading || !isAudioLoaded}
+              aria-label={param.label} // Pass the label as aria-label
             />
           </div>
         );
