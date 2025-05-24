@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import { GeistSans, GeistMono } from 'geist';
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 
 import Head from 'next/head';
 import Image from 'next/image';
@@ -201,16 +202,6 @@ export const metadata = {
   },
 };
 
-const geistSans = GeistSans ({
-  subsets: ['latin'],
-  variable: '--font-geist-sans', // Link to your existing CSS variable
-});
-
-const geistMono = GeistMono ({
-  subsets: ['latin'],
-  variable: '--font-geist-mono', // Link to your existing CSS variable
-});
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -218,7 +209,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable}`}>
-      <head>
+ <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
         <meta name="google-site-verification" content="YeU0_IIP-PLuFSe1-WhZSFJLP30iNuUi89SKvusNUFM" />
       </head>
       <script
