@@ -100,7 +100,6 @@ export function EffectCard({
               step={param.step}
               onValueChange={(val) => handleSliderChange(param.name, val)}
               disabled={isLoading || !isAudioLoaded}
-              aria-label={param.label} // Pass the label as aria-label
             />
           </div>
         );
@@ -183,9 +182,12 @@ export function EffectCard({
   return (
     <Card className="shadow-md overflow-hidden">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <IconComponent className="h-5 w-5 text-primary" />
-          {effect.name}
+        <CardTitle>
+          {/* Changed from div to h2 for accessibility */}
+          <h2 className="flex items-center gap-2 text-lg">
+            <IconComponent className="h-5 w-5 text-primary" />
+            {effect.name}
+          </h2>
         </CardTitle>
         <CardDescription className="text-xs">{effect.description}</CardDescription>
       </CardHeader>

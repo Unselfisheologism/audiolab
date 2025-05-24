@@ -36,7 +36,7 @@ export default function AutoScrollingCarousel() {
         {/* LEFT TOAST CARD */}
         <article className="flex-shrink-0 bg-white/90 shadow-lg rounded-lg p-4 border border-gray-200 max-w-md min-w-[300px]">
           <h2 className="font-bold text-base mb-2 text-black">Optimize Your Audio Projects</h2>
-          <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+          <ul className="list-disc list-inside text-base text-gray-700 space-y-1">
             <li>Audio files & original recordings</li>
             <li>Audio projects with minimal quality loss</li>
             <li>
@@ -53,13 +53,13 @@ export default function AutoScrollingCarousel() {
         {/* ABOUT CARD */}
         <article className="flex-shrink-0 bg-white/90 shadow-lg rounded-lg p-6 border border-gray-200 max-w-md min-w-[300px]">
           <h2 className="text-xl font-bold mb-2 text-primary">About Audio Lab</h2>
-          <p className="text-sm text-gray-700">
+          <p className="text-base text-gray-700">
             <strong>Empowering Creativity Through Accessible Audio Tools.</strong> At Audiolab, we provide a comprehensive collection of easy-to-use web tools to transform your audio projects.<br />
             Whether you’re tweaking vocal tracks, adding cinematic reverb effects, or crafting bass-heavy songs, our online audio toolkit delivers precision and flexibility.
           </p>
           <br />
           <span className="font-semibold text-black">Key Features:</span>
-          <ul className="list-disc list-inside text-sm text-gray-700 mt-2 space-y-1 pl-4">
+          <ul className="list-disc list-inside text-base text-gray-700 mt-2 space-y-1 pl-4">
             <li>
               <Link href="#reverbPresets" className="text-blue-900 underline">Reverb Presets</Link>: Simulate spaces from intimate bathrooms to grand concert halls.
             </li>
@@ -84,7 +84,7 @@ export default function AutoScrollingCarousel() {
         {/* PHILOSOPHY CARD */}
         <article className="flex-shrink-0 bg-white/90 shadow-lg rounded-lg p-6 border border-gray-200 max-w-md min-w-[300px]">
           <h2 className="text-xl font-bold mb-2 text-primary">Our Philosophy</h2>
-          <p className="text-sm text-gray-700">
+          <p className="text-base text-gray-700">
             <strong>Innovation meets Accessibility.</strong><br />
             We believe audio production tools should be intuitive, powerful, and free for all creators.<br />
             Audiolab combines user-centric design with advanced algorithms for seamless processing.<br />
@@ -98,7 +98,7 @@ export default function AutoScrollingCarousel() {
         {/* CONSIDERATIONS CARD */}
         <article className="flex-shrink-0 bg-white/90 shadow-lg rounded-lg p-6 border border-gray-200 max-w-md min-w-[300px]">
           <h2 className="text-xl font-bold mb-2 text-primary">Important Considerations</h2>
-          <p className="text-sm text-gray-700">
+          <p className="text-base text-gray-700">
             <strong>Optimize Your Audio Workflow.</strong><br />
             For best results, keep these tips in mind:
             <br /><br />

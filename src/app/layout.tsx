@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import { GeistSans } from 'geist/font/sans';
-import { GeistMono } from 'geist/font/mono';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import { GeistSans, GeistMono } from 'next/font/google';
+
 import Script from 'next/script';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -202,13 +202,23 @@ export const metadata = {
   },
 };
 
+const geistSans = GeistSans({
+  subsets: ['latin'],
+  variable: '--font-geist-sans', // Link to your existing CSS variable
+});
+
+const geistMono = GeistMono({
+  subsets: ['latin'],
+  variable: '--font-geist-mono', // Link to your existing CSS variable
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode; 
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable}`}>
       <head>
         <meta name="google-site-verification" content="YeU0_IIP-PLuFSe1-WhZSFJLP30iNuUi89SKvusNUFM" />
       </head>
@@ -383,6 +393,7 @@ export default function RootLayout({
               <img 
                 src="https://fazier.com/api/v1/public/badges/embed_image.svg?launch_id=4421&badge_type=daily&theme=light" 
                 width={270} 
+                height={54}
                 alt="Fazier badge" 
                 unoptimized
               />

@@ -257,9 +257,6 @@ export default function AudioForgeClientContent() {
           isMobile={isMobile} 
           onOpenEffectsPanel={() => setIsEffectsSheetOpen(true)}
         />
-        <main className="flex-grow min-h-0 md:flex">
-          {/* SEO: Main H1 for the app (hidden visually but accessible for SEO/screen readers in skeleton state) */}
-          <h1 className="sr-only">Audiolab: Online Audio Editor, Bass Booster, 8D Audio, Reverb & More</h1>
           {isMobile ? (
              <div className="flex-grow p-4 overflow-y-auto">
                 <MainContentSkeleton />
@@ -275,7 +272,6 @@ export default function AudioForgeClientContent() {
               </ResizablePanel>
             </ResizablePanelGroup>
           )}
-        </main>
         <AppFooter />
       </div>
     );
@@ -287,9 +283,6 @@ export default function AudioForgeClientContent() {
         isMobile={isMobile}
         onOpenEffectsPanel={() => setIsEffectsSheetOpen(true)}
       />
-      <main className="flex-grow min-h-0 p-4 overflow-y-auto md:flex md:p-0 md:overflow-visible">
-        {/* SEO: Main H1 for the app (visually hidden on mobile, visible on desktop for SEO) */}
-        <h1 className="sr-only">Audiolab: Online Audio Editor, Bass Booster, 8D Audio, Reverb</h1>
         {isMobile ? (
           <>
             <MainDisplayPanel {...mainDisplayPanelProps} />
@@ -362,7 +355,6 @@ export default function AudioForgeClientContent() {
             </ResizablePanel>
           </ResizablePanelGroup>
         )}
-      </main>
       <AppFooter />
     </div>
   );
