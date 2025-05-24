@@ -1,5 +1,6 @@
 import { LegalLinks } from './LegalLinks';
 import { Separator } from '@/components/ui/separator';
+import Link from 'next/link';
 import { FaYoutube, FaXTwitter, FaLinkedin, FaMedium, FaDiscord, FaRegEnvelope } from "react-icons/fa6";
 
 export function AppFooter() {
@@ -30,7 +31,10 @@ export function AppFooter() {
         </div>
 
         {/* Legal Links Section */}
-        <LegalLinks /> {/* Assuming LegalLinks also contains target="_blank" links that need title attributes */}
+        <div className="flex justify-center gap-4 mb-6 text-sm">
+ <LegalLinks /> {/* Assuming LegalLinks also contains target="_blank" links that need title attributes */}
+          <Link href="/sitemap" className="hover:underline">Site Map</Link>
+        </div>
 
         <Separator className="my-6 bg-border/50" />
 
