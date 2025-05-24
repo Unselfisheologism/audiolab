@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import { GeistSans, GeistMono } from 'geist/font/next';
- 
+import { GeistSans, GeistMono } from 'geist';
+
 import Head from 'next/head';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
@@ -201,12 +201,12 @@ export const metadata = {
   },
 };
 
-const geistSans = GeistSans({
+const geistSans = GeistSans ({
   subsets: ['latin'],
   variable: '--font-geist-sans', // Link to your existing CSS variable
 });
 
-const geistMono = GeistMono({
+const geistMono = GeistMono ({
   subsets: ['latin'],
   variable: '--font-geist-mono', // Link to your existing CSS variable
 });
