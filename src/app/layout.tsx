@@ -208,15 +208,14 @@ export default function RootLayout({
   children: React.ReactNode; 
 }>) {
   return (
- <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
         <meta name="google-site-verification" content="YeU0_IIP-PLuFSe1-WhZSFJLP30iNuUi89SKvusNUFM" />
-      </head>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "WebApplication",
+             "@type": "WebApplication",
             "name": "Audio Lab",
             "url": "https://audiolab.in.net",
             "description": "Free online audio editor with tools like 8D Audio Converter, Lo-fi, 432Hz Tuning, Resonance Alteration, Tempo Change, Stereo Widener, Bass Booster, Equalizer, Reverb, and more.",
@@ -357,7 +356,7 @@ export default function RootLayout({
              ]
           })
         }}
-      />
+ ></script>
       <body className="font-sans bg-background text-foreground">
         {/* Uncomment this line if using AppHeader */}
         {/* <AppHeader /> */}
