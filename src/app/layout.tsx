@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import { GeistSans, GeistMono } from '@vercel/geist/font/next';
-import Script from 'next/script';
+import { GeistSans, GeistMono } from 'geist/font/next';
+ 
 import Head from 'next/head';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
