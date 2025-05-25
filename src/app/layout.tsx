@@ -11,6 +11,11 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 // import { AppHeader } from '@/components/audio-forge/AppHeader'; // Uncomment if you want the header
 
+const AutoScrollingCarousel = dynamic(
+  () => import("@/components/AutoScrollingCarousel"),
+  { ssr: false }
+);
+
 export const metadata = {
   title: 'Free Audio Editor | Bass Booster, 8D Sound FX & Convert Tools',
   description: 'Free Audio Editor Online: Bass Booster, 8D Sound FX & Convert Tools. Edit, enhance, and transform audio files effortlessly with powerful effects for music, podcasts, and videos. ',
