@@ -7,14 +7,8 @@ import { GeistMono } from 'geist/font/mono';
 import Head from 'next/head';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
-import dynamic from 'next/dynamic';
 import Link from 'next/link';
-// import { AppHeader } from '@/components/audio-forge/AppHeader'; // Uncomment if you want the header
-
-const AutoScrollingCarousel = dynamic(
-  () => import("@/components/AutoScrollingCarousel"),
-  { ssr: false }
-);
+import ClientAutoScrollingCarousel from '@/components/ClientAutoScrollingCarousel';
 
 export const metadata = {
   title: 'Free Audio Editor | Bass Booster, 8D Sound FX & Convert Tools',
@@ -412,7 +406,7 @@ export default function RootLayout({
           </div> 
         </div>
        {/* === CAROUSEL === */}
-        <AutoScrollingCarousel />
+        <ClientAutoScrollingCarousel />
 
         {/* === MAIN CONTENT === */}      
 
