@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 const legalLinks = [
   { href: '/faq', label: 'FAQ' },
+  { href: '/about', label: 'About Us' },
   { href: '/terms', label: 'Terms of Service' },
   { href: '/privacy', label: 'Privacy Policy' },
   { href: '/cookies', label: 'Cookie Policy' },
