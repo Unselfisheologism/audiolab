@@ -4,11 +4,11 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { AppHeader } from '@/components/audio-forge/AppHeader';
 import { AudioControlsPanel } from './AudioControlsPanel';
 import { MainDisplayPanel } from './MainDisplayPanel';
+
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import type { EffectSettings } from '@/types/audio-forge';
 import { useToast } from '@/hooks/use-toast';
-import { audioUtils, fileToDataUrl } from '@/lib/audio-utils';
 import { effectsList } from '@/app/audio-forge/effects';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -30,6 +30,7 @@ export default function AudioForgeClientContent() {
   const isMobile = useIsMobile();
   const [isEffectsSheetOpen, setIsEffectsSheetOpen] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
+  const audioWorker = useRef<Worker | null>(null);
 
   useEffect(() => {
     setHasMounted(true);
@@ -49,10 +50,21 @@ export default function AudioForgeClientContent() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Initialize AudioContext for main thread playback and visualizer
     if (typeof window !== 'undefined' && !audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
+
+    // Initialize Web Worker
+    if (typeof window !== 'undefined' && !audioWorker.current) {
+      audioWorker.current = new Worker(new URL('../../workers/audioWorker.ts', import.meta.url));
+      
+      audioWorker.current.onmessage = (event) => {
+        // This will be implemented in the next step
+      };
+    }
   }, []);
+
 
   const loadAudioBuffer = useCallback(async (dataUrl: string | null, setBuffer: React.Dispatch<React.SetStateAction<AudioBuffer | null>>) => {
     if (!dataUrl || !audioContextRef.current) {
@@ -136,29 +148,28 @@ export default function AudioForgeClientContent() {
     setAnalysisResult(null); 
     setAnalysisSourceEffectId(null);
     const currentAudio = processedAudioDataUrl || originalAudioDataUrl; 
-    
+
+    if (!audioWorker.current || !currentAudio) {
+       toast({ title: "System Error", description: "Audio processing worker is not available.", variant: "destructive" });
+       setIsLoading(false);
+       return;
+    }
+
     const effectToApply = effectsList.find(e => e.id === effectId || e.parameters?.find(p => p.handlerKey === effectId));
-    const actualHandlerKey = effectToApply?.parameters?.find(p => p.handlerKey === effectId)?.handlerKey || effectToApply?.handlerKey || effectId;
+    // Pass the actual effect ID or handler key if it's a preset
+    const handlerKey = effectToApply?.parameters?.find(p => p.handlerKey === effectId)?.handlerKey || effectToApply?.handlerKey || effectId;
     const parentEffectId = effectToApply?.id || null;
 
     try {
-      let result: { processedAudioDataUrl: string; analysis?: string } = { processedAudioDataUrl: currentAudio };
       const combinedParams = { ...(effectSettings[parentEffectId ?? effectId] || {}), ...params };
 
-      if (audioUtils[actualHandlerKey]) {
-        result = await audioUtils[actualHandlerKey](currentAudio, combinedParams);
-      } else {
-        throw new Error(`Handler for ${actualHandlerKey} not found.`);
-      }
-      
-      setProcessedAudioDataUrl(result.processedAudioDataUrl);
-      if (result.analysis) {
-        setAnalysisResult(result.analysis);
-        if (effectToApply?.outputsAnalysis && parentEffectId) {
-          setAnalysisSourceEffectId(parentEffectId);
-        }
-      }
-      toast({ title: "Effect Applied", description: `${effectToApply?.name || actualHandlerKey} processing complete.` });
+      audioWorker.current.postMessage({
+        type: 'applyEffect',
+        effectId: handlerKey, // Send the handler key
+        audioDataUrl: currentAudio,
+        params: combinedParams,
+      });
+
     } catch (error: any) {
       console.error(`Error applying effect ${effectId}:`, error);
       toast({ title: "Processing Error", description: `Could not apply ${effectToApply?.name || effectId}. ${error.message || 'Unknown error'}`, variant: "destructive" });
@@ -175,24 +186,25 @@ export default function AudioForgeClientContent() {
       toast({ title: "Nothing to Export", description: "No processed audio available.", variant: "destructive" });
       return;
     }
+
+    if (!audioWorker.current) {
+       toast({ title: "System Error", description: "Audio processing worker is not available.", variant: "destructive" });
+       return;
+    }
+
     setIsLoading(true);
+
+    // Send a message to the worker to handle the export
+    audioWorker.current.postMessage({
+      type: 'exportAudio',
+      audioDataUrl: processedAudioDataUrl,
+      format: format,
+      quality: quality,
+      loopCount: loopCount,
+      originalFileName: originalAudioFile?.name // Pass original name for filename suggestion
+    });
+
     try {
-      let audioToDownloadUrl = processedAudioDataUrl;
-      if (loopCount > 1) {
-        toast({ title: "Looping Audio", description: `Applying ${loopCount} loops... This may take a moment.` });
-        audioToDownloadUrl = await audioUtils.loopAudio(processedAudioDataUrl, loopCount);
-      }
-
-      toast({ title: "Export Ready", description: `Preparing download for ${originalAudioFile?.name || 'audio'}_forged.${format}.` });
-      const link = document.createElement('a');
-      link.href = audioToDownloadUrl;
-      const baseName = originalAudioFile ? originalAudioFile.name.substring(0, originalAudioFile.name.lastIndexOf('.')) : 'audio';
-      const loopSuffix = loopCount > 1 ? `_loops${loopCount}` : '';
-      link.download = `${baseName}_forged${loopSuffix}.${format}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
     } catch (error: any) {
       console.error("Error during export:", error);
       toast({ title: "Export Error", description: `Failed to export audio. ${error.message}`, variant: "destructive" });
