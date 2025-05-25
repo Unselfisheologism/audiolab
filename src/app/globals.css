@@ -19,7 +19,7 @@ html {
     --secondary: 0 0% 96.1%; /* Slightly off-white */
     --secondary-foreground: 180 100% 25.1%; /* Deep Teal for text on secondary */
     --muted: 0 0% 90%; /* Lighter gray for muted text/elements */
-    --muted-foreground: 0 0% 25%; /* Darker gray for muted text/elements to meet 7:1 contrast */
+    --muted-foreground: #404040; /* Darker gray for muted text/elements to meet 7:1 contrast */
     --accent: 183 100% 72%; /* #7DF9FF Electric Blue */
     --accent-foreground: 180 100% 15%; /* Dark Teal for text on accent */
     --destructive: 0 84.2% 60.2%;

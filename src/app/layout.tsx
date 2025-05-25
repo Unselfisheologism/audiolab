@@ -7,7 +7,7 @@ import { GeistMono } from 'geist/font/mono';
 import Head from 'next/head';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
-import AutoScrollingCarousel from "@/components/AutoScrollingCarousel";
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 // import { AppHeader } from '@/components/audio-forge/AppHeader'; // Uncomment if you want the header
 
