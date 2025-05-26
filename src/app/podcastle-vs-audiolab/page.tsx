@@ -1,6 +1,3 @@
-import { AppHeader } from '@/components/audio-forge/AppHeader';
-import { AppFooter } from '@/components/audio-forge/AppFooter';
-
 export default function AudiomassVsAudiolabPage() {
  const htmlContent = `
 <!DOCTYPE html>
@@ -1069,9 +1066,7 @@ export default function AudiomassVsAudiolabPage() {
 
  return (
  <>
- <AppHeader />
  <main dangerouslySetInnerHTML={{ __html: htmlContent }} />
- <AppFooter />
  </>
  );
 }

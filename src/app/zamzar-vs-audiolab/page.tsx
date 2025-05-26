@@ -1,6 +1,3 @@
-import { AppHeader } from '@/components/audio-forge/AppHeader';
-import { AppFooter } from '@/components/audio-forge/AppFooter';
-
 const staticHtmlContent = `
 <head>
     <meta charset="UTF-8">
@@ -1185,9 +1182,7 @@ const staticHtmlContent = `
 export default function ZamzarVsAudioLabPage() {
   return (
     <>
-      <AppHeader />
       <main dangerouslySetInnerHTML={{ __html: staticHtmlContent }} />
-      <AppFooter />
     </>
   );
 }
