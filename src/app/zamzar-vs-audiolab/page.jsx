@@ -1,3 +1,4 @@
+"use client";
 export const dynamicParams = false;
 <>
   <meta charSet="UTF-8" />
