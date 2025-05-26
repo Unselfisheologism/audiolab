@@ -5,7 +5,7 @@ export default function AudiomassVsAudiolabPage() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AudioLab: The Most Powerful Free Online Audio Editor</title>
+    <title>Audiomass VS Audio Lab: Which is Better?</title>
     <style>
         :root {
             --primary-color: #F2F2F2;
@@ -15,6 +15,7 @@ export default function AudiomassVsAudiolabPage() {
             --header-bg: #FFFFFF;
             --header-link: #000000;
             --footer-bg: #F2F2F2;
+            --text-color: #000000; /* Added for black text */
             --footer-text: #808080;
             --dark-text: #333333;
             --medium-text: #555555;
@@ -40,7 +41,7 @@ export default function AudiomassVsAudiolabPage() {
 
         body {
             background-color: var(--primary-color);
-            color: var(--dark-text);
+            color: var(--text-color); /* Changed to text-color */
             line-height: 1.6;
             overflow-x: hidden;
         }
@@ -88,7 +89,7 @@ export default function AudiomassVsAudiolabPage() {
         .logo-text {
             font-size: 1.5rem;
             font-weight: bold;
-            color: var(--dark-text);
+            color: var(--text-color); /* Changed to text-color */
             margin-left: 10px;
         }
 
@@ -107,7 +108,7 @@ export default function AudiomassVsAudiolabPage() {
         }
 
         .nav-menu a {
-            color: var(--header-link);
+            color: var(--text-color); /* Changed to text-color */
             text-decoration: none;
             font-weight: 500;
             transition: color var(--transition-speed);
@@ -123,7 +124,7 @@ export default function AudiomassVsAudiolabPage() {
             border: none;
             font-size: 1.5rem;
             cursor: pointer;
-            color: var(--dark-text);
+            color: var(--text-color); /* Changed to text-color */
         }
 
         .mobile-nav {
@@ -157,7 +158,7 @@ export default function AudiomassVsAudiolabPage() {
         }
 
         .mobile-nav-menu a {
-            color: var(--header-link);
+            color: var(--text-color); /* Changed to text-color */
             text-decoration: none;
             font-weight: 500;
             font-size: 1.1rem;
@@ -212,7 +213,7 @@ export default function AudiomassVsAudiolabPage() {
         .section-title {
             font-size: clamp(1.8rem, 3vw, 2.5rem);
             margin-bottom: 20px;
-            color: var(--dark-text);
+            color: var(--text-color); /* Changed to text-color */
             text-align: center;
         }
 
@@ -220,7 +221,7 @@ export default function AudiomassVsAudiolabPage() {
             font-size: clamp(1.1rem, 2vw, 1.3rem);
             margin-bottom: 30px;
             color: var(--medium-text);
-            text-align: center;
+            text-align: center; /* Changed to text-color */
         }
 
         .section-description {
@@ -268,7 +269,7 @@ export default function AudiomassVsAudiolabPage() {
         }
 
         /* Product Comparison */
-        .product-comparison {
+        .product-comparison { /* Changed to text-color */
             background-color: var(--secondary-color);
             padding: 80px 0;
         }
@@ -339,14 +340,14 @@ export default function AudiomassVsAudiolabPage() {
             font-size: clamp(1.6rem, 2.8vw, 2rem);
             font-weight: 700;
             margin-bottom: 10px;
-            color: var(--dark-text);
+            color: var(--text-color); /* Changed to text-color */
         }
 
         .competitor-title {
             font-size: clamp(1.4rem, 2.5vw, 1.8rem);
             font-weight: normal;
             margin-bottom: 10px;
-            color: var(--dark-text);
+            color: var(--text-color); /* Changed to text-color */
         }
 
         .product-subtitle {
@@ -376,7 +377,7 @@ export default function AudiomassVsAudiolabPage() {
         .product-content {
             font-size: clamp(0.9rem, 1.5vw, 1.1rem);
             margin-bottom: 30px;
-            color: var(--dark-text);
+            color: var(--text-color); /* Changed to text-color */
             flex-grow: 1;
         }
 
@@ -394,7 +395,7 @@ export default function AudiomassVsAudiolabPage() {
 
         .competitor-text {
             text-align: center;
-            color: var(--light-text);
+            color: var(--text-color); /* Changed to text-color */
             font-size: 0.9rem;
         }
 
@@ -447,7 +448,7 @@ export default function AudiomassVsAudiolabPage() {
         }
 
         /* Benefits Section */
-        .benefits {
+        .benefits { /* Changed to text-color */
             background-color: var(--primary-color);
             padding: 80px 0;
         }
@@ -483,7 +484,7 @@ export default function AudiomassVsAudiolabPage() {
             font-size: 1.3rem;
             font-weight: 600;
             margin-bottom: 15px;
-            color: var(--dark-text);
+            color: var(--text-color); /* Changed to text-color */
         }
 
         .benefit-content {
@@ -492,7 +493,7 @@ export default function AudiomassVsAudiolabPage() {
         }
 
         /* Why Choose Us Section */
-        .why-choose-us {
+        .why-choose-us { /* Changed to text-color */
             background-color: var(--secondary-color);
             padding: 80px 0;
         }
@@ -533,7 +534,7 @@ export default function AudiomassVsAudiolabPage() {
             font-size: 1.5rem;
             font-weight: 600;
             margin-bottom: 15px;
-            color: var(--dark-text);
+            color: var(--text-color); /* Changed to text-color */
         }
 
         .choice-text {
@@ -543,7 +544,7 @@ export default function AudiomassVsAudiolabPage() {
         }
 
         /* Internal Links Section */
-        .internal-links {
+        .internal-links { /* Changed to text-color */
             background-color: var(--primary-color);
             padding: 80px 0;
         }
@@ -581,7 +582,7 @@ export default function AudiomassVsAudiolabPage() {
             font-size: 1.2rem;
             font-weight: 600;
             margin-bottom: 10px;
-            color: var(--dark-text);
+            color: var(--text-color); /* Changed to text-color */
         }
 
         .link-description {
@@ -591,7 +592,7 @@ export default function AudiomassVsAudiolabPage() {
         }
 
         /* FAQ Section */
-        .faq {
+        .faq { /* Changed to text-color */
             background-color: var(--secondary-color);
             padding: 80px 0;
         }
@@ -615,7 +616,7 @@ export default function AudiomassVsAudiolabPage() {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-weight: 600;
+            font-weight: 600; /* Changed to text-color */
             color: var(--dark-text);
         }
 
@@ -646,7 +647,7 @@ export default function AudiomassVsAudiolabPage() {
         }
 
         /* Call to Action */
-        .cta {
+        .cta { /* Changed to text-color */
             background: linear-gradient(100deg, var(--gradient-start), var(--gradient-end));
             color: var(--secondary-color);
             padding: 80px 0;
@@ -670,7 +671,7 @@ export default function AudiomassVsAudiolabPage() {
         }
 
         /* Footer */
-        footer {
+        footer { /* Changed to text-color */
             background-color: var(--footer-bg);
             color: var(--footer-text);
             padding: 60px 0 30px;
@@ -711,7 +712,7 @@ export default function AudiomassVsAudiolabPage() {
         .footer-logo-text {
             font-size: 1.3rem;
             font-weight: bold;
-            color: var(--dark-text);
+            color: var(--text-color); /* Changed to text-color */
             margin-left: 10px;
         }
 
@@ -724,7 +725,7 @@ export default function AudiomassVsAudiolabPage() {
             font-size: 1.1rem;
             font-weight: 600;
             margin-bottom: 20px;
-            color: var(--dark-text);
+            color: var(--text-color); /* Changed to text-color */
         }
 
         .footer-links {
@@ -856,7 +857,7 @@ export default function AudiomassVsAudiolabPage() {
         <div class="container header-container">
             <div class="logo-container">
                 <img src="https://audiolab.in.net/icon.png" alt="Audio Lab interface showing comprehensive audio editing tools and waveform display" class="logo">
-                <span class="logo-text">Audio Lab</span>
+                <span class="logo-text" style="color: #000000;">Audio Lab</span>
             </div>
             <nav>
                 <ul class="nav-menu">
@@ -886,9 +887,9 @@ export default function AudiomassVsAudiolabPage() {
     <!-- Hero Section -->
     <section class="hero">
         <div class="container">
-            <h1 class="hero-title">AudioLab: The Most Powerful Free Online Audio Editor with Advanced 8D & Bass Effects</h1>
-            <p class="hero-subtitle">Transform Your Audio with Professional-Grade Tools: Bass Boost, 8D Audio, Reverb Presets, and Complete Format Support - All in Your Browser</p>
-            <p class="hero-description">Experience studio-quality audio editing with zero installations, unlimited formats, and advanced sound processing algorithms.</p>
+            <h1 class="hero-title" style="color: #000000;">AudioLab: The Most Powerful Free Online Audio Editor with Advanced 8D & Bass Effects</h1>
+            <p class="hero-subtitle" style="color: #000000;">Transform Your Audio with Professional-Grade Tools: Bass Boost, 8D Audio, Reverb Presets, and Complete Format Support - All in Your Browser</p>
+            <p class="hero-description" style="color: #000000;">Experience studio-quality audio editing with zero installations, unlimited formats, and advanced sound processing algorithms.</p>
             <div class="btn-container">
                 <a href="https://audiolab.in.net/features" target="_blank" rel="noopener noreferrer" class="btn">Start Editing Free</a>
             </div>
@@ -896,9 +897,9 @@ export default function AudiomassVsAudiolabPage() {
     </section>
 
     <!-- Product Comparison -->
-    <section class="product-comparison">
+    <section class="product-comparison" style="color: #000000;">
         <div class="container">
-            <h2 class="comparison-title">Audio Lab vs AudioMass Comparison</h2>
+            <h2 class="comparison-title" style="color: #000000;">Audio Lab vs AudioMass Comparison</h2>
             <div class="comparison-container">
                 <div class="product-card our-product">
                     <span class="recommended-badge">Recommended</span>
@@ -906,18 +907,18 @@ export default function AudiomassVsAudiolabPage() {
                     <div class="product-subtitle">Your All-in-One Audio Magic Workshop</div>
                     <img src="https://websitelm-us-east-2.s3.us-west-2.amazonaws.com/audiolab.in.netHomepageFirstscreenScreenshot.png" alt="Audio Lab interface showing comprehensive audio editing tools and waveform display" class="product-image">
                     <div class="product-content">Transform your audio with our powerful, browser-based toolkit! From immersive 8D soundscapes to precision bass boosting, Audio Lab delivers professional-grade audio manipulation without the complexity. Edit, enhance, and convert with zero uploads – your files stay private while you create sonic masterpieces with our intuitive interface and extensive preset library.</div>
-                    <a href="https://audiolab.in.net/features" target="_blank" rel="noopener noreferrer" class="btn product-button">Experience Audio Freedom</a>
+                    <a href="https://audiolab.in.net/features" target="_blank" rel="noopener noreferrer" class="btn product-button" style="color: #000000;">Experience Audio Freedom</a>
                 </div>
                 <div class="vs-separator">VS</div>
                 <div class="product-card competitor-product">
                     <div class="competitor-title">AudioMass</div>
                     <div class="competitor-subtitle">Basic Browser-Based Waveform Editing</div>
                     <img src="https://websitelm-us-east-2.s3.us-west-2.amazonaws.com/audiomass.coHomepageFirstscreenScreenshot.png" alt="AudioMass waveform editor interface with basic editing controls" class="product-image">
-                    <div class="competitor-content">AudioMass offers a streamlined approach to web-based audio editing with its open-source platform. Focusing on fundamental waveform manipulation, it provides basic cutting, trimming, and volume adjustment tools for simple audio tasks. Perfect for users seeking straightforward audio editing without additional effects.</div>
-                    <div class="competitor-text">Competitor Site</div>
+                    <div class="competitor-content" style="color: #000000;">AudioMass offers a streamlined approach to web-based audio editing with its open-source platform. Focusing on fundamental waveform manipulation, it provides basic cutting, trimming, and volume adjustment tools for simple audio tasks. Perfect for users seeking straightforward audio editing without additional effects.</div>
+                    <div class="competitor-text" style="color: #000000;">Competitor Site</div>
                 </div>
             </div>
-
+            
             <div class="comparison-table-container">
                 <table class="comparison-table">
                     <thead>
@@ -992,10 +993,10 @@ export default function AudiomassVsAudiolabPage() {
         </div>
     </section>
 
-    <!-- Benefits Section -->
+    <!-- Benefits Section --> 
     <section class="benefits">
         <div class="container">
-            <h2 class="section-title">Transform Your Audio Like Never Before - Free, Powerful, and Browser-Based</h2>
+            <h2 class="section-title" style="color: #000000;">Transform Your Audio Like Never Before - Free, Powerful, and Browser-Based</h2>
             <p class="section-description">Experience professional-grade audio editing without the complexity. AudioLab delivers premium features right in your browser, with no downloads or signups required.</p>
             <div class="benefits-container">
                 <div class="benefit-block">
@@ -1025,10 +1026,10 @@ export default function AudiomassVsAudiolabPage() {
         </div>
     </section>
 
-    <!-- Why Choose Us Section -->
+    <!-- Why Choose Us Section --> 
     <section class="why-choose-us">
         <div class="container">
-            <h2 class="section-title">Transform Your Audio Like Never Before</h2>
+            <h2 class="section-title" style="color: #000000;">Transform Your Audio Like Never Before</h2>
             <p class="section-description">Discover why creators worldwide choose Audio Lab for their sound editing needs. Our innovative tools and user-friendly interface make professional audio editing accessible to everyone.</p>
             <div class="choice-blocks-container">
                 <div class="choice-block">
@@ -1065,10 +1066,10 @@ export default function AudiomassVsAudiolabPage() {
         </div>
     </section>
 
-    <!-- Internal Links Section -->
+    <!-- Internal Links Section --> 
     <section class="internal-links">
         <div class="container">
-            <h2 class="section-title">Explore AudioLab's Essential Pages</h2>
+            <h2 class="section-title" style="color: #000000;">Explore AudioLab's Essential Pages</h2>
             <div class="links-grid">
                 <div class="link-card">
                     <img src="https://audiolab.in.net/icon.png" alt="FAQ icon" class="link-image">
@@ -1109,10 +1110,10 @@ export default function AudiomassVsAudiolabPage() {
         </div>
     </section>
 
-    <!-- FAQ Section -->
+    <!-- FAQ Section --> 
     <section class="faq">
         <div class="container">
-            <h2 class="section-title">Frequently Asked Questions</h2>
+            <h2 class="section-title" style="color: #000000;">Frequently Asked Questions</h2>
             <div class="faq-container">
                 <div class="faq-item">
                     <div class="faq-question">What makes Audio Lab different from other online editors?</div>
@@ -1157,10 +1158,10 @@ export default function AudiomassVsAudiolabPage() {
         </div>
     </section>
 
-    <!-- Call to Action -->
+    <!-- Call to Action --> 
     <section class="cta">
         <div class="container">
-            <h2 class="cta-title">Transform Your Audio Into Professional-Grade Sound Instantly!</h2>
+            <h2 class="cta-title" style="color: #000000;">Transform Your Audio Into Professional-Grade Sound Instantly!</h2>
             <p class="cta-subtitle">Unleash powerful effects, boost bass, create 8D soundscapes, and enhance your tracks - all for free, right in your browser.</p>
             <div class="btn-container">
                 <a href="https://audiolab.in.net" target="_blank" rel="noopener noreferrer" class="btn">Start Editing Free</a>
@@ -1168,14 +1169,14 @@ export default function AudiomassVsAudiolabPage() {
         </div>
     </section>
 
-    <!-- Footer -->
+    <!-- Footer --> 
     <footer>
         <div class="container footer-container">
             <div class="footer-brand">
                 <div class="footer-logo-container">
                     <img src="https://audiolab.in.net/icon.png" alt="Audio Lab interface showing comprehensive audio editing tools and waveform display" class="footer-logo">
-                    <span class="footer-logo-text">Audio Lab</span>
-                </div>
+                    <span class="footer-logo-text" style="color: #000000;">Audio Lab</span>
+                </div> 
                 <p class="footer-description">Transform your audio with our powerful, browser-based toolkit. From immersive 8D soundscapes to precision bass boosting, all with zero uploads – your files stay private.</p>
                 <div class="social-icons">
                     <a href="https://x.com/Jeff9James" target="_blank" rel="noopener noreferrer" class="social-icon">𝕏</a>
@@ -1186,7 +1187,7 @@ export default function AudiomassVsAudiolabPage() {
             </div>
             <div class="footer-links-container">
                 <div class="footer-column">
-                    <h3 class="footer-column-title">Features</h3>
+                    <h3 class="footer-column-title" style="color: #000000;">Features</h3>
                     <ul class="footer-links">
                         <li><a href="https://audiolab.in.net/#dreamscapeMaker" target="_blank" rel="noopener noreferrer">Lo-fi</a></li>
                         <li><a href="https://audiolab.in.net/#audio8DConverter" target="_blank" rel="noopener noreferrer">8D Audio Converter</a></li>
@@ -1196,7 +1197,7 @@ export default function AudiomassVsAudiolabPage() {
                     </ul>
                 </div>
                 <div class="footer-column">
-                    <h3 class="footer-column-title">Resources</h3>
+                    <h3 class="footer-column-title" style="color: #000000;">Resources</h3>
                     <ul class="footer-links">
                         <li><a href="https://unselfishneologism.substack.com" target="_blank" rel="noopener noreferrer">Tutorials</a></li>
                         <li><a href="https://www.youtube.com/@WhAtNOTif-r4h" target="_blank" rel="noopener noreferrer">YouTube</a></li>
@@ -1205,7 +1206,7 @@ export default function AudiomassVsAudiolabPage() {
                     </ul>
                 </div>
                 <div class="footer-column">
-                    <h3 class="footer-column-title">Legal</h3>
+                    <h3 class="footer-column-title" style="color: #000000;">Legal</h3>
                     <ul class="footer-links">
                         <li><a href="https://audiolab.in.net/about" target="_blank" rel="noopener noreferrer">About Us</a></li>
                         <li><a href="https://audiolab.in.net/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a></li>

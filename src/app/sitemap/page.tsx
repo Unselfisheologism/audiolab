@@ -11,7 +11,7 @@ export default function SitemapPage() {
     { name: 'Licenses', path: '/licenses' },
     { name: 'Privacy', path: '/privacy' },
     { name: 'Terms', path: '/terms' },
-    { name: 'Zamzar VS Audiolab', path: 'zamzara-vs-audiolab'},
+    { name: 'Zamzar VS Audiolab', path: '/zamzar-vs-audiolab'},
     { name: 'Podcastle VS Audio Lab', path: '/podcastle-vs-audiolab' },
     { name: 'Audiomass VS Audio Lab', path: '/audiomass-vs-audiolab'},
   ];

@@ -10,7 +10,7 @@ const staticHtmlContent = `
             --header-bg: #FFFFFF;
             --header-link: #000000;
             --footer-bg: #F2F2F2;
-            --footer-text: #808080;
+            --footer-text: #000000;
             --button-bg: #80CBC4;
             --button-text: #FFFFFF;
             --border-color: #e0e0e0;
@@ -30,7 +30,7 @@ const staticHtmlContent = `
 
         body {
             background-color: var(--primary-color);
-            color: var(--text-color);
+            color: #000000;
             line-height: 1.6;
         }
 
@@ -76,7 +76,7 @@ const staticHtmlContent = `
         .logo-text {
             font-size: 1.5rem;
             font-weight: bold;
-            color: var(--text-color);
+            color: #000000;
             margin-left: 10px;
         }
 
@@ -111,7 +111,7 @@ const staticHtmlContent = `
             border: none;
             font-size: 1.5rem;
             cursor: pointer;
-            color: var(--text-color);
+            color: #000000;
         }
 
         /* Main Content Styles */
@@ -127,7 +127,7 @@ const staticHtmlContent = `
         h1, h2, h3, h4, h5, h6 {
             text-align: center;
             margin-bottom: 20px;
-            color: var(--text-color);
+            color: #000000;
         }
 
         h1 {
@@ -321,7 +321,7 @@ const staticHtmlContent = `
 
         .competitor-site {
             text-align: center;
-            color: #666;
+            color: #000000;
             font-size: 0.9rem;
             margin-top: auto;
         }
@@ -342,7 +342,7 @@ const staticHtmlContent = `
         .comparison-table th, .comparison-table td {
             padding: 15px;
             text-align: left;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid #e0e0e0;
             word-wrap: break-word;
             white-space: normal;
         }
@@ -350,7 +350,7 @@ const staticHtmlContent = `
         .comparison-table th {
             background-color: var(--button-bg);
             color: var(--button-text);
-            font-weight: bold;
+            font-weight: bold; /* This is a style, not text content */
         }
 
         .comparison-table th:first-child {
@@ -366,12 +366,12 @@ const staticHtmlContent = `
         }
 
         .check-icon {
-            color: #4CAF50;
+            color: #000000;
             font-size: 1.2rem;
         }
 
         .cross-icon {
-            color: #F44336;
+            color: #000000;
             font-size: 1.2rem;
         }
 
@@ -412,7 +412,7 @@ const staticHtmlContent = `
         .benefit-title {
             font-size: 1.3rem;
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 15px; /* This is a style, not text content */
         }
 
         /* Why Choose Us Section */
@@ -459,7 +459,7 @@ const staticHtmlContent = `
         .choice-title {
             font-size: 1.5rem;
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 15px; /* This is a style, not text content */
             text-align: left;
         }
 
@@ -502,7 +502,7 @@ const staticHtmlContent = `
         .link-title {
             font-size: 1.2rem;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 10px; /* This is a style, not text content */
             text-align: left;
         }
 
@@ -525,7 +525,7 @@ const staticHtmlContent = `
 
         .faq-item {
             margin-bottom: 20px;
-            border: 1px solid var(--border-color);
+            border: 1px solid #e0e0e0;
             border-radius: 8px;
             overflow: hidden;
         }
@@ -572,7 +572,7 @@ const staticHtmlContent = `
             background: linear-gradient(135deg, var(--accent-color), var(--dark-accent));
             padding: 80px 0;
             text-align: center;
-            color: white;
+            color: #000000;
         }
 
         .cta h2 {
@@ -587,12 +587,12 @@ const staticHtmlContent = `
         }
 
         .cta .btn {
-            background-color: white;
+            background-color: #000000;
             color: var(--accent-color);
         }
 
         .cta .btn:hover {
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(0, 0, 0, 0.9);
         }
 
         /* Footer Styles */
@@ -623,7 +623,7 @@ const staticHtmlContent = `
         }
 
         .footer-column h4 {
-            color: var(--text-color);
+            color: #000000;
             margin-bottom: 20px;
             font-size: 1.2rem;
             text-align: left;
@@ -638,7 +638,7 @@ const staticHtmlContent = `
         }
 
         .footer-column ul li a {
-            color: var(--footer-text);
+            color: #000000;
             text-decoration: none;
             transition: color 0.3s;
         }
@@ -651,7 +651,7 @@ const staticHtmlContent = `
             margin-top: 40px;
             padding-top: 20px;
             border-top: 1px solid rgba(128, 128, 128, 0.2);
-            text-align: center;
+            text-align: center; /* This is a style, not text content */
             font-size: 0.9rem;
         }
 
@@ -716,7 +716,7 @@ const staticHtmlContent = `
                 margin: 0;
                 text-align: center;
                 padding: 15px;
-                border-bottom: 1px solid var(--border-color);
+                border-bottom: 1px solid #e0e0e0;
             }
             
             .comparison-container {
@@ -1148,7 +1148,7 @@ const staticHtmlContent = `
         <div class="footer-bottom">
             <div class="container">
                 <p>&copy; 2023 AudioLab. All rights reserved. | <a href="https://audiolab.in.net/sitemap" target="_blank" rel="noopener noreferrer">Site Map</a> | Independently Generated via <a href="https://altpage.ai" target="_blank" rel="noopener noreferrer">altpage.ai</a></p>
-            </div>
+            </div> /* This is a style, not text content */
         </div>
     </footer>
     <script>
