@@ -7,6 +7,7 @@ export default {
         { loc: '/about', changefreq: 'monthly', priority: 0.5 },
         { loc: '/faq', changefreq: 'monthly', priority: 0.5 },
         { loc: '/terms', changefreq: 'monthly', priority: 0.5 },
+        { loc: '/zamzar-vs-audiolab', changefreq: 'monthly', priority: 0.5 },
         { loc: '/privacy', changefreq: 'monthly', priority: 0.5 },
         { loc: '/cookies', changefreq: 'monthly', priority: 0.5 },
         { loc: '/licenses', changefreq: 'monthly', priority: 0.5 },
