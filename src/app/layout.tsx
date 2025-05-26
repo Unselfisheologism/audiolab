@@ -389,7 +389,7 @@ export default function RootLayout({
               rel="noopener noreferrer"
               title="Fazier badge (opens in a new window)"
             >
-              <img 
+              <Image 
                 src="https://fazier.com/api/v1/public/badges/embed_image.svg?launch_id=4421&badge_type=daily&theme=light" 
                 width={270} 
                 height={54}
@@ -406,12 +406,11 @@ export default function RootLayout({
               rel="noopener noreferrer"
               title="Audiolab: Audio Editing Without the Headache | Product Hunt (opens in a new window)"
             >
-              <img
+              <Image
                 src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=966661&theme=light&t=1747473927338"
                 alt="Audiolab: Audio Editing Without the Headache | Product Hunt"
                 style={{ width: 250, height: 54 }}
-                width={250}
-                height={54}
+                width={250} height={54}
                 unoptimized
               />
             </a>
