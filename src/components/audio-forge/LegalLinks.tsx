@@ -6,7 +6,7 @@ const legalLinks = [
   { href: '/about', label: 'About Us' },
   { href: '/terms', label: 'Terms of Service' },
   { href: '/zamzar-vs-audiolab', label: 'Zamzar VS Audio Lab' },
-  { href: '/audiomass-vs-audiolab', label: 'Audiomass VS Audio Lab' },
+  { href: '/podcastle-vs-audiolab', label: 'Podcastle VS Audio Lab' },
   { href: '/privacy', label: 'Privacy Policy' },
   { href: '/cookies', label: 'Cookie Policy' },
   { href: '/licenses', label: 'Third-Party Licenses' },

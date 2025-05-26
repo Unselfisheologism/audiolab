@@ -8,7 +8,7 @@ export default {
         { loc: '/faq', changefreq: 'monthly', priority: 0.5 },
         { loc: '/terms', changefreq: 'monthly', priority: 0.5 },
         { loc: '/zamzar-vs-audiolab', changefreq: 'monthly', priority: 0.5 },
-        { loc: '/audiomass-vs-audiolab', changefreq: 'monthly', priority: 0.5 },
+        { loc: '/podcastle-vs-audiolab', changefreq: 'monthly', priority: 0.5 },
         { loc: '/privacy', changefreq: 'monthly', priority: 0.5 },
         { loc: '/cookies', changefreq: 'monthly', priority: 0.5 },
         { loc: '/licenses', changefreq: 'monthly', priority: 0.5 },
