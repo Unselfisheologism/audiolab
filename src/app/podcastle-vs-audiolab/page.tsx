@@ -1,4 +1,4 @@
-export default function AudiomassVsAudiolabPage() {
+export default function PodcastleVsAudiolabPage() {
  const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">

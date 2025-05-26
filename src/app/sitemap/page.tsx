@@ -13,6 +13,7 @@ export default function SitemapPage() {
     { name: 'Terms', path: '/terms' },
     { name: 'Zamzar VS Audiolab', path: 'zamzara-vs-audiolab'},
     { name: 'Podcastle VS Audio Lab', path: '/podcastle-vs-audiolab' },
+    { name: 'Audiomass VS Audio Lab', path: '/audiomass-vs-audiolab'},
   ];
 
   return (
