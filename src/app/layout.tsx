@@ -417,23 +417,34 @@ export default function RootLayout({
           </div>
 
           <div className="flex flex-col items-center">
-            <span className="text-sm font-medium mb-1">Made in</span>
-            <a
-              href="https://bolt.new"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Made in Bolt.new (opens in a new window)"
-              className="badge-wrapper-120x40"
-            >
-              <Image
-                src="https://res.cloudinary.com/ddz3nsnq1/image/upload/v1748427872/1000160693-removebg-preview_knyvsm.png"
-                alt="Made in Bolt.new"
-                width={120}
-                height={40}
-                unoptimized
-              />
-            </a>
-          </div>
+              <span className="text-sm font-medium mb-1">Made in</span>
+                <a
+                  href="https://bolt.new"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Made in Bolt.new (opens in a new window)"
+                  className="badge-wrapper-120x40"
+                >
+                {/* Light mode badge */}
+                <Image
+                      src="https://res.cloudinary.com/ddz3nsnq1/image/upload/v1748427872/1000160693-removebg-preview_knyvsm.png"
+                      alt="Made in Bolt.new (light mode)"
+                      width={120}
+                      height={40}
+                      unoptimized
+                      className="block dark:hidden"
+                /> 
+                {/* Dark mode badge */}
+                <Image
+                      src="https://your-dark-mode-badge-url.png"
+                      alt="Made in Bolt.new (dark mode)"
+                      width={120}
+                      height={40}
+                      unoptimized
+                      className="hidden dark:block"
+                />
+              </a>
+            </div>
         </div>
 
        {/* === CAROUSEL === */}      
