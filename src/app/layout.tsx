@@ -367,7 +367,7 @@ export default function RootLayout({
         dangerouslySetInnerHTML={{
             __html: stringifiedSchemaMarkup
           }}
- ></script>
+      ></script>
       <body className="font-sans bg-background text-foreground">
         {/* Uncomment this line if using AppHeader */}
         {/* <AppHeader /> */}
@@ -381,7 +381,7 @@ export default function RootLayout({
           </section>
 
           {/* BADGES */}
-        <div className="flex flex-row items-center gap-x-4">
+        <div className="flex flex-row items-center justify-center gap-x-4">
           <div className="badge-wrapper-270x54">   
             <a 
               href="https://fazier.com/launches/audiolab" 
@@ -414,9 +414,29 @@ export default function RootLayout({
                 unoptimized
               />
             </a>
-          </div> 
+          </div>
+
+          <div className="flex flex-col items-center">
+            <span className="text-sm font-medium mb-1">Made in</span>
+            <a
+              href="https://bolt.new"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Made in Bolt.new (opens in a new window)"
+              className="badge-wrapper-120x40"
+            >
+              <Image
+                src="https://raw.githubusercontent.com/stackblitz/docs/main/static/img/bolt-logo.png"
+                alt="Made in Bolt.new"
+                width={120}
+                height={40}
+                unoptimized
+              />
+            </a>
+          </div>
         </div>
-       {/* === CAROUSEL === */}
+
+       {/* === CAROUSEL === */}      
         <ClientAutoScrollingCarousel />
 
         {/* === MAIN CONTENT === */}      
