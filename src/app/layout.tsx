@@ -427,7 +427,7 @@ export default function RootLayout({
                 >
                 {/* Light mode badge */}
                 <Image
-                      src="https://res.cloudinary.com/ddz3nsnq1/image/upload/v1748427872/1000160693-removebg-preview_knyvsm.png"
+                      src="https://res.cloudinary.com/ddz3nsnq1/image/upload/v1748429478/1000160714-removebg-preview_zrso2j.png"
                       alt="Made in Bolt.new (light mode)"
                       width={120}
                       height={40}
@@ -436,7 +436,7 @@ export default function RootLayout({
                 /> 
                 {/* Dark mode badge */}
                 <Image
-                      src="https://your-dark-mode-badge-url.png"
+                      src="https://res.cloudinary.com/ddz3nsnq1/image/upload/v1748428905/1000160700-removebg-preview_em3pue.png"
                       alt="Made in Bolt.new (dark mode)"
                       width={120}
                       height={40}
