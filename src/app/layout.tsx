@@ -426,7 +426,7 @@ export default function RootLayout({
               className="badge-wrapper-120x40"
             >
               <Image
-                src="https://raw.githubusercontent.com/stackblitz/docs/main/static/img/bolt-logo.png"
+                src="https://res.cloudinary.com/ddz3nsnq1/image/upload/v1748427383/images_lag38i.png"
                 alt="Made in Bolt.new"
                 width={120}
                 height={40}
