@@ -1,0 +1,10 @@
+# This file is for building the AudioViz Studio app (Site 2) on Netlify
+# when its base directory is set to 'audioviz-master' (or whatever this folder is named)
+# in Netlify's UI build settings for this specific site.
+
+[build]
+  command = "npm run build"  # Uses the "build": "next build" from this project's package.json
+  publish = ".next"          # Standard Next.js output directory, relative to this project's root
+
+[build.environment]
+  NODE_VERSION = "20.18.0" # Consistent Node.js version
