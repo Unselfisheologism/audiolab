@@ -1,11 +1,11 @@
-# This file is for building the AudioViz Studio app (Site 2) on Netlify
-# when its base directory is set to 'audioviz-master' in Netlify's UI build settings.
-
-[build]
-  # By removing the explicit 'command', we let Netlify use its auto-detected
-  # Next.js build command, or the one specified in the Netlify UI (which is 'next build').
-  # This should allow Netlify's specialized Next.js build process to correctly handle basePath.
-  publish = ".next"          # Standard Next.js output directory, relative to 'audioviz-master'
+# This netlify.toml is for the AudioViz Studio app (Site 2, built from the 'audioviz-master' subdirectory).
+# We are relying on Netlify's auto-detection for Next.js build settings.
+#
+# Ensure in Netlify's UI for this specific site ("audiovizstudio"):
+# - Base directory: "audioviz-master" (or whatever this folder is named in your monorepo)
+# - Build command: (Can be left blank to let Netlify auto-detect, or set to "next build")
+# - Publish directory: ".next" (relative to the Base directory)
 
 [build.environment]
-  NODE_VERSION = "20.18.0" # Consistent Node.js version
+  NODE_VERSION = "20.18.0" # Keep Node.js version consistent
+
