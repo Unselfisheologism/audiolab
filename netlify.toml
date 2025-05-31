@@ -1,10 +1,26 @@
+
 [build]
-  command = "next build && npm run postbuild"
-  publish = "out" 
+  command = "next build && npm run postbuild" # Assumes postbuild does 'next export' for your main site
+  publish = "out"                             # For your main static/exported site
 
 [build.environment]
   NODE_VERSION = "20.18.0"
 
+# IMPORTANT: Order of redirects matters. Specific paths should come before catch-alls.
+
+# Proxy for the AudioViz Studio app
+# This rule MUST come BEFORE the "/*" catch-all SPA rule.
+[[redirects]]
+  from = "/audio-viz/*"
+  # Replace [YOUR_AUDIOVIZ_STUDIO_NETLIFY_APP_URL] with the actual Netlify URL
+  # of your deployed AudioViz Studio app (the one built from the 'audioviz-master' subdir).
+  # Example: https://your-unique-audioviz-name.netlify.app/audio-viz/:splat
+  to = "audiovizstudio.netlify.app/audio-viz/:splat"
+  status = 200 # Proxy rewrite
+  force = true
+
+# Catch-all for your main site (likely an SPA or static export)
+# This handles all other paths for audiolab.in.net
 [[redirects]]
   from = "/*"
   to = "/index.html"
