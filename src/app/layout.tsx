@@ -412,6 +412,7 @@ export default function RootLayout({
                 data-businessunit-id="683bc8c1fe7a18bd7cb48aa1"
                 data-style-height="52px"
                 data-style-width="100%"
+                data-theme="light"
               >
                 <a href="https://www.trustpilot.com/review/audiolab.in.net" target="_blank" rel="noopener">
                   Trustpilot
