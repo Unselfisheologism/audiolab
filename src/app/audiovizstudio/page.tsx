@@ -115,7 +115,7 @@ export default function AudioVizStudioPage() {
     // AppHeader and AppFooter are now specific to this page's content area if needed,
     // or you might remove them if audiolab provides global ones.
     // For now, keeping them to replicate the original structure within this page.
-    <div className="flex flex-col w-full">
+    <div className="audioviz-page-theme flex flex-col w-full">
       <AppHeader />
       <main className="flex-grow container mx-auto p-4 md:p-6 lg:p-8 space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

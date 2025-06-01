@@ -5,14 +5,6 @@
 [build.environment]
   NODE_VERSION = "20.18.0"
 
-# Proxy for the AudioViz Studio app
-[[redirects]]
-  from = "/audiovizstudio/*"  # Matches the path users will type
-  # Replace audiovizstudio.netlify.app with the actual Netlify URL for Site 2
-  to = "https://audiovizstudio.netlify.app/audiovizstudio/:splat" 
-  status = 200
-  force = true
-
 # Catch-all for your main site
 [[redirects]]
   from = "/*"
