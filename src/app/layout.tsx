@@ -346,11 +346,25 @@ export const metadata = {
   },
 };
 
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode; 
 }>) {
+  // Place useEffect here
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      !document.querySelector('script[src*="widget.trustpilot.com/bootstrap"]')
+    ) {
+      const script = document.createElement("script");
+      script.src = "https://widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js";
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
   return (
     <html lang="en\" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <Head>
@@ -399,22 +413,20 @@ export default function RootLayout({
             </a>
           </div>  
           
-          <div className="badge-wrapper-250x54">
-            <a
-              href="https://www.producthunt.com/posts/audiolab-2?embed=true&utm_source=badge-featured&utm_medium=badge"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Audiolab: Audio Editing Without the Headache | Product Hunt (opens in a new window)"
-            >
-              <Image
-                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=966661&theme=light&t=1747473927338"
-                alt="Audiolab: Audio Editing Without the Headache | Product Hunt"
-                style={{ width: 250, height: 54 }}
-                width={250} height={54}
-                unoptimized
-              />
-            </a>
-          </div>
+            <div className="badge-wrapper-250x54">
+              <div
+                className="trustpilot-widget"
+                data-locale="en-US"
+                data-template-id="56278e9abfbbba0bdcd568bc"
+                data-businessunit-id="683bc8c1fe7a18bd7cb48aa1"
+                data-style-height="52px"
+                data-style-width="100%"
+              >
+                <a href="https://www.trustpilot.com/review/audiolab.in.net" target="_blank" rel="noopener">
+                  Trustpilot
+                </a>
+              </div>
+            </div>
 
           <div className="flex flex-col items-center">
               <span className="text-sm font-medium mb-1">Made in</span>
