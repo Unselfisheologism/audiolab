@@ -351,19 +351,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode; 
 }>) {
-  // Place useEffect here
-  useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      !document.querySelector('script[src*="widget.trustpilot.com/bootstrap"]')
-    ) {
-      const script = document.createElement("script");
-      script.src = "https://widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js";
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
-
   return (
     <html lang="en\" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <Head>
