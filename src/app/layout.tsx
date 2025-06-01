@@ -1,4 +1,3 @@
-"use client";
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
@@ -376,6 +375,11 @@ export default function RootLayout({
         {/* Add preloads for other weights/styles of Geist Sans if used in critical path */}
         {/* <link rel="preload" href="/_next/static/media/Geist-Sans-Medium.woff2" as="font" type="font/woff2" crossOrigin="" /> */}
         {/* <link rel="preload" href="/_next/static/media/Geist-Sans-SemiBold.woff2" as="font" type="font/woff2" crossOrigin="" /> */}
+        <script
+          async
+          type="text/javascript"
+          src="https://widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js"
+        ></script>
       </Head>
       <script
         type="application/ld+json"
