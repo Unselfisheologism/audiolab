@@ -354,7 +354,7 @@ export default function RootLayout({
   return (
     <html lang="en\" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <Head>
-        <meta name="google-site-verification" content="YeU0_IIP-PLuFSe1-WhZSFJLP30iNuUi89SKvusNUFM" />
+        <meta name="google-site-verification\" content="YeU0_IIP-PLuFSe1-WhZSFJLP30iNuUi89SKvusNUFM" />
         {/* Preload Geist Sans regular and bold fonts - Adjust paths if necessary */}
         <link rel="preload" href="/_next/static/media/Geist-Sans-Regular.woff2" as="font" type="font/woff2" crossOrigin="" />
         <link rel="preload" href="/_next/static/media/Geist-Sans-Bold.woff2" as="font" type="font/woff2" crossOrigin="" />
