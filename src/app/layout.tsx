@@ -6,7 +6,6 @@ import { GeistMono } from 'geist/font/mono';
 
 import Head from 'next/head';
 import Image from 'next/image';
-import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import ClientAutoScrollingCarousel from '@/components/ClientAutoScrollingCarousel';
 
