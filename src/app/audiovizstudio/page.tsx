@@ -1,22 +1,19 @@
-
 "use client";
 
 import type { Metadata } from 'next'; // Keep for potential page-specific metadata
 import { useState, useEffect, useCallback } from 'react';
-import AppHeader from '@/components/audioviz/app-header';
-import AppFooter from '@/components/audioviz/app-footer';
+// AppHeader and AppFooter are now rendered by src/app/audiovizstudio/layout.tsx
 import FileUploadSection from '@/components/audioviz/file-upload-section';
 import AudioTranscriptSection from '@/components/audioviz/audio-transcript-section';
 import TemplateCustomizationSection from '@/components/audioviz/template-customization-section';
 import ExportSection from '@/components/audioviz/export-section';
 import type { TranscriptLine, VideoTemplateValue, VideoResolution, VideoAspectRatio, VideoOutputFormat, BackgroundConfig, IconPosition, TranscriptStyleConfig } from '@/types/audiovizTypes';
 import { videoTemplates, defaultTranscriptStyleConfig } from '@/types/audiovizTypes';
-import { useToast } from '@/hooks/use-toast'; // Assuming audiolab has this
+import { useToast } from '@/hooks/use-toast';
 
-// Page-specific metadata (optional, can be defined in layout if preferred)
+// Page-specific metadata (optional, can be defined in layout if preferred, or here)
 // export const metadata: Metadata = {
-//   title: 'AudioViz Studio - AudioLab',
-//   description: 'Create stunning audio visualizations within AudioLab.',
+//   title: 'AudioViz Studio - Create', // Example if you want it here
 // };
 
 export default function AudioVizStudioPage() {
@@ -111,69 +108,62 @@ export default function AudioVizStudioPage() {
 
 
   return (
-    // Removed the overall flex flex-col min-h-screen, as this will be part of audiolab's layout
-    // AppHeader and AppFooter are now specific to this page's content area if needed,
-    // or you might remove them if audiolab provides global ones.
-    // For now, keeping them to replicate the original structure within this page.
-    <div className="audioviz-page-theme flex flex-col w-full">
-      <AppHeader />
-      <main className="flex-grow container mx-auto p-4 md:p-6 lg:p-8 space-y-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <FileUploadSection
-            onAudioUpload={handleAudioUpload}
-            onTranscriptUpload={handleTranscriptUpload}
-          />
-          <TemplateCustomizationSection
-            selectedTemplate={selectedTemplate}
-            onTemplateChange={handleTemplateChange}
-            backgroundConfig={backgroundConfig}
-            onBackgroundConfigChange={setBackgroundConfig}
-            resolution={resolution}
-            onResolutionChange={setResolution}
-            aspectRatio={aspectRatio}
-            onAspectRatioChange={setAspectRatio}
-            outputFormat={outputFormat}
-            onOutputFormatChange={setOutputFormat}
-            customIconFile={customIconFile}
-            onCustomIconFileChange={setCustomIconFile}
-            useDefaultIcon={useDefaultIcon}
-            onUseDefaultIconChange={setUseDefaultIcon}
-            iconPosition={iconPosition}
-            onIconPositionChange={setIconPosition}
-            transcriptPosition={transcriptPosition}
-            onTranscriptPositionChange={setTranscriptPosition}
-            transcriptStyleConfig={transcriptStyleConfig}
-            onTranscriptStyleConfigChange={setTranscriptStyleConfig}
-          />
-        </div>
-        <AudioTranscriptSection
-          transcriptLines={transcriptLines}
-          onTranscriptChange={handleTranscriptChange}
-          audioFileUrl={audioFileUrl}
-          backgroundConfig={backgroundConfig}
+    // The AppHeader, AppFooter, and the outermost div with theme/flex are now in src/app/audiovizstudio/layout.tsx
+    <main className="flex-grow container mx-auto p-4 md:p-6 lg:p-8 space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <FileUploadSection
+          onAudioUpload={handleAudioUpload}
+          onTranscriptUpload={handleTranscriptUpload}
+        />
+        <TemplateCustomizationSection
           selectedTemplate={selectedTemplate}
+          onTemplateChange={handleTemplateChange}
+          backgroundConfig={backgroundConfig}
+          onBackgroundConfigChange={setBackgroundConfig}
+          resolution={resolution}
+          onResolutionChange={setResolution}
           aspectRatio={aspectRatio}
-          customIconUrl={customIconUrl}
+          onAspectRatioChange={setAspectRatio}
+          outputFormat={outputFormat}
+          onOutputFormatChange={setOutputFormat}
+          customIconFile={customIconFile}
+          onCustomIconFileChange={setCustomIconFile}
+          useDefaultIcon={useDefaultIcon}
+          onUseDefaultIconChange={setUseDefaultIcon}
+          iconPosition={iconPosition}
+          onIconPositionChange={setIconPosition}
+          transcriptPosition={transcriptPosition}
+          onTranscriptPositionChange={setTranscriptPosition}
+          transcriptStyleConfig={transcriptStyleConfig}
+          onTranscriptStyleConfigChange={setTranscriptStyleConfig}
+        />
+      </div>
+      <AudioTranscriptSection
+        transcriptLines={transcriptLines}
+        onTranscriptChange={handleTranscriptChange}
+        audioFileUrl={audioFileUrl}
+        backgroundConfig={backgroundConfig}
+        selectedTemplate={selectedTemplate}
+        aspectRatio={aspectRatio}
+        customIconUrl={customIconUrl}
+        useDefaultIcon={useDefaultIcon}
+        iconPosition={iconPosition}
+        transcriptPosition={transcriptPosition}
+        transcriptStyleConfig={transcriptStyleConfig}
+      />
+      {audioFile && (
+        <ExportSection
+          audioFile={audioFile}
+          backgroundConfig={backgroundConfig}
+          transcriptLines={transcriptLines}
+          selectedTemplate={selectedTemplate}
+          resolution={resolution}
+          aspectRatio={aspectRatio}
+          customIconFile={customIconFile}
           useDefaultIcon={useDefaultIcon}
           iconPosition={iconPosition}
-          transcriptPosition={transcriptPosition}
-          transcriptStyleConfig={transcriptStyleConfig}
         />
-        {audioFile && (
-          <ExportSection
-            audioFile={audioFile}
-            backgroundConfig={backgroundConfig}
-            transcriptLines={transcriptLines}
-            selectedTemplate={selectedTemplate}
-            resolution={resolution}
-            aspectRatio={aspectRatio}
-            customIconFile={customIconFile}
-            useDefaultIcon={useDefaultIcon}
-            iconPosition={iconPosition}
-          />
-        )}
-      </main>
-      <AppFooter />
-    </div>
+      )}
+    </main>
   );
 }
