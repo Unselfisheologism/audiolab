@@ -4,6 +4,7 @@ export default {
     generateRobotsTxt: true, // Enable robots.txt file generation
     additionalPaths: async (config) => [
         { loc: '/audio-forge', changefreq: 'weekly', priority: 0.7 },
+        { loc: '/audiovizstudio', changefreq: 'monthly', priority: 0.5 },
         { loc: '/about', changefreq: 'monthly', priority: 0.5 },
         { loc: '/faq', changefreq: 'monthly', priority: 0.5 },
         { loc: '/terms', changefreq: 'monthly', priority: 0.5 },
