@@ -4,9 +4,14 @@
 
 [build.environment]
   NODE_VERSION = "20.18.0"
-
+  
 # Catch-all for your main site
 [[redirects]]
+  from = "/audiovizstudio"
+  to = "/audiovizstudio.html" # Explicitly point to the HTML file
+  status = 200
+  force = true # Use force to ensure it's tested
+  
   from = "/*"
   to = "/index.html"
   status = 200
