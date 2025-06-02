@@ -6,6 +6,7 @@ export default function SitemapPage() {
   const mainPages = [
     { name: 'Home', path: '/' },
     { name: 'Audio Forge', path: '/audio-forge' },
+    { name: 'Audio To Video Converter', path: '/audiovizstudio' },
     { name: 'Cookies', path: '/cookies' },
     { name: 'FAQ', path: '/faq' },
     { name: 'Licenses', path: '/licenses' },
