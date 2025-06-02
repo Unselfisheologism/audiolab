@@ -4,19 +4,20 @@
 
 [build.environment]
   NODE_VERSION = "20.18.0"
-  
-# Catch-all for your main site
+
+# TEMPORARY DIAGNOSTIC RULE - This is one complete redirect rule
 [[redirects]]
   from = "/audiovizstudio"
   to = "/audiovizstudio.html" # Explicitly point to the HTML file
   status = 200
-  force = true # Use force to ensure it's tested
-  
+  force = true
+
+# Catch-all for your main site - This is another complete redirect rule
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# ... (your existing headers)
 [[headers]]
   for = "/*"
   [headers.values]
