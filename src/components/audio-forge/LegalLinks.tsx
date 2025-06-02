@@ -2,6 +2,7 @@
 import Link from 'next/link';
 
 const legalLinks = [
+  { href: '/audiovizstudio', label: 'Audio To Video Converter' },
   { href: '/faq', label: 'FAQ' },
   { href: '/about', label: 'About Us' },
   { href: '/terms', label: 'Terms of Service' },
