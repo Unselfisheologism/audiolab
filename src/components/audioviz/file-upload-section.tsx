@@ -44,7 +44,7 @@ export default function FileUploadSection({ onAudioUpload, onTranscriptUpload }:
           <UploadCloud className="mr-2 h-6 w-6 text-primary" />
           Upload Files
         </CardTitle>
-        <CardDescription>Select your audio and transcript files to get started.</CardDescription>
+        <CardDescription>Select your audio and transcript files to convert audio to video.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
